@@ -1,0 +1,24 @@
+--- a/vmblock-only/linux/filesystem.c	2014-06-12 19:20:45.000000000 -0400
++++ b/vmblock-only/linux/filesystem.c	2015-05-13 17:26:30.000000000 -0400
+@@ -320,6 +320,21 @@
+      struct dentry *dentry,     // IN: dentry within directory
+      ino_t ino)                 // IN: inode number to assign to new inode
+ {
++   
++   #if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 19, 0)
++   struct nameidata {
++          struct path     path;
++          struct qstr     last;
++          struct path     root;
++          struct inode    *inode; /* path.dentry.d_inode */
++          unsigned int    flags;
++          unsigned        seq, m_seq;
++          int             last_type;
++          unsigned        depth;
++          char *saved_names[MAX_NESTED_LINKS + 1];
++   };
++   #endif
++
+    VMBlockInodeInfo *iinfo;
+    struct inode *inode;
+    struct nameidata actualNd;

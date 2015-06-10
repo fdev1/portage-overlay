@@ -1,0 +1,15 @@
+--- a/vmnet-only/userif.c	2014-06-12 20:38:25.000000000 -0400
++++ b/vmnet-only/userif.c	2015-05-13 18:52:46.000000000 -0400
+@@ -523,7 +523,11 @@
+       .iov_base = buf,
+       .iov_len  = len,
+    };
+-   return skb_copy_datagram_iovec(skb, 0, &iov, len);
++
++   struct iov_iter iter;
++   ssize_t n;
++   iov_iter_init(&iter, WRITE, &iov, len, len);
++   return skb_copy_datagram_iter(skb, 0, &iter, len);
+ }
+ 
+ 
