@@ -26,7 +26,7 @@ RDEPEND="${DEPEND}
 src_unpack()
 {
 	mkdir -p "${S}" || die "Unpack failed!"
-	unzip -x "/usr/portage/distfiles/${A}" -d "${S}" >/dev/null || die "Unpack failed!"
+	unzip -x "${DISTDIR}/${A}" -d "${S}" >/dev/null || die "Unpack failed!"
 }
 
 src_install()
