@@ -31,36 +31,40 @@ src_unpack()
 
 src_install()
 {
+
+	MERGEDIR="/opt/jnes-${PV}"
+	INSTALLDIR="${D}/${MERGEDIR}"
+
 	# install Jnes
 	#
-	mkdir -p "${D}/usr/lib/jnes" || die "Install failed!"
-	cp -R "${S}/Jnes.chm" "${D}/usr/lib/jnes" || die "Install failed!"
-	cp -R "${S}/Jnes.cht" "${D}/usr/lib/jnes" || die "Install failed!"
-	cp -R "${S}/Jnes.exe" "${D}/usr/lib/jnes" || die "Install failed!"
-	cp -R "${S}/kailleraclient.dll" "${D}/usr/lib/jnes" || die "Install failed!"
-	cp -R "${S}/palettes" "${D}/usr/lib/jnes" || die "Install failed!"
+	mkdir -p "${INSTALLDIR}" || die "Install failed!"
+	cp -R "${S}/Jnes.chm" "${INSTALLDIR}" || die "Install failed!"
+	cp -R "${S}/Jnes.cht" "${INSTALLDIR}" || die "Install failed!"
+	cp -R "${S}/Jnes.exe" "${INSTALLDIR}" || die "Install failed!"
+	cp -R "${S}/kailleraclient.dll" "${INSTALLDIR}" || die "Install failed!"
+	cp -R "${S}/palettes" "${INSTALLDIR}" || die "Install failed!"
 	
 	# install language files
 	#
-	use nls && ( cp -R "${S}/languages" "${D}/usr/lib/jnes" || die "Install failed!" )
+	use nls && ( cp -R "${S}/languages" "${INSTALLDIR}" || die "Install failed!" )
 
 	# create config file
 	#
-	echo "[Jnes]" > "${D}/usr/lib/jnes/Jnes.ini" || die "Install failed!"
-	echo "options=7052114013" >> "${D}/usr/lib/jnes/Jnes.ini" || die "Install failed!"
-	chown root:games "${D}/usr/lib/jnes/Jnes.ini" || die "Install failed!"
-	chmod 664 "${D}/usr/lib/jnes/Jnes.ini" || die "Install failed"
-	chmod 754 "${D}/usr/lib/jnes/Jnes.exe" || die "Install failed"
+	echo "[Jnes]" > "${INSTALLDIR}/Jnes.ini" || die "Install failed!"
+	echo "options=7052114013" >> "${INSTALLDIR}/Jnes.ini" || die "Install failed!"
+	chown root:games "${INSTALLDIR}/Jnes.ini" || die "Install failed!"
+	chmod 664 "${INSTALLDIR}/Jnes.ini" || die "Install failed"
+	chmod 754 "${INSTALLDIR}/Jnes.exe" || die "Install failed"
 
 	# extract windows ico from executable
 	#
-	wrestool -x -t 14 "${D}/usr/lib/jnes/Jnes.exe" > "${D}/usr/lib/jnes/Jnes.ico" || die "Install failed!"
+	wrestool -x -t 14 "${INSTALLDIR}/Jnes.exe" > "${INSTALLDIR}/Jnes.ico" || die "Install failed!"
 
 	# create executable script in /usr/bin
 	#
 	mkdir -p "${D}/usr/bin" || die "Install failed!"
 	echo "#!/bin/sh" > "${D}/usr/bin/jnes" || die "Install failed!"
-	echo "wine /usr/lib/jnes/Jnes.exe" >> "${D}/usr/bin/jnes" || die "Install failed!"
+	echo "wine \"${MERGEDIR}/Jnes.exe\"" >> "${D}/usr/bin/jnes" || die "Install failed!"
 	chown root:games "${D}/usr/bin/jnes" || die "Install failed!"
 	chmod 754 "${D}/usr/bin/jnes" || die "Install failed!"
 
