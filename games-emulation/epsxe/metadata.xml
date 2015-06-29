@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "http://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<herd>epsxe</herd>
+	<longdescription>ePSXe is a Playstation emulator for Linux.</longdescription>
+	<use>
+		<flag name="bios">Install Playstation bios files</flag>
+		<flag name="xgl2">Install Pete's XGL2 PSX GPU plugin</flag>
+		<flag name="mesa">Install Pete's MesaGL GPU plugin</flag>
+		<flag name="softgpu">Install Pete's Soft X GPU plugin</flag>
+		<flag name="config-ui">
+			Install plugins configuration dialogs (requires GTK+ 1)
+		</flag>
+		<flag name="menu">
+			Install desktop menu item (requires downloading Windows version
+			to extract icon)
+		</flag>
+		<flag name="oss">
+			Install Pete's OSS (Open Sound System) Audio SPU plugin
+		</flag>
+	</use>
+</pkgmetadata>
