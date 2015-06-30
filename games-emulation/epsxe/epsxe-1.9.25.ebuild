@@ -11,7 +11,10 @@ HOMEPAGE="http://www.epsxe.com"
 SRC_URI="http://www.epsxe.com/files/epsxe1925lin.zip
 bios? ( https://drive.google.com/uc?export=download&id=0BzPt9N2PyrQGenh0MGxCa1pxejQ -> playstation-bios.tar.xz )
 xgl2? ( http://www.pbernert.com/gpupetexgl209.tar.gz )
-mesa? ( http://www.pbernert.com/gpupeopsmesagl178.tar.gz )
+mesa? ( 
+	http://www.pbernert.com/gpupeopsmesagl178.tar.gz 
+	!bin? ( http://www.pbernert.com/PeopsOpenGLGpu178Sources.zip )
+)
 softgpu? ( http://www.pbernert.com/gpupeopssoftx118.tar.gz )
 oss? ( 
 	bin? ( http://www.pbernert.com/spupeopsoss109.tar.gz )
@@ -57,6 +60,14 @@ src_unpack()
 	use bios && tar -xf "${DISTDIR}/playstation-bios.tar.xz" -C "${S}"
 	use xgl2 && tar -xf "${DISTDIR}/gpupetexgl209.tar.gz" -C "${S}"
 	use mesa && tar -xf "${DISTDIR}/gpupeopsmesagl178.tar.gz" -C "${S}"
+	if use mesa; then
+		if ! (use bin); then
+			mkdir -p "${S}/mesagl"
+			unzip -x "${DISTDIR}/PeopsOpenGLGpu178Sources.zip" -d "${S}/mesagl" > /dev/null
+			tar -xf "${S}/mesagl/src/src_linux_cfg/gpucfg.tar.gz" \
+				-C "${S}/mesagl/src/src_linux_cfg"
+		fi
+	fi
 	use softgpu && tar -xf "${DISTDIR}/gpupeopssoftx118.tar.gz" -C "${S}"
 	if (use config-ui && (use xgl2 || use mesa || use softgpu)); then
 		mkdir -p "${S}/cfg-files"
@@ -166,6 +177,32 @@ src_prepare()
 		cp "${S}/SCPH7502.BIN"  "${S}/scph7502.bin"
 	fi
 
+	if (use mesa && ! (use bin)); then
+		do_fix_line_endings "${S}/mesagl/src/src_plugin"
+		mv "${S}/mesagl/src/src_plugin/GL_EXT.H" "${S}/mesagl/src/src_plugin/gl_ext.h"
+		cd "${S}/mesagl/src/src_plugin"
+		for f in $(ls); do
+			if [ -f "${f}" ]; then
+				mv "${f}" "${f}.orig"
+				sed -e "s/BOOL/BOOLeAN/g" "${f}.orig" > "${f}"
+				rm "${f}.orig"
+			fi
+		done
+		mv Makefile Makefile.orig
+		sed -e "s/\/usr\/X11R6\/lib\/libXxf86vm.a//g" Makefile.orig | \
+		sed -e "s/-Wall -m32 -mcpu=pentium -O3 -ffast-math -fomit-frame-pointer/-m32 -ffast-math ${CFLAGS}/g" | \
+		sed -e "s/-lpthread/-lpthread -lXxf86vm/g" > Makefile
+
+		if use config-ui; then
+			do_fix_line_endings "${S}/mesagl/src/src_linux_cfg/gpucfg"
+			do_fix_line_endings "${S}/mesagl/src/src_linux_cfg/gpucfg/src"
+			cd "${S}/mesagl/src/src_linux_cfg/gpucfg"
+			epatch "${FILESDIR}/PeopsOpenGLGpu178-gtk.patch"
+			eautoconf
+			eautomake
+		fi
+	fi
+
 	# fix readme filenames
 	if use oss; then
 		if use bin; then
@@ -222,6 +259,12 @@ src_prepare()
 
 src_configure()
 {
+	if (use mesa && (! (use bin))); then
+		if use config-ui; then
+			cd "${S}/mesagl/src/src_linux_cfg/gpucfg"
+			econf CFLAGS="-m32 ${CFLAGS}"
+		fi
+	fi
 	if (use oss && (! (use bin))); then
 		if use config-ui; then
 			cd "${S}/oss/src/linuxcfg"
@@ -240,6 +283,17 @@ src_configure()
 
 src_compile()
 {
+	if (use mesa && (! (use bin))); then
+		cd "${S}/mesagl/src/src_plugin"
+		emake
+		if use config-ui; then
+			cd "${S}/mesagl/src/src_linux_cfg/gpucfg"
+			emake
+			cp "${S}/mesagl/src/src_linux_cfg/gpucfg/src/gpucfg" \
+				"${S}/mesagl/src/src_linux_cfg/gpucfg/src/cfgPeopsMesaGL" || \
+				die "Compile failed!"
+		fi
+	fi
 	if (use oss && (! (use bin))); then
 		cd "${S}/oss/src"
 		emake
@@ -388,17 +442,33 @@ src_install()
 	if use mesa; then
 		rm -f "${INSTALLDIR}/plugins/remove.me"
 		rm -f "${INSTALLDIR}/cfg/erase.me"
-		insopts --owner=root --group=root --mode=644
-		insinto "${MERGEDIR}/plugins"
-		doins "${S}/peops_psx_mesagl_gpu/libgpuPeopsMesaGL.so.1.0.78"
-		insopts --owner=root --group=games --mode=664
-		insinto /etc/epsxe
-		doins "${S}/peops_psx_mesagl_gpu/gpuPeopsMesaGL.cfg"
-		dosym /etc/epsxe/gpuPeopsMesaGL.cfg "${MERGEDIR}/cfg/gpuPeopsMesaGL.cfg"
-		if use config-ui; then
-			insopts --owner=root --group=games --mode=750
-			insinto "${MERGEDIR}/cfg"
-			doins "${S}/peops_psx_mesagl_gpu/cfgPeopsMesaGL"
+		if use bin; then
+			insopts --owner=root --group=root --mode=644
+			insinto "${MERGEDIR}/plugins"
+			doins "${S}/peops_psx_mesagl_gpu/libgpuPeopsMesaGL.so.1.0.78"
+			insopts --owner=root --group=games --mode=664
+			insinto /etc/epsxe
+			doins "${S}/peops_psx_mesagl_gpu/gpuPeopsMesaGL.cfg"
+			dosym /etc/epsxe/gpuPeopsMesaGL.cfg "${MERGEDIR}/cfg/gpuPeopsMesaGL.cfg"
+			if use config-ui; then
+				insopts --owner=root --group=games --mode=750
+				insinto "${MERGEDIR}/cfg"
+				doins "${S}/peops_psx_mesagl_gpu/cfgPeopsMesaGL"
+			fi
+		else
+			insopts --owner=root --group=root --mode=644
+			insinto "${MERGEDIR}/plugins"
+			doins "${S}/mesagl/src/src_plugin/libgpuPeopsMesaGL.so.1.0.78"
+			touch gpuPeopsMesaGL.cfg
+			insopts --owner=root --group=games --mode=664
+			insinto /etc/epsxe
+			doins gpuPeopsMesaGL.cfg
+			dosym /etc/epsxe/gpuPeopsMesaGL.cfg "${MERGEDIR}/cfg/gpuPeopsMesaGL.cfg"
+			if use config-ui; then
+				insopts --owner=root --group=games --mode=750
+				insinto "${MERGEDIR}/cfg"
+				doins "${S}/mesagl/src/src_linux_cfg/gpucfg/src/cfgPeopsMesaGL"
+			fi
 		fi
 	fi
 
