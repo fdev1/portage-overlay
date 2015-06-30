@@ -1,0 +1,204 @@
+--- a/src/interface.c	2004-09-19 15:20:34.000000000 -0400
++++ b/src/interface.c	2015-06-29 18:37:04.000000000 -0400
+@@ -50,7 +50,7 @@
+   GtkWidget *chkIRQWait;
+   GtkWidget *chkHiCompat;
+ 
+-  CfgWnd = gtk_window_new (GTK_WINDOW_DIALOG);
++  CfgWnd = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+   gtk_object_set_data (GTK_OBJECT (CfgWnd), "CfgWnd", CfgWnd);
+   gtk_container_set_border_width (GTK_CONTAINER (CfgWnd), 10);
+   gtk_window_set_title (GTK_WINDOW (CfgWnd), "Configure P.E.Op.S. OSS PSX SPU plugin...");
+@@ -71,7 +71,7 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (btnOK);
+   gtk_fixed_put (GTK_FIXED (fixed1), btnOK, 40, 336);
+-  gtk_widget_set_uposition (btnOK, 40, 336);
++  gtk_widget_set_uposition (btnOK, 40, 345);
+   gtk_widget_set_usize (btnOK, 136, 24);
+ 
+   btnCancel = gtk_button_new_with_label ("Cancel");
+@@ -80,7 +80,7 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (btnCancel);
+   gtk_fixed_put (GTK_FIXED (fixed1), btnCancel, 232, 336);
+-  gtk_widget_set_uposition (btnCancel, 232, 336);
++  gtk_widget_set_uposition (btnCancel, 245, 345);
+   gtk_widget_set_usize (btnCancel, 136, 24);
+ 
+   frmXA = gtk_frame_new ("XA music");
+@@ -89,8 +89,8 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (frmXA);
+   gtk_fixed_put (GTK_FIXED (fixed1), frmXA, 0, 120);
+-  gtk_widget_set_uposition (frmXA, 0, 120);
+-  gtk_widget_set_usize (frmXA, 408, 72);
++  gtk_widget_set_uposition (frmXA, 10, 120);
++  gtk_widget_set_usize (frmXA, 425, 78);
+ 
+   fixed3 = gtk_fixed_new ();
+   gtk_widget_ref (fixed3);
+@@ -105,7 +105,7 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (chkEnableXA);
+   gtk_fixed_put (GTK_FIXED (fixed3), chkEnableXA, 16, 0);
+-  gtk_widget_set_uposition (chkEnableXA, 16, 0);
++  gtk_widget_set_uposition (chkEnableXA, 16, 140);
+   gtk_widget_set_usize (chkEnableXA, 376, 24);
+ 
+   chkXASpeed = gtk_check_button_new_with_label ("Change XA speed, if it is played too fast");
+@@ -114,7 +114,7 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (chkXASpeed);
+   gtk_fixed_put (GTK_FIXED (fixed3), chkXASpeed, 16, 24);
+-  gtk_widget_set_uposition (chkXASpeed, 16, 24);
++  gtk_widget_set_uposition (chkXASpeed, 16, 165);
+   gtk_widget_set_usize (chkXASpeed, 376, 24);
+ 
+   frmGeneral = gtk_frame_new ("General settings");
+@@ -123,8 +123,8 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (frmGeneral);
+   gtk_fixed_put (GTK_FIXED (fixed1), frmGeneral, 0, 0);
+-  gtk_widget_set_uposition (frmGeneral, 0, 0);
+-  gtk_widget_set_usize (frmGeneral, 408, 112);
++  gtk_widget_set_uposition (frmGeneral, 10, 0);
++  gtk_widget_set_usize (frmGeneral, 425, 112);
+ 
+   fixed2 = gtk_fixed_new ();
+   gtk_widget_ref (fixed2);
+@@ -139,7 +139,7 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (label8);
+   gtk_fixed_put (GTK_FIXED (fixed2), label8, 24, 32);
+-  gtk_widget_set_uposition (label8, 24, 32);
++  gtk_widget_set_uposition (label8, 39, 47);
+   gtk_widget_set_usize (label8, 64, 24);
+   gtk_label_set_justify (GTK_LABEL (label8), GTK_JUSTIFY_RIGHT);
+ 
+@@ -149,8 +149,8 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (label9);
+   gtk_fixed_put (GTK_FIXED (fixed2), label9, 0, 64);
+-  gtk_widget_set_uposition (label9, 0, 64);
+-  gtk_widget_set_usize (label9, 88, 24);
++  gtk_widget_set_uposition (label9, 15, 76);
++  gtk_widget_set_usize (label9, 88, 29);
+   gtk_label_set_justify (GTK_LABEL (label9), GTK_JUSTIFY_RIGHT);
+ 
+   label1 = gtk_label_new ("Volume:");
+@@ -159,7 +159,7 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (label1);
+   gtk_fixed_put (GTK_FIXED (fixed2), label1, 24, 0);
+-  gtk_widget_set_uposition (label1, 24, 0);
++  gtk_widget_set_uposition (label1, 39, 15);
+   gtk_widget_set_usize (label1, 64, 24);
+   gtk_label_set_justify (GTK_LABEL (label1), GTK_JUSTIFY_RIGHT);
+ 
+@@ -169,8 +169,8 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (cbReverb);
+   gtk_fixed_put (GTK_FIXED (fixed2), cbReverb, 88, 32);
+-  gtk_widget_set_uposition (cbReverb, 88, 32);
+-  gtk_widget_set_usize (cbReverb, 304, 24);
++  gtk_widget_set_uposition (cbReverb, 105, 47);
++  gtk_widget_set_usize (cbReverb, 320, 24);
+   gtk_combo_set_value_in_list (GTK_COMBO (cbReverb), TRUE, FALSE);
+   gtk_combo_set_case_sensitive (GTK_COMBO (cbReverb), TRUE);
+   gtk_combo_set_use_arrows_always (GTK_COMBO (cbReverb), TRUE);
+@@ -193,8 +193,8 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (cbVolume);
+   gtk_fixed_put (GTK_FIXED (fixed2), cbVolume, 88, 0);
+-  gtk_widget_set_uposition (cbVolume, 88, 0);
+-  gtk_widget_set_usize (cbVolume, 304, 24);
++  gtk_widget_set_uposition (cbVolume, 105, 15);
++  gtk_widget_set_usize (cbVolume, 320, 24);
+   gtk_combo_set_value_in_list (GTK_COMBO (cbVolume), TRUE, FALSE);
+   gtk_combo_set_case_sensitive (GTK_COMBO (cbVolume), TRUE);
+   gtk_combo_set_use_arrows_always (GTK_COMBO (cbVolume), TRUE);
+@@ -218,8 +218,8 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (cbInterpolation);
+   gtk_fixed_put (GTK_FIXED (fixed2), cbInterpolation, 88, 64);
+-  gtk_widget_set_uposition (cbInterpolation, 88, 64);
+-  gtk_widget_set_usize (cbInterpolation, 304, 22);
++  gtk_widget_set_uposition (cbInterpolation, 105, 79);
++  gtk_widget_set_usize (cbInterpolation, 320, 22);
+   gtk_combo_set_value_in_list (GTK_COMBO (cbInterpolation), TRUE, FALSE);
+   gtk_combo_set_case_sensitive (GTK_COMBO (cbInterpolation), TRUE);
+   gtk_combo_set_use_arrows_always (GTK_COMBO (cbInterpolation), TRUE);
+@@ -243,8 +243,8 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (frmMisc);
+   gtk_fixed_put (GTK_FIXED (fixed1), frmMisc, 0, 200);
+-  gtk_widget_set_uposition (frmMisc, 0, 200);
+-  gtk_widget_set_usize (frmMisc, 408, 120);
++  gtk_widget_set_uposition (frmMisc, 10, 200);
++  gtk_widget_set_usize (frmMisc, 425, 130);
+ 
+   fixed4 = gtk_fixed_new ();
+   gtk_widget_ref (fixed4);
+@@ -259,7 +259,7 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (chkDisStereo);
+   gtk_fixed_put (GTK_FIXED (fixed4), chkDisStereo, 16, 72);
+-  gtk_widget_set_uposition (chkDisStereo, 16, 72);
++  gtk_widget_set_uposition (chkDisStereo, 16, 295);
+   gtk_widget_set_usize (chkDisStereo, 368, 24);
+ 
+   chkIRQDBuf = gtk_check_button_new_with_label ("SPU IRQ - handle irqs in decoded sound buffer areas");
+@@ -268,7 +268,7 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (chkIRQDBuf);
+   gtk_fixed_put (GTK_FIXED (fixed4), chkIRQDBuf, 16, 48);
+-  gtk_widget_set_uposition (chkIRQDBuf, 16, 48);
++  gtk_widget_set_uposition (chkIRQDBuf, 16, 270);
+   gtk_widget_set_usize (chkIRQDBuf, 384, 24);
+ 
+   chkIRQWait = gtk_check_button_new_with_label ("SPU IRQ - wait for cpu action (enable it for a few games)");
+@@ -277,8 +277,8 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (chkIRQWait);
+   gtk_fixed_put (GTK_FIXED (fixed4), chkIRQWait, 16, 24);
+-  gtk_widget_set_uposition (chkIRQWait, 16, 24);
+-  gtk_widget_set_usize (chkIRQWait, 376, 24);
++  gtk_widget_set_uposition (chkIRQWait, 16, 245);
++  gtk_widget_set_usize (chkIRQWait, 385, 24);
+ 
+   chkHiCompat = gtk_check_button_new_with_label ("High compatibility mode (SPUupdate/async interface needed)");
+   gtk_widget_ref (chkHiCompat);
+@@ -286,8 +286,8 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (chkHiCompat);
+   gtk_fixed_put (GTK_FIXED (fixed4), chkHiCompat, 16, 0);
+-  gtk_widget_set_uposition (chkHiCompat, 16, 0);
+-  gtk_widget_set_usize (chkHiCompat, 376, 24);
++  gtk_widget_set_uposition (chkHiCompat, 16, 220);
++  gtk_widget_set_usize (chkHiCompat, 415, 24);
+ 
+   gtk_signal_connect (GTK_OBJECT (CfgWnd), "destroy",
+                       GTK_SIGNAL_FUNC (on_CfgWnd_destroy),
+@@ -314,7 +314,7 @@
+   GtkWidget *label6;
+   GtkWidget *label3;
+ 
+-  AboutWnd = gtk_window_new (GTK_WINDOW_DIALOG);
++  AboutWnd = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+   gtk_object_set_data (GTK_OBJECT (AboutWnd), "AboutWnd", AboutWnd);
+   gtk_container_set_border_width (GTK_CONTAINER (AboutWnd), 12);
+   gtk_window_set_title (GTK_WINDOW (AboutWnd), "About P.E.Op.S. OSS PSX SPU...");
+--- a/configure.in	2015-06-29 18:43:13.000000000 -0400
++++ b/configure.in	2015-06-29 18:41:39.000000000 -0400
+@@ -9,8 +9,8 @@
+ AM_PROG_CC_STDC
+ AC_HEADER_STDC
+ 
+-AM_PATH_GTK(1.2.0, ,
+-            AC_MSG_ERROR(Cannot find GTK: Is gtk-config in path?))
++PKG_CHECK_MODULES(GTK, gtk+-2.0, ,
++            AC_MSG_ERROR(Cannot find gtk+2.0))
+ 
+ dnl Set PACKAGE_DATA_DIR in config.h.
+ if test "x${datadir}" = 'x${prefix}/share'; then

@@ -4,7 +4,7 @@
 
 EAPI=5
 
-inherit games
+inherit games autotools
 
 DESCRIPTION="ePSXe Playstation Emulator"
 HOMEPAGE="http://www.epsxe.com"
@@ -13,20 +13,26 @@ bios? ( https://drive.google.com/uc?export=download&id=0BzPt9N2PyrQGenh0MGxCa1px
 xgl2? ( http://www.pbernert.com/gpupetexgl209.tar.gz )
 mesa? ( http://www.pbernert.com/gpupeopsmesagl178.tar.gz )
 softgpu? ( http://www.pbernert.com/gpupeopssoftx118.tar.gz )
-oss? ( http://www.pbernert.com/spupeopsoss109.tar.gz )
+oss? ( 
+	bin? ( http://www.pbernert.com/spupeopsoss109.tar.gz )
+	!bin? ( http://downloads.sourceforge.net/project/peops/peopsspu/P.E.Op.S.%20Sound%20SPU%201.9/PeopsSpu109.tar.gz )
+)
 menu? ( http://www.epsxe.com/files/ePSXe1925.zip )
 nullspu? ( http://www.pbernert.com/spupetenull101.tar.gz )
 alsa? ( http://downloads.sourceforge.net/project/peops/peopsspu/P.E.Op.S.%20Sound%20SPU%201.9/PeopsSpu109.tar.gz )
+pulseaudio? ( http://downloads.sourceforge.net/project/peops/peopsspu/P.E.Op.S.%20Sound%20SPU%201.9/PeopsSpu109.tar.gz )
 http://www.pbernert.com/petegpucfg_V2-9_V1-77_V1-18.tar.gz"
 
 LICENSE="epsxe"
 SLOT="0"
 KEYWORDS="x86 amd64"
-IUSE="doc bios xgl2 mesa softgpu config-ui oss +menu nullspu alsa"
+IUSE="doc bios xgl2 mesa softgpu config-ui oss +menu nullspu alsa pulseaudio bin"
 RESTRICT="mirror"
 
 DEPEND="
 	app-arch/unzip
+	sys-devel/make
+	app-text/dos2unix
 	>=app-arch/upx-ucl-3.0
 	menu? ( media-gfx/icoutils )
 "
@@ -56,11 +62,32 @@ src_unpack()
 		mkdir -p "${S}/cfg-files"
 		tar -xf "${DISTDIR}/petegpucfg_V2-9_V1-77_V1-18.tar.gz" -C "${S}/cfg-files"
 	fi
-	use oss && tar -xf "${DISTDIR}/spupeopsoss109.tar.gz" -C "${S}"
+	#use oss && tar -xf "${DISTDIR}/spupeopsoss109.tar.gz" -C "${S}"
+	if use oss; then
+		if use bin; then
+			tar -xf "${DISTDIR}/suppeopsoss109.tar.gz" -C "${S}"
+		else
+			mkdir -p "${S}/oss"
+			tar -xf "${DISTDIR}/PeopsSpu109.tar.gz" -C "${S}/oss"
+			if use config-ui; then
+				tar -xf "${S}/oss/src/linuxcfg/spucfg.tar.gz" -C "${S}/oss/src/linuxcfg"
+			fi
+		fi
+	fi
 	use nullspu && tar -xf "${DISTDIR}/spupetenull101.tar.gz" -C "${S}"
 	if use alsa; then
 		mkdir -p "${S}/alsa"
 		tar -xf "${DISTDIR}/PeopsSpu109.tar.gz" -C "${S}/alsa"
+		if use config-ui; then
+			tar -xf "${S}/alsa/src/linuxcfg/spucfg.tar.gz" -C "${S}/alsa/src/linuxcfg"
+		fi
+	fi
+	if use pulseaudio; then
+		mkdir -p "${S}/pulse"
+		tar -xf "${DISTDIR}/PeopsSpu109.tar.gz" -C "${S}/pulse"
+		if use config-ui; then
+			tar -xf "${S}/pulse/src/linuxcfg/spucfg.tar.gz" -C "${S}/pulse/src/linuxcfg"
+		fi
 	fi
 	if use menu; then
 		mkdir -p "${S}/w32" || die "Unpack failed!"
@@ -68,44 +95,126 @@ src_unpack()
 	fi
 }
 
+do_fix_line_endings()
+{
+	einfo "Finxing line ending in ${1}"
+	cd "${1}"
+	for f in $(ls); do
+		dos2unix -q "${f}" 
+	done
+}
+
+do_patch_spu_plugin()
+{
+	# change plugin name
+	cp "${1}/src/spu.c" "${1}/src/spu.c.orig"
+	sed -e "s/P.E.Op.S. ALSA Audio Driver/P.E.Op.S. ${3} Audio Driver/g" \
+		"${1}/src/spu.c.orig" > "${1}/src/spu.c"
+
+	# change config file and dialog executable name
+	cp "${1}/spuPeopsOSS.cfg" "${1}/spuPeops${2}.cfg"
+	cp "${1}/src/cfg.c" "${1}/src/cfg.c.orig"
+	sed -e "s/spuPeopsOSS.cfg/spuPeops${2}.cfg/g" \
+		"${1}/src/cfg.c.orig" | \
+	sed -e "s/cfgPeopsOSS/cfgPeops${2}/g" > \
+		"${1}/src/cfg.c"
+
+	if use config-ui; then
+		# Fix line endings
+		do_fix_line_endings "${1}/src/linuxcfg"
+		do_fix_line_endings "${1}/src/linuxcfg/src"
+			
+		# use gtk+2 patch
+		cd "${1}/src/linuxcfg"
+		epatch "${FILESDIR}/PeopsSpu109-linuxcfg-gtk.patch"
+
+		# change dialog title
+		cp "${1}/src/linuxcfg/src/interface.c" "${1}/src/linuxcfg/src/interface.c.orig"
+		sed -e "s/Configure P.E.Op.S. OSS PSX SPU plugin/Configure P.E.Op.S. ${2} PSX SPU plugin/g" \
+			"${1}/src/linuxcfg/src/interface.c.orig" > \
+			"${1}/src/linuxcfg/src/interface.c"
+
+		# change hardcoded config file
+		cp "${1}/src/linuxcfg/src/main.c" "${1}/src/linuxcfg/src/main.c.orig"
+		sed -e "s/spuPeopsOSS.cfg/spuPeops${2}.cfg/g" \
+			"${1}/src/linuxcfg/src/main.c.orig" > \
+			"${1}/src/linuxcfg/src/main.c"
+
+		cd "${1}/src/linuxcfg"
+		einfo "Regenerating autotools files."
+		eautoconf
+		eautomake
+	fi
+}
+
 src_prepare()
 {	
 	# unupx it
-	#
+	einfo "Unpacking ePSXe executable..."
 	mv "${S}/epsxe" "${S}/epsxe.bak"
-	upx -d -o "${S}/epsxe" "${S}/epsxe.bak"
+	upx -q -d -o "${S}/epsxe" "${S}/epsxe.bak"
 	rm "${S}/epsxe.bak"
 
 	# fix bios filenames
-	#
 	if use bios; then
-		cp -v "${S}/SCPH1000.BIN"  "${S}/scph1000.bin"
-		cp -v "${S}/SCPH1001.bin"  "${S}/scph1001.bin"
-		cp -v "${S}/SCPH5000.BIN"  "${S}/scph5000.bin"
-		cp -v "${S}/SCPH5500.BIN"  "${S}/scph5500.bin"
-		cp -v "${S}/SCPH7001.BIN"  "${S}/scph7001.bin"
-		cp -v "${S}/SCPH7502.BIN"  "${S}/scph7502.bin"
+		einfo "Fixing PlayStation bios names..."
+		cp "${S}/SCPH1000.BIN"  "${S}/scph1000.bin"
+		cp "${S}/SCPH1001.bin"  "${S}/scph1001.bin"
+		cp "${S}/SCPH5000.BIN"  "${S}/scph5000.bin"
+		cp "${S}/SCPH5500.BIN"  "${S}/scph5500.bin"
+		cp "${S}/SCPH7001.BIN"  "${S}/scph7001.bin"
+		cp "${S}/SCPH7502.BIN"  "${S}/scph7502.bin"
 	fi
 
 	# fix readme filenames
-	#
 	if use oss; then
-		cp -v "${S}/readme_1_9.txt" "${S}/spuPeopsOSS_readme_1_9.txt"
+		if use bin; then
+			cp "${S}/readme_1_9.txt" "${S}/spuPeopsOSS_readme_1_9.txt"
+		else
+			cp "${S}/oss/readme_1_9.txt" "${S}/oss/spuPeopsOSS_readme_1_9.txt"
+			cp "${S}/oss/src/Makefile" "${S}/oss/src/Makefile.orig"
+			sed -e "s/-fPIC/-fPIC -m32/g" "${S}/oss/src/Makefile.orig" | \
+			sed -e "s/-Wall -mpentium -O3 -ffast-math -fomit-frame-pointer/${CFLAGS}/g" | \
+			sed -e "s/LINKFLAGS = /LINKFLAGS = -m32 /g" > "${S}/oss/src/Makefile"
+			if use config-ui; then
+				do_fix_line_endings "${S}/oss/src/linuxcfg"
+				do_fix_line_endings "${S}/oss/src/linuxcfg/src"
+				cd "${S}/oss/src/linuxcfg"
+				epatch "${FILESDIR}/PeopsSpu109-linuxcfg-gtk.patch"
+
+				einfo "Regenerating autotools files."
+				eautoconf
+				eautomake
+			fi
+		fi
 	fi
 	if use nullspu; then
-		cp -v "${S}/readme.txt" "${S}/spuPeteNull_readme.txt"
+		cp "${S}/readme.txt" "${S}/spuPeteNull_readme.txt"
 	fi
 
 	if use alsa; then
-		cp -v "${S}/alsa/src/Makefile" "${S}/alsa/src/Makefile.orig"
+		cp "${S}/alsa/src/Makefile" "${S}/alsa/src/Makefile.orig"
 		sed -e "s/USEALSA = FALSE/USEALSA = TRUE/g" "${S}/alsa/src/Makefile.orig" | \
-		sed -e "s/-mpentium//g" | \
 		sed -e "s/-fPIC/-fPIC -m32/g" | \
+		sed -e "s/-Wall -mpentium -O3 -ffast-math -fomit-frame-pointer/${CFLAGS}/g" | \
 		sed -e "s/LINKFLAGS = /LINKFLAGS = -m32 /g" > "${S}/alsa/src/Makefile"
+		do_patch_spu_plugin "${S}/alsa" "ALSA" "ALSA"
+	fi
+	if use pulseaudio; then
+		cp "${S}/pulse/src/Makefile" "${S}/pulse/src/Makefile.orig"
+		sed -e "s/USEALSA = FALSE/USEALSA = TRUE/g" "${S}/pulse/src/Makefile.orig" | \
+		sed -e "s/-fPIC/-fPIC -m32/g" | \
+		sed -e "s/-Wall -mpentium -O3 -ffast-math -fomit-frame-pointer/${CFLAGS}/g" | \
+		sed -e "s/libspuPeopsALSA.so/libspuPeopsPA.so/g" | \
+		sed -e "s/LINKFLAGS = /LINKFLAGS = -m32 /g" > "${S}/pulse/src/Makefile"
+	
+		# patch to use pulseaudio
+		cp "${S}/pulse/src/alsa.c" "${S}/pulse/src/alsa.c.orig"
+		sed -e "s/default/pulse/g" "${S}/pulse/src/alsa.c.orig" > "${S}/pulse/src/alsa.c"
+		do_patch_spu_plugin "${S}/pulse" "PA" "PulseAudio"
 	fi
 
 	# extract windows icon
-	#
 	if use menu; then
 		wrestool -x -t 14 "${S}/w32/ePSXe.exe" > "${S}/epsxe.ico"
 	fi
@@ -113,14 +222,53 @@ src_prepare()
 
 src_configure()
 {
-	return
+	if (use oss && (! (use bin))); then
+		if use config-ui; then
+			cd "${S}/oss/src/linuxcfg"
+			econf CFLAGS="-m32 ${CFLAGS}"
+		fi
+	fi
+	if (use alsa && use config-ui); then
+		cd "${S}/alsa/src/linuxcfg"
+		econf CFLAGS="-m32 ${CFLAGS}"
+	fi
+	if (use pulseaudio && use config-ui); then
+		cd "${S}/pulse/src/linuxcfg"
+		econf CFLAGS="-m32 ${CFLAGS}"
+	fi
 }
 
 src_compile()
 {
+	if (use oss && (! (use bin))); then
+		cd "${S}/oss/src"
+		emake
+		if use config-ui; then
+			cd "${S}/oss/src/linuxcfg"
+			emake
+			cp "${S}/oss/src/linuxcfg/src/spucfg" \
+				"${S}/oss/src/linuxcfg/src/cfgPeopsOSS" || die "Compile failed!"
+		fi
+	fi
 	if use alsa; then
 		cd "${S}/alsa/src"
-		make
+		emake
+		if use config-ui; then
+			cd "${S}/alsa/src/linuxcfg"
+			emake
+			cp "${S}/alsa/src/linuxcfg/src/spucfg" \
+				"${S}/alsa/src/linuxcfg/src/cfgPeopsALSA" || die "Compile failed!"
+		fi
+	fi
+	if use pulseaudio; then
+		cd "${S}/pulse/src"
+		emake
+		if use config-ui; then
+			cd "${S}/pulse/src/linuxcfg"
+			emake
+			cp "${S}/pulse/src/linuxcfg/src/spucfg" \
+				"${S}/pulse/src/linuxcfg/src/cfgPeopsPA" || die "Compile failed!"
+		fi
 	fi
 }
 
@@ -279,22 +427,42 @@ src_install()
 	if use oss; then
 		rm -f "${INSTALLDIR}/plugins/remove.me"
 		rm -f "${INSTALLDIR}/cfg/erase.me"
-		insopts --owner=root --group=root --mode=644
-		insinto "${MERGEDIR}/plugins"
-		doins "${S}/libspuPeopsOSS.so.1.0.9" "${INSTALLDIR}/plugins"
-		insopts --owner=root --group=games --mode=664
-		insinto /etc/epsxe
-		doins "${S}/spuPeopsOSS.cfg"
-		dosym /etc/epsxe/spuPeopsOSS.cfg "${MERGEDIR}/cfg/spuPeopsOSS.cfg"
-		if use config-ui; then
-			insopts --owner=root --group=games --mode=750
-			insinto "${MERGEDIR}/cfg"
-			doins "${S}/cfgPeopsOSS"
-		fi
-		if use doc; then
+		if use bin; then
 			insopts --owner=root --group=root --mode=644
-			insinto "${MERGEDIR}/docs"
-			doins "${S}/spuPeopsOSS_readme_1_9.txt"
+			insinto "${MERGEDIR}/plugins"
+			doins "${S}/libspuPeopsOSS.so.1.0.9"
+			insopts --owner=root --group=games --mode=664
+			insinto /etc/epsxe
+			doins "${S}/spuPeopsOSS.cfg"
+			dosym /etc/epsxe/spuPeopsOSS.cfg "${MERGEDIR}/cfg/spuPeopsOSS.cfg"
+			if use config-ui; then
+				insopts --owner=root --group=games --mode=750
+				insinto "${MERGEDIR}/cfg"
+				doins "${S}/cfgPeopsOSS"
+			fi
+			if use doc; then
+				insopts --owner=root --group=root --mode=644
+				insinto "${MERGEDIR}/docs"
+				doins "${S}/spuPeopsOSS_readme_1_9.txt"
+			fi
+		else
+			insopts --owner=root --group=root --mode=644
+			insinto "${MERGEDIR}/plugins"
+			doins "${S}/oss/src/libspuPeopsOSS.so.1.0.9"
+			insopts --owner=root --group=games --mode=664
+			insinto /etc/epsxe
+			doins "${S}/oss/spuPeopsOSS.cfg"
+			dosym /etc/epsxe/spuPeopsOSS.cfg "${MERGEDIR}/cfg/spuPeopsOSS.cfg"
+			if use config-ui; then
+				insopts --owner=root --group=games --mode=750
+				insinto "${MERGEDIR}/cfg"
+				doins "${S}/oss/src/linuxcfg/src/cfgPeopsOSS"
+			fi
+			if use doc; then
+				insopts --owner=root --group=root --mode=644
+				insinto "${MERGEDIR}/docs"
+				doins "${S}/oss/spuPeopsOSS_readme_1_9.txt"
+			fi
 		fi
 	fi
 
@@ -304,6 +472,32 @@ src_install()
 		insopts --owner=root --group=root --mode=644
 		insinto "${MERGEDIR}/plugins"
 		doins "${S}/alsa/src/libspuPeopsALSA.so.1.0.9"
+		insopts --owner=root --group=games --mode=664
+		insinto /etc/epsxe
+		doins "${S}/alsa/spuPeopsALSA.cfg"
+		dosym /etc/epsxe/spuPeopsALSA.cfg "${MERGEDIR}/cfg/spuPeopsALSA.cfg"
+		if use config-ui;  then
+			insopts --owner=root --group=games --mode=750
+			insinto "${MERGEDIR}/cfg"
+			doins "${S}/alsa/src/linuxcfg/src/cfgPeopsALSA"
+		fi
+	fi
+
+	if use pulseaudio; then
+		rm -f "${INSTALLDIR}/plugins/remove.me"
+		rm -f "${INSTALLDIR}/cfg/erase.me"
+		insopts --owner=root --group=root --mode=644
+		insinto "${MERGEDIR}/plugins"
+		doins "${S}/pulse/src/libspuPeopsPA.so.1.0.9"
+		insopts --owner=root --group=games --mode=664
+		insinto /etc/epsxe
+		doins "${S}/pulse/spuPeopsPA.cfg"
+		dosym /etc/epsxe/spuPeopsPA.cfg "${MERGEDIR}/cfg/spuPeopsPA.cfg"
+		if use config-ui; then
+			insopts --owner=root --group=games --mode=750
+			insinto "${MERGEDIR}/cfg"
+			doins "${S}/pulse/src/linuxcfg/src/cfgPeopsPA"
+		fi
 	fi
 
 	if use nullspu; then
