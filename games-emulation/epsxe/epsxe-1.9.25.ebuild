@@ -466,7 +466,7 @@ src_compile()
 
 src_install()
 {
-	MERGEDIR="/opt/epsxe-${PV}"
+	MERGEDIR="/opt/epsxe"
 	INSTALLDIR="${D}/${MERGEDIR}"
 
 	diropts --owner=root --group=root
