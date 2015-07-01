@@ -1,0 +1,55 @@
+--- a/src/makes/mk.x11	2008-04-27 15:52:42.000000000 -0400
++++ b/src/makes/mk.x11.orig2	2015-06-30 20:49:33.000000000 -0400
+@@ -14,9 +14,9 @@
+ NUMBER = 1.0.18
+ CFG = cfgPeopsSoft
+ CFGOBJS = conf.o interface.o support.o
+-CFLAGS += `gtk-config --cflags` -m32
++CFLAGS += `pkg-config --cflags gtk+-2.0` -m32
+ ASMFLAGS += -O9999 -f elf
+-CFGLIBS +=  `gtk-config --libs`
++CFGLIBS += -lX11 `pkg-config --libs gtk+-2.0`
+ LIBS += -L/usr/X11/lib
+ 
+ ifeq ($(XF86VM), TRUE)
+--- a/src/conf.c	2015-06-30 20:38:06.000000000 -0400
++++ b/src/conf.c	2015-06-30 20:34:23.000000000 -0400
+@@ -205,26 +205,21 @@
+ 
+ void OnCfgFixes(GtkButton *button, gpointer user_data)
+ {
+- GtkWidget *DlgPacker;
+  GtkWidget *Label;
+  GtkWidget *Ok,*Cancel;
+  GtkWidget *Box,*BBox;
+  int i;
+  char Text[32];
+ 
+- FixesDlg = gtk_window_new(GTK_WINDOW_DIALOG);
++ FixesDlg = gtk_window_new(GTK_WINDOW_TOPLEVEL);
+ // gtk_widget_set_usize(FixesDlg, 500, 400);
+  gtk_window_set_title(GTK_WINDOW(FixesDlg), "Special game fixes...");
+  gtk_window_set_position(GTK_WINDOW(FixesDlg), GTK_WIN_POS_CENTER);
+  gtk_container_set_border_width(GTK_CONTAINER(FixesDlg), 5);
+ 
+- DlgPacker = gtk_packer_new();
+- gtk_container_add(GTK_CONTAINER(FixesDlg), DlgPacker);
+-
+  Box = gtk_vbox_new(0, 5);
+  gtk_container_set_border_width(GTK_CONTAINER(Box), 5);
+- gtk_packer_add(GTK_PACKER(DlgPacker), Box, GTK_SIDE_TOP, GTK_ANCHOR_CENTER,
+-                GTK_FILL_X, 0, 8, 8, 0, 0);
++ gtk_container_add(GTK_CONTAINER(FixesDlg), Box);
+ 
+  Label = gtk_label_new("Activate the following options only if you want to play one of the listed games\n(or if your game is showing similar glitches)!");
+  gtk_box_pack_start(GTK_BOX(Box), Label, FALSE, FALSE, 0);
+@@ -249,8 +244,7 @@
+    gtk_toggle_button_set_active(GTK_TOGGLE_BUTTON(FixesBtns[i]), dwCfgFixes & (1<<i));
+ 
+  BBox = gtk_hbutton_box_new();
+- gtk_packer_add(GTK_PACKER(DlgPacker), BBox, GTK_SIDE_BOTTOM, GTK_ANCHOR_S,
+-                GTK_FILL_X | GTK_FILL_Y | GTK_EXPAND, 0, 8, 8, 0, 0);
++ gtk_container_add(GTK_CONTAINER(FixesDlg), BBox);
+ 
+  Ok = gtk_button_new_with_label("Ok");
+  gtk_signal_connect(GTK_OBJECT(Ok), "clicked", GTK_SIGNAL_FUNC(OnCfgFixes_Ok), NULL);
