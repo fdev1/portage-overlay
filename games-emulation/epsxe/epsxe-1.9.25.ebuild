@@ -62,7 +62,7 @@ RDEPEND="${DEPEND}
 	x11-libs/gtk+:2[abi_x86_32]
 	>=media-libs/sdl-ttf-2.0.0[abi_x86_32]
 	media-libs/mesa[abi_x86_32]
-	config-ui? ( xgl2? ( x11-libs/gtk+:1[abi_x86_32] ) )
+	config-ui? ( xgl2? ( bin? ( x11-libs/gtk+:1[abi_x86_32] ) ) )
 	config-ui? ( mesa? ( bin? ( x11-libs/gtk+:1[abi_x86_32] ) ) )
 	config-ui? ( oss? ( bin? ( x11-libs/gtk+:1[abi_x86_32] ) ) )
 	config-ui? ( alsa? ( bin? (  x11-libs/gtk+:1[abi_x86_32] ) ) )
@@ -105,7 +105,7 @@ src_unpack()
 		fi
 	fi
 
-	if (use config-ui && (use xgl2 || use mesa || use softgpu)); then
+	if (use config-ui && use bin && (use xgl2 || use softgpu)); then
 		mkdir -p "${S}/cfg-files"
 		tar -xf "${DISTDIR}/petegpucfg_V2-9_V1-77_V1-18.tar.gz" -C "${S}/cfg-files"
 	fi
@@ -267,8 +267,9 @@ src_prepare()
 		if use config-ui; then
 			einfo "Preparing XGL2 GPU plugin configuration utility..."
 			do_fix_line_endings "${S}/gpucfg2"
-			#do_fix_line_endings "${S}/gpucfg2/src"
+			do_fix_line_endings "${S}/gpucfg2/src"
 			cd "${S}/gpucfg2"
+			epatch "${FILESDIR}/PeteXGL209-cfg-gtk.patch"
 			eautoconf
 			eautomake
 		fi

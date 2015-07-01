@@ -1,0 +1,762 @@
+--- a/configure.in	2015-07-01 00:22:38.000000000 -0400
++++ b/configure.in	2015-07-01 00:19:28.000000000 -0400
+@@ -9,8 +9,8 @@
+ AM_PROG_CC_STDC
+ AC_HEADER_STDC
+ 
+-AM_PATH_GTK(1.2.0, ,
+-            AC_MSG_ERROR(Cannot find GTK: Is gtk-config in path?))
++PKG_CHECK_MODULES(GTK, gtk+-2.0, ,
++            AC_MSG_ERROR(Cannot find gtk+2.0))
+ 
+ dnl Set PACKAGE_DATA_DIR in config.h.
+ if test "x${datadir}" = 'x${prefix}/share'; then
+--- a/src/interface.c	2015-07-01 00:22:38.000000000 -0400
++++ b/src/interface.c	2015-07-01 00:19:17.000000000 -0400
+@@ -126,13 +126,14 @@
+   GtkWidget *label11;
+   GtkWidget *chkScanlines;
+ 
+-  CfgWnd = gtk_window_new (GTK_WINDOW_DIALOG);
++  CfgWnd = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+   gtk_object_set_data (GTK_OBJECT (CfgWnd), "CfgWnd", CfgWnd);
+-  gtk_container_set_border_width (GTK_CONTAINER (CfgWnd), 8);
++  /* gtk_container_set_border_width (GTK_CONTAINER (CfgWnd), 8); */
+   gtk_window_set_title (GTK_WINDOW (CfgWnd), "Pete's GLX2 PSX GPU configuration...");
+   gtk_window_set_position (GTK_WINDOW (CfgWnd), GTK_WIN_POS_CENTER);
+-  gtk_window_set_modal (GTK_WINDOW (CfgWnd), TRUE);
+-  gtk_window_set_policy (GTK_WINDOW (CfgWnd), FALSE, FALSE, FALSE);
++  /* gtk_window_set_modal (GTK_WINDOW (CfgWnd), TRUE); */
++  gtk_window_set_policy (GTK_WINDOW (CfgWnd), FALSE, TRUE, FALSE);
++  gtk_window_resize(GTK_WINDOW (CfgWnd), 865, 570);
+ 
+   fixed1 = gtk_fixed_new ();
+   gtk_widget_ref (fixed1);
+@@ -147,7 +148,7 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (btnSave);
+   gtk_fixed_put (GTK_FIXED (fixed1), btnSave, 104, 472);
+-  gtk_widget_set_uposition (btnSave, 104, 472);
++  gtk_widget_set_uposition (btnSave, 144, 535);
+   gtk_widget_set_usize (btnSave, 160, 24);
+ 
+   frmTextures = gtk_frame_new ("Textures");
+@@ -156,8 +157,8 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (frmTextures);
+   gtk_fixed_put (GTK_FIXED (fixed1), frmTextures, 312, 0);
+-  gtk_widget_set_uposition (frmTextures, 312, 0);
+-  gtk_widget_set_usize (frmTextures, 360, 136);
++  gtk_widget_set_uposition (frmTextures, 410, 0);
++  gtk_widget_set_usize (frmTextures, 450, 136);
+ 
+   fixed3 = gtk_fixed_new ();
+   gtk_widget_ref (fixed3);
+@@ -172,7 +173,7 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (edtMaxTex);
+   gtk_fixed_put (GTK_FIXED (fixed3), edtMaxTex, 248, 64);
+-  gtk_widget_set_uposition (edtMaxTex, 248, 64);
++  gtk_widget_set_uposition (edtMaxTex, 750, 75);
+   gtk_widget_set_usize (edtMaxTex, 96, 24);
+ 
+   label6 = gtk_label_new ("Filtering:");
+@@ -181,7 +182,7 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (label6);
+   gtk_fixed_put (GTK_FIXED (fixed3), label6, 8, 0);
+-  gtk_widget_set_uposition (label6, 8, 0);
++  gtk_widget_set_uposition (label6, 420, 25);
+   gtk_widget_set_usize (label6, 64, 24);
+ 
+   cmbFilter = gtk_combo_new ();
+@@ -190,8 +191,8 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (cmbFilter);
+   gtk_fixed_put (GTK_FIXED (fixed3), cmbFilter, 80, 0);
+-  gtk_widget_set_uposition (cmbFilter, 80, 0);
+-  gtk_widget_set_usize (cmbFilter, 264, 24);
++  gtk_widget_set_uposition (cmbFilter, 570, 25);
++  gtk_widget_set_usize (cmbFilter, 285, 24);
+   gtk_combo_set_value_in_list (GTK_COMBO (cmbFilter), TRUE, FALSE);
+   gtk_combo_set_use_arrows_always (GTK_COMBO (cmbFilter), TRUE);
+   cmbFilter_items = g_list_append (cmbFilter_items, (gpointer) "0: None");
+@@ -217,8 +218,8 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (cmbHiresTex);
+   gtk_fixed_put (GTK_FIXED (fixed3), cmbHiresTex, 80, 32);
+-  gtk_widget_set_uposition (cmbHiresTex, 80, 32);
+-  gtk_widget_set_usize (cmbHiresTex, 264, 22);
++  gtk_widget_set_uposition (cmbHiresTex, 570, 50);
++  gtk_widget_set_usize (cmbHiresTex, 285, 22);
+   gtk_combo_set_value_in_list (GTK_COMBO (cmbHiresTex), TRUE, FALSE);
+   gtk_combo_set_use_arrows_always (GTK_COMBO (cmbHiresTex), TRUE);
+   cmbHiresTex_items = g_list_append (cmbHiresTex_items, (gpointer) "0: None (standard)");
+@@ -240,8 +241,8 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (label7);
+   gtk_fixed_put (GTK_FIXED (fixed3), label7, 8, 64);
+-  gtk_widget_set_uposition (label7, 8, 64);
+-  gtk_widget_set_usize (label7, 240, 24);
++  gtk_widget_set_uposition (label7, 420, 75);
++  gtk_widget_set_usize (label7, 260, 24);
+ 
+   label23 = gtk_label_new ("HiRes Tex:");
+   gtk_widget_ref (label23);
+@@ -249,7 +250,7 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (label23);
+   gtk_fixed_put (GTK_FIXED (fixed3), label23, 8, 32);
+-  gtk_widget_set_uposition (label23, 8, 32);
++  gtk_widget_set_uposition (label23, 420, 50);
+   gtk_widget_set_usize (label23, 64, 24);
+ 
+   chkTWinShader = gtk_check_button_new_with_label ("Use pixel shaders for \"PSX Texture Window\" emulation");
+@@ -258,8 +259,8 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (chkTWinShader);
+   gtk_fixed_put (GTK_FIXED (fixed3), chkTWinShader, 8, 88);
+-  gtk_widget_set_uposition (chkTWinShader, 8, 88);
+-  gtk_widget_set_usize (chkTWinShader, 336, 24);
++  gtk_widget_set_uposition (chkTWinShader, 420 , 100);
++  gtk_widget_set_usize (chkTWinShader, 360, 24);
+ 
+   btnCancel = gtk_button_new_with_label ("Cancel");
+   gtk_widget_ref (btnCancel);
+@@ -267,7 +268,7 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (btnCancel);
+   gtk_fixed_put (GTK_FIXED (fixed1), btnCancel, 400, 472);
+-  gtk_widget_set_uposition (btnCancel, 400, 472);
++  gtk_widget_set_uposition (btnCancel, 550, 535);
+   gtk_widget_set_usize (btnCancel, 160, 24);
+ 
+   frmWindow = gtk_frame_new ("Window options");
+@@ -276,8 +277,8 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (frmWindow);
+   gtk_fixed_put (GTK_FIXED (fixed1), frmWindow, 0, 0);
+-  gtk_widget_set_uposition (frmWindow, 0, 0);
+-  gtk_widget_set_usize (frmWindow, 304, 136);
++  gtk_widget_set_uposition (frmWindow, 4, 0);
++  gtk_widget_set_usize (frmWindow, 400, 136);
+ 
+   fixed2 = gtk_fixed_new ();
+   gtk_widget_ref (fixed2);
+@@ -292,7 +293,7 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (edtXSize);
+   gtk_fixed_put (GTK_FIXED (fixed2), edtXSize, 64, 0);
+-  gtk_widget_set_uposition (edtXSize, 64, 0);
++  gtk_widget_set_uposition (edtXSize, 64, 25);
+   gtk_widget_set_usize (edtXSize, 72, 24);
+ 
+   edtYSize = gtk_entry_new ();
+@@ -301,7 +302,7 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (edtYSize);
+   gtk_fixed_put (GTK_FIXED (fixed2), edtYSize, 208, 0);
+-  gtk_widget_set_uposition (edtYSize, 208, 0);
++  gtk_widget_set_uposition (edtYSize, 208, 25);
+   gtk_widget_set_usize (edtYSize, 72, 24);
+ 
+   label3 = gtk_label_new ("Height:");
+@@ -310,7 +311,7 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (label3);
+   gtk_fixed_put (GTK_FIXED (fixed2), label3, 160, 0);
+-  gtk_widget_set_uposition (label3, 160, 0);
++  gtk_widget_set_uposition (label3, 160, 25);
+   gtk_widget_set_usize (label3, 48, 24);
+   gtk_label_set_justify (GTK_LABEL (label3), GTK_JUSTIFY_RIGHT);
+ 
+@@ -320,7 +321,7 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (label2);
+   gtk_fixed_put (GTK_FIXED (fixed2), label2, 16, 0);
+-  gtk_widget_set_uposition (label2, 16, 0);
++  gtk_widget_set_uposition (label2, 16, 25);
+   gtk_widget_set_usize (label2, 48, 24);
+   gtk_label_set_justify (GTK_LABEL (label2), GTK_JUSTIFY_RIGHT);
+ 
+@@ -330,7 +331,7 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (label31);
+   gtk_fixed_put (GTK_FIXED (fixed2), label31, 160, 88);
+-  gtk_widget_set_uposition (label31, 160, 88);
++  gtk_widget_set_uposition (label31, 160, 100);
+   gtk_widget_set_usize (label31, 48, 24);
+   gtk_label_set_justify (GTK_LABEL (label31), GTK_JUSTIFY_RIGHT);
+ 
+@@ -340,7 +341,7 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (label30);
+   gtk_fixed_put (GTK_FIXED (fixed2), label30, 0, 88);
+-  gtk_widget_set_uposition (label30, 0, 88);
++  gtk_widget_set_uposition (label30, 8, 100);
+   gtk_widget_set_usize (label30, 64, 24);
+   gtk_label_set_justify (GTK_LABEL (label30), GTK_JUSTIFY_RIGHT);
+ 
+@@ -350,7 +351,7 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (cmbXRes);
+   gtk_fixed_put (GTK_FIXED (fixed2), cmbXRes, 64, 56);
+-  gtk_widget_set_uposition (cmbXRes, 64, 56);
++  gtk_widget_set_uposition (cmbXRes, 72, 75);
+   gtk_widget_set_usize (cmbXRes, 88, 24);
+   gtk_combo_set_value_in_list (GTK_COMBO (cmbXRes), TRUE, FALSE);
+   gtk_combo_set_use_arrows_always (GTK_COMBO (cmbXRes), TRUE);
+@@ -373,7 +374,7 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (label24);
+   gtk_fixed_put (GTK_FIXED (fixed2), label24, 0, 56);
+-  gtk_widget_set_uposition (label24, 0, 56);
++  gtk_widget_set_uposition (label24, 8, 75);
+   gtk_widget_set_usize (label24, 64, 24);
+   gtk_label_set_justify (GTK_LABEL (label24), GTK_JUSTIFY_RIGHT);
+ 
+@@ -383,7 +384,7 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (label25);
+   gtk_fixed_put (GTK_FIXED (fixed2), label25, 184, 56);
+-  gtk_widget_set_uposition (label25, 184, 56);
++  gtk_widget_set_uposition (label25, 180, 75);
+   gtk_widget_set_usize (label25, 24, 24);
+   gtk_label_set_justify (GTK_LABEL (label25), GTK_JUSTIFY_RIGHT);
+ 
+@@ -393,8 +394,8 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (chkFullScreen);
+   gtk_fixed_put (GTK_FIXED (fixed2), chkFullScreen, 64, 24);
+-  gtk_widget_set_uposition (chkFullScreen, 64, 24);
+-  gtk_widget_set_usize (chkFullScreen, 80, 24);
++  gtk_widget_set_uposition (chkFullScreen, 64, 50);
++  gtk_widget_set_usize (chkFullScreen, 100, 24);
+ 
+   cmbStretch = gtk_combo_new ();
+   gtk_widget_ref (cmbStretch);
+@@ -402,7 +403,7 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (cmbStretch);
+   gtk_fixed_put (GTK_FIXED (fixed2), cmbStretch, 64, 88);
+-  gtk_widget_set_uposition (cmbStretch, 64, 88);
++  gtk_widget_set_uposition (cmbStretch, 72, 100);
+   gtk_widget_set_usize (cmbStretch, 88, 24);
+   gtk_combo_set_value_in_list (GTK_COMBO (cmbStretch), TRUE, FALSE);
+   gtk_combo_set_use_arrows_always (GTK_COMBO (cmbStretch), TRUE);
+@@ -426,7 +427,7 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (cmbYRes);
+   gtk_fixed_put (GTK_FIXED (fixed2), cmbYRes, 208, 56);
+-  gtk_widget_set_uposition (cmbYRes, 208, 56);
++  gtk_widget_set_uposition (cmbYRes, 208, 75);
+   gtk_widget_set_usize (cmbYRes, 88, 24);
+   gtk_combo_set_value_in_list (GTK_COMBO (cmbYRes), TRUE, FALSE);
+   gtk_combo_set_use_arrows_always (GTK_COMBO (cmbYRes), TRUE);
+@@ -450,7 +451,7 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (cmbRender);
+   gtk_fixed_put (GTK_FIXED (fixed2), cmbRender, 208, 88);
+-  gtk_widget_set_uposition (cmbRender, 208, 88);
++  gtk_widget_set_uposition (cmbRender, 208, 100);
+   gtk_widget_set_usize (cmbRender, 88, 24);
+   gtk_combo_set_value_in_list (GTK_COMBO (cmbRender), TRUE, FALSE);
+   gtk_combo_set_use_arrows_always (GTK_COMBO (cmbRender), TRUE);
+@@ -473,8 +474,8 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (frmCompat);
+   gtk_fixed_put (GTK_FIXED (fixed1), frmCompat, 312, 136);
+-  gtk_widget_set_uposition (frmCompat, 312, 136);
+-  gtk_widget_set_usize (frmCompat, 360, 144);
++  gtk_widget_set_uposition (frmCompat, 410, 136);
++  gtk_widget_set_usize (frmCompat, 450, 144);
+ 
+   fixed5 = gtk_fixed_new ();
+   gtk_widget_ref (fixed5);
+@@ -489,7 +490,7 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (label28);
+   gtk_fixed_put (GTK_FIXED (fixed5), label28, 0, 96);
+-  gtk_widget_set_uposition (label28, 0, 96);
++  gtk_widget_set_uposition (label28, 420, 235);
+   gtk_widget_set_usize (label28, 136, 24);
+   gtk_label_set_justify (GTK_LABEL (label28), GTK_JUSTIFY_RIGHT);
+ 
+@@ -499,7 +500,7 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (edtFBorder);
+   gtk_fixed_put (GTK_FIXED (fixed5), edtFBorder, 136, 96);
+-  gtk_widget_set_uposition (edtFBorder, 136, 96);
++  gtk_widget_set_uposition (edtFBorder, 570, 235);
+   gtk_widget_set_usize (edtFBorder, 64, 22);
+ 
+   cmbOffscreen = gtk_combo_new ();
+@@ -508,8 +509,8 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (cmbOffscreen);
+   gtk_fixed_put (GTK_FIXED (fixed5), cmbOffscreen, 136, 0);
+-  gtk_widget_set_uposition (cmbOffscreen, 136, 0);
+-  gtk_widget_set_usize (cmbOffscreen, 208, 24);
++  gtk_widget_set_uposition (cmbOffscreen, 570, 160);
++  gtk_widget_set_usize (cmbOffscreen, 285, 24);
+   gtk_combo_set_value_in_list (GTK_COMBO (cmbOffscreen), TRUE, FALSE);
+   gtk_combo_set_use_arrows_always (GTK_COMBO (cmbOffscreen), TRUE);
+   cmbOffscreen_items = g_list_append (cmbOffscreen_items, (gpointer) "0: None - Fastest, most glitches");
+@@ -531,7 +532,7 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (label9);
+   gtk_fixed_put (GTK_FIXED (fixed5), label9, 0, 0);
+-  gtk_widget_set_uposition (label9, 0, 0);
++  gtk_widget_set_uposition (label9, 420, 160);
+   gtk_widget_set_usize (label9, 136, 24);
+ 
+   cmbFrameTex = gtk_combo_new ();
+@@ -540,8 +541,8 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (cmbFrameTex);
+   gtk_fixed_put (GTK_FIXED (fixed5), cmbFrameTex, 136, 32);
+-  gtk_widget_set_uposition (cmbFrameTex, 136, 32);
+-  gtk_widget_set_usize (cmbFrameTex, 208, 24);
++  gtk_widget_set_uposition (cmbFrameTex, 570, 185);
++  gtk_widget_set_usize (cmbFrameTex, 285, 24);
+   gtk_combo_set_value_in_list (GTK_COMBO (cmbFrameTex), TRUE, FALSE);
+   gtk_combo_set_use_arrows_always (GTK_COMBO (cmbFrameTex), TRUE);
+   cmbFrameTex_items = g_list_append (cmbFrameTex_items, (gpointer) "0: None - No FB effects");
+@@ -564,7 +565,7 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (label10);
+   gtk_fixed_put (GTK_FIXED (fixed5), label10, 0, 32);
+-  gtk_widget_set_uposition (label10, 0, 32);
++  gtk_widget_set_uposition (label10, 420, 185);
+   gtk_widget_set_usize (label10, 136, 24);
+ 
+   cmbFrameAcc = gtk_combo_new ();
+@@ -573,8 +574,8 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (cmbFrameAcc);
+   gtk_fixed_put (GTK_FIXED (fixed5), cmbFrameAcc, 136, 64);
+-  gtk_widget_set_uposition (cmbFrameAcc, 136, 64);
+-  gtk_widget_set_usize (cmbFrameAcc, 208, 22);
++  gtk_widget_set_uposition (cmbFrameAcc, 570, 210);
++  gtk_widget_set_usize (cmbFrameAcc, 285, 22);
+   gtk_combo_set_value_in_list (GTK_COMBO (cmbFrameAcc), TRUE, FALSE);
+   gtk_combo_set_use_arrows_always (GTK_COMBO (cmbFrameAcc), TRUE);
+   cmbFrameAcc_items = g_list_append (cmbFrameAcc_items, (gpointer) "0: Minimum - Missing screens");
+@@ -597,7 +598,7 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (label22);
+   gtk_fixed_put (GTK_FIXED (fixed5), label22, 0, 64);
+-  gtk_widget_set_uposition (label22, 0, 64);
++  gtk_widget_set_uposition (label22, 420, 210);
+   gtk_widget_set_usize (label22, 136, 24);
+ 
+   label29 = gtk_label_new ("(0..1000, for FS effects)");
+@@ -606,7 +607,7 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (label29);
+   gtk_fixed_put (GTK_FIXED (fixed5), label29, 200, 96);
+-  gtk_widget_set_uposition (label29, 200, 96);
++  gtk_widget_set_uposition (label29, 650, 235);
+   gtk_widget_set_usize (label29, 152, 24);
+ 
+   frmFPS = gtk_frame_new ("Framerate");
+@@ -615,8 +616,8 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (frmFPS);
+   gtk_fixed_put (GTK_FIXED (fixed1), frmFPS, 0, 136);
+-  gtk_widget_set_uposition (frmFPS, 0, 136);
+-  gtk_widget_set_usize (frmFPS, 304, 144);
++  gtk_widget_set_uposition (frmFPS, 5, 136);
++  gtk_widget_set_usize (frmFPS, 400, 169);
+ 
+   fixed4 = gtk_fixed_new ();
+   gtk_widget_ref (fixed4);
+@@ -631,7 +632,7 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (edtFPSlim);
+   gtk_fixed_put (GTK_FIXED (fixed4), edtFPSlim, 160, 96);
+-  gtk_widget_set_uposition (edtFPSlim, 160, 96);
++  gtk_widget_set_uposition (edtFPSlim, 175, 260);
+   gtk_widget_set_usize (edtFPSlim, 72, 24);
+ 
+   chkFPSSkip = gtk_check_button_new_with_label ("Use Frame skipping");
+@@ -640,7 +641,7 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (chkFPSSkip);
+   gtk_fixed_put (GTK_FIXED (fixed4), chkFPSSkip, 8, 48);
+-  gtk_widget_set_uposition (chkFPSSkip, 8, 48);
++  gtk_widget_set_uposition (chkFPSSkip, 8, 210);
+   gtk_widget_set_usize (chkFPSSkip, 280, 24);
+ 
+   rdbLimAuto = gtk_radio_button_new_with_label (fixed4_group, "FPS limit auto-detection");
+@@ -650,8 +651,8 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (rdbLimAuto);
+   gtk_fixed_put (GTK_FIXED (fixed4), rdbLimAuto, 32, 72);
+-  gtk_widget_set_uposition (rdbLimAuto, 32, 72);
+-  gtk_widget_set_usize (rdbLimAuto, 160, 24);
++  gtk_widget_set_uposition (rdbLimAuto, 32, 235);
++  gtk_widget_set_usize (rdbLimAuto, 180, 24);
+ 
+   rdbLimMan = gtk_radio_button_new_with_label (fixed4_group, "FPS limit manual");
+   fixed4_group = gtk_radio_button_group (GTK_RADIO_BUTTON (rdbLimMan));
+@@ -660,8 +661,8 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (rdbLimMan);
+   gtk_fixed_put (GTK_FIXED (fixed4), rdbLimMan, 32, 96);
+-  gtk_widget_set_uposition (rdbLimMan, 32, 96);
+-  gtk_widget_set_usize (rdbLimMan, 120, 24);
++  gtk_widget_set_uposition (rdbLimMan, 32, 260);
++  gtk_widget_set_usize (rdbLimMan, 130, 24);
+ 
+   label8 = gtk_label_new ("FPS");
+   gtk_widget_ref (label8);
+@@ -669,7 +670,7 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (label8);
+   gtk_fixed_put (GTK_FIXED (fixed4), label8, 240, 96);
+-  gtk_widget_set_uposition (label8, 240, 96);
++  gtk_widget_set_uposition (label8, 265, 260);
+   gtk_widget_set_usize (label8, 40, 24);
+ 
+   chkShowFPS = gtk_check_button_new_with_label ("Show FPS display on startup");
+@@ -678,7 +679,7 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (chkShowFPS);
+   gtk_fixed_put (GTK_FIXED (fixed4), chkShowFPS, 8, 0);
+-  gtk_widget_set_uposition (chkShowFPS, 8, 0);
++  gtk_widget_set_uposition (chkShowFPS, 8, 160);
+   gtk_widget_set_usize (chkShowFPS, 280, 24);
+ 
+   chkFPSLimit = gtk_check_button_new_with_label ("Use FPS limit");
+@@ -687,7 +688,7 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (chkFPSLimit);
+   gtk_fixed_put (GTK_FIXED (fixed4), chkFPSLimit, 8, 24);
+-  gtk_widget_set_uposition (chkFPSLimit, 8, 24);
++  gtk_widget_set_uposition (chkFPSLimit, 8, 185);
+   gtk_widget_set_usize (chkFPSLimit, 280, 24);
+ 
+   frmFixes = gtk_frame_new ("Special game fixes");
+@@ -696,8 +697,8 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (frmFixes);
+   gtk_fixed_put (GTK_FIXED (fixed1), frmFixes, 312, 280);
+-  gtk_widget_set_uposition (frmFixes, 312, 280);
+-  gtk_widget_set_usize (frmFixes, 360, 184);
++  gtk_widget_set_uposition (frmFixes, 410, 280);
++  gtk_widget_set_usize (frmFixes, 450, 250);
+ 
+   fixed7 = gtk_fixed_new ();
+   gtk_widget_ref (fixed7);
+@@ -712,8 +713,8 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (chkFix4);
+   gtk_fixed_put (GTK_FIXED (fixed7), chkFix4, 8, 96);
+-  gtk_widget_set_uposition (chkFix4, 8, 96);
+-  gtk_widget_set_usize (chkFix4, 176, 16);
++  gtk_widget_set_uposition (chkFix4, 420, 425);
++  gtk_widget_set_usize (chkFix4, 200, 16);
+ 
+   chkFix14 = gtk_check_button_new_with_label ("4000: Old texture filtering");
+   gtk_widget_ref (chkFix14);
+@@ -721,8 +722,8 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (chkFix14);
+   gtk_fixed_put (GTK_FIXED (fixed7), chkFix14, 184, 128);
+-  gtk_widget_set_uposition (chkFix14, 184, 128);
+-  gtk_widget_set_usize (chkFix14, 168, 16);
++  gtk_widget_set_uposition (chkFix14, 630, 475);
++  gtk_widget_set_usize (chkFix14, 250, 16);
+ 
+   chkFix13 = gtk_check_button_new_with_label ("2000: Adjust screen width");
+   gtk_widget_ref (chkFix13);
+@@ -730,8 +731,8 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (chkFix13);
+   gtk_fixed_put (GTK_FIXED (fixed7), chkFix13, 184, 112);
+-  gtk_widget_set_uposition (chkFix13, 184, 112);
+-  gtk_widget_set_usize (chkFix13, 168, 16);
++  gtk_widget_set_uposition (chkFix13, 630, 450);
++  gtk_widget_set_usize (chkFix13, 250, 16);
+ 
+   chkFix12 = gtk_check_button_new_with_label ("1000: Odd/even hack");
+   gtk_widget_ref (chkFix12);
+@@ -739,7 +740,7 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (chkFix12);
+   gtk_fixed_put (GTK_FIXED (fixed7), chkFix12, 184, 96);
+-  gtk_widget_set_uposition (chkFix12, 184, 96);
++  gtk_widget_set_uposition (chkFix12, 630, 425);
+   gtk_widget_set_usize (chkFix12, 168, 16);
+ 
+   chkFix10 = gtk_check_button_new_with_label ("400: No subtr. blending");
+@@ -748,8 +749,8 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (chkFix10);
+   gtk_fixed_put (GTK_FIXED (fixed7), chkFix10, 184, 64);
+-  gtk_widget_set_uposition (chkFix10, 184, 64);
+-  gtk_widget_set_usize (chkFix10, 168, 16);
++  gtk_widget_set_uposition (chkFix10, 630, 375);
++  gtk_widget_set_usize (chkFix10, 250, 16);
+ 
+   chkFix0 = gtk_check_button_new_with_label ("01: Low compat. reads");
+   gtk_widget_ref (chkFix0);
+@@ -757,7 +758,7 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (chkFix0);
+   gtk_fixed_put (GTK_FIXED (fixed7), chkFix0, 8, 32);
+-  gtk_widget_set_uposition (chkFix0, 8, 32);
++  gtk_widget_set_uposition (chkFix0, 420, 325);
+   gtk_widget_set_usize (chkFix0, 176, 16);
+ 
+   chkFix1 = gtk_check_button_new_with_label ("02: Ignore moves (FF7/8)");
+@@ -766,8 +767,8 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (chkFix1);
+   gtk_fixed_put (GTK_FIXED (fixed7), chkFix1, 8, 48);
+-  gtk_widget_set_uposition (chkFix1, 8, 48);
+-  gtk_widget_set_usize (chkFix1, 176, 16);
++  gtk_widget_set_uposition (chkFix1, 420, 350);
++  gtk_widget_set_usize (chkFix1, 200, 16);
+ 
+   chkFix2 = gtk_check_button_new_with_label ("04: Black brightness (Lunar)");
+   gtk_widget_ref (chkFix2);
+@@ -775,8 +776,8 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (chkFix2);
+   gtk_fixed_put (GTK_FIXED (fixed7), chkFix2, 8, 64);
+-  gtk_widget_set_uposition (chkFix2, 8, 64);
+-  gtk_widget_set_usize (chkFix2, 176, 16);
++  gtk_widget_set_uposition (chkFix2, 420, 375);
++  gtk_widget_set_usize (chkFix2, 200, 16);
+ 
+   chkFix3 = gtk_check_button_new_with_label ("08: unused");
+   gtk_widget_ref (chkFix3);
+@@ -784,7 +785,7 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (chkFix3);
+   gtk_fixed_put (GTK_FIXED (fixed7), chkFix3, 8, 80);
+-  gtk_widget_set_uposition (chkFix3, 8, 80);
++  gtk_widget_set_uposition (chkFix3, 420, 400);
+   gtk_widget_set_usize (chkFix3, 176, 16);
+ 
+   chkFix5 = gtk_check_button_new_with_label ("20: unused");
+@@ -793,7 +794,7 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (chkFix5);
+   gtk_fixed_put (GTK_FIXED (fixed7), chkFix5, 8, 112);
+-  gtk_widget_set_uposition (chkFix5, 8, 112);
++  gtk_widget_set_uposition (chkFix5, 420, 450);
+   gtk_widget_set_usize (chkFix5, 176, 16);
+ 
+   chkFix6 = gtk_check_button_new_with_label ("40: unused");
+@@ -802,7 +803,7 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (chkFix6);
+   gtk_fixed_put (GTK_FIXED (fixed7), chkFix6, 8, 128);
+-  gtk_widget_set_uposition (chkFix6, 8, 128);
++  gtk_widget_set_uposition (chkFix6, 420, 475);
+   gtk_widget_set_usize (chkFix6, 176, 16);
+ 
+   chkFix7 = gtk_check_button_new_with_label ("80: unused");
+@@ -811,7 +812,7 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (chkFix7);
+   gtk_fixed_put (GTK_FIXED (fixed7), chkFix7, 8, 144);
+-  gtk_widget_set_uposition (chkFix7, 8, 144);
++  gtk_widget_set_uposition (chkFix7, 420, 500);
+   gtk_widget_set_usize (chkFix7, 168, 16);
+ 
+   chkFix8 = gtk_check_button_new_with_label ("100: Old frame skipping");
+@@ -820,8 +821,8 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (chkFix8);
+   gtk_fixed_put (GTK_FIXED (fixed7), chkFix8, 184, 32);
+-  gtk_widget_set_uposition (chkFix8, 184, 32);
+-  gtk_widget_set_usize (chkFix8, 168, 16);
++  gtk_widget_set_uposition (chkFix8, 630, 325);
++  gtk_widget_set_usize (chkFix8, 250, 16);
+ 
+   chkFix9 = gtk_check_button_new_with_label ("200: unused");
+   gtk_widget_ref (chkFix9);
+@@ -829,7 +830,7 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (chkFix9);
+   gtk_fixed_put (GTK_FIXED (fixed7), chkFix9, 184, 48);
+-  gtk_widget_set_uposition (chkFix9, 184, 48);
++  gtk_widget_set_uposition (chkFix9, 630, 350);
+   gtk_widget_set_usize (chkFix9, 168, 16);
+ 
+   chkFix11 = gtk_check_button_new_with_label ("800: unused");
+@@ -838,7 +839,7 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (chkFix11);
+   gtk_fixed_put (GTK_FIXED (fixed7), chkFix11, 184, 80);
+-  gtk_widget_set_uposition (chkFix11, 184, 80);
++  gtk_widget_set_uposition (chkFix11, 630, 400);
+   gtk_widget_set_usize (chkFix11, 168, 16);
+ 
+   chkFix15 = gtk_check_button_new_with_label ("8000: unused");
+@@ -847,7 +848,7 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (chkFix15);
+   gtk_fixed_put (GTK_FIXED (fixed7), chkFix15, 184, 144);
+-  gtk_widget_set_uposition (chkFix15, 184, 144);
++  gtk_widget_set_uposition (chkFix15, 630, 500);
+   gtk_widget_set_usize (chkFix15, 168, 16);
+ 
+   chkGameFixes = gtk_check_button_new_with_label ("Use game fixes");
+@@ -856,7 +857,7 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (chkGameFixes);
+   gtk_fixed_put (GTK_FIXED (fixed7), chkGameFixes, 8, 0);
+-  gtk_widget_set_uposition (chkGameFixes, 8, 0);
++  gtk_widget_set_uposition (chkGameFixes, 420, 300);
+   gtk_widget_set_usize (chkGameFixes, 336, 24);
+ 
+   frame1 = gtk_frame_new ("Fullscreen effects");
+@@ -865,8 +866,8 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (frame1);
+   gtk_fixed_put (GTK_FIXED (fixed1), frame1, 0, 280);
+-  gtk_widget_set_uposition (frame1, 0, 280);
+-  gtk_widget_set_usize (frame1, 304, 96);
++  gtk_widget_set_uposition (frame1, 5, 305);
++  gtk_widget_set_usize (frame1, 400, 120);
+ 
+   fixed9 = gtk_fixed_new ();
+   gtk_widget_ref (fixed9);
+@@ -881,8 +882,8 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (cmbSLevel);
+   gtk_fixed_put (GTK_FIXED (fixed9), cmbSLevel, 88, 48);
+-  gtk_widget_set_uposition (cmbSLevel, 88, 48);
+-  gtk_widget_set_usize (cmbSLevel, 208, 24);
++  gtk_widget_set_uposition (cmbSLevel, 110, 380);
++  gtk_widget_set_usize (cmbSLevel, 240, 24);
+   gtk_combo_set_value_in_list (GTK_COMBO (cmbSLevel), TRUE, FALSE);
+   gtk_combo_set_use_arrows_always (GTK_COMBO (cmbSLevel), TRUE);
+   cmbSLevel_items = g_list_append (cmbSLevel_items, (gpointer) "0: Minimum");
+@@ -905,8 +906,8 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (cmbShader);
+   gtk_fixed_put (GTK_FIXED (fixed9), cmbShader, 88, 24);
+-  gtk_widget_set_uposition (cmbShader, 88, 24);
+-  gtk_widget_set_usize (cmbShader, 208, 24);
++  gtk_widget_set_uposition (cmbShader, 110, 355);
++  gtk_widget_set_usize (cmbShader, 240, 24);
+   gtk_combo_set_value_in_list (GTK_COMBO (cmbShader), TRUE, FALSE);
+   gtk_combo_set_use_arrows_always (GTK_COMBO (cmbShader), TRUE);
+   cmbShader_items = g_list_append (cmbShader_items, (gpointer) "0: None - No shader effects");
+@@ -931,7 +932,7 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (chkFullFilter);
+   gtk_fixed_put (GTK_FIXED (fixed9), chkFullFilter, 8, 0);
+-  gtk_widget_set_uposition (chkFullFilter, 8, 0);
++  gtk_widget_set_uposition (chkFullFilter, 8, 330);
+   gtk_widget_set_usize (chkFullFilter, 280, 24);
+ 
+   label26 = gtk_label_new ("Shader effects:");
+@@ -940,8 +941,8 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (label26);
+   gtk_fixed_put (GTK_FIXED (fixed9), label26, 0, 24);
+-  gtk_widget_set_uposition (label26, 0, 24);
+-  gtk_widget_set_usize (label26, 88, 24);
++  gtk_widget_set_uposition (label26, 8, 355);
++  gtk_widget_set_usize (label26, 100, 24);
+   gtk_label_set_justify (GTK_LABEL (label26), GTK_JUSTIFY_RIGHT);
+ 
+   label27 = gtk_label_new ("Shader level:");
+@@ -950,8 +951,8 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (label27);
+   gtk_fixed_put (GTK_FIXED (fixed9), label27, 0, 48);
+-  gtk_widget_set_uposition (label27, 0, 48);
+-  gtk_widget_set_usize (label27, 88, 24);
++  gtk_widget_set_uposition (label27, 8, 380);
++  gtk_widget_set_usize (label27, 100, 24);
+   gtk_label_set_justify (GTK_LABEL (label27), GTK_JUSTIFY_RIGHT);
+ 
+   frmMisc = gtk_frame_new ("Misc");
+@@ -960,8 +961,8 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (frmMisc);
+   gtk_fixed_put (GTK_FIXED (fixed1), frmMisc, 0, 376);
+-  gtk_widget_set_uposition (frmMisc, 0, 376);
+-  gtk_widget_set_usize (frmMisc, 304, 88);
++  gtk_widget_set_uposition (frmMisc, 5, 425);
++  gtk_widget_set_usize (frmMisc, 400, 105);
+ 
+   fixed6 = gtk_fixed_new ();
+   gtk_widget_ref (fixed6);
+@@ -976,7 +977,7 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (edtScanBlend);
+   gtk_fixed_put (GTK_FIXED (fixed6), edtScanBlend, 232, 0);
+-  gtk_widget_set_uposition (edtScanBlend, 232, 0);
++  gtk_widget_set_uposition (edtScanBlend, 330, 450);
+   gtk_widget_set_usize (edtScanBlend, 54, 22);
+ 
+   chkExtensions = gtk_check_button_new_with_label ("Use OpenGL extensions (recommended)");
+@@ -985,7 +986,7 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (chkExtensions);
+   gtk_fixed_put (GTK_FIXED (fixed6), chkExtensions, 8, 40);
+-  gtk_widget_set_uposition (chkExtensions, 8, 40);
++  gtk_widget_set_uposition (chkExtensions, 8, 500);
+   gtk_widget_set_usize (chkExtensions, 280, 24);
+ 
+   chkFilterMdec = gtk_check_button_new_with_label ("Filtered MDECs (smoother looking movies)");
+@@ -994,8 +995,8 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (chkFilterMdec);
+   gtk_fixed_put (GTK_FIXED (fixed6), chkFilterMdec, 8, 24);
+-  gtk_widget_set_uposition (chkFilterMdec, 8, 24);
+-  gtk_widget_set_usize (chkFilterMdec, 280, 16);
++  gtk_widget_set_uposition (chkFilterMdec, 8, 475);
++  gtk_widget_set_usize (chkFilterMdec, 300, 16);
+ 
+   label11 = gtk_label_new ("Blending (0..255,-1=dot):");
+   gtk_widget_ref (label11);
+@@ -1003,8 +1004,8 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (label11);
+   gtk_fixed_put (GTK_FIXED (fixed6), label11, 88, 0);
+-  gtk_widget_set_uposition (label11, 88, 0);
+-  gtk_widget_set_usize (label11, 144, 24);
++  gtk_widget_set_uposition (label11, 120, 450);
++  gtk_widget_set_usize (label11, 170, 24);
+ 
+   chkScanlines = gtk_check_button_new_with_label ("Scanlines");
+   gtk_widget_ref (chkScanlines);
+@@ -1012,8 +1013,8 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (chkScanlines);
+   gtk_fixed_put (GTK_FIXED (fixed6), chkScanlines, 8, 0);
+-  gtk_widget_set_uposition (chkScanlines, 8, 0);
+-  gtk_widget_set_usize (chkScanlines, 80, 24);
++  gtk_widget_set_uposition (chkScanlines, 8, 450);
++  gtk_widget_set_usize (chkScanlines, 90, 24);
+ 
+   gtk_signal_connect (GTK_OBJECT (CfgWnd), "destroy",
+                       GTK_SIGNAL_FUNC (on_CfgWnd_destroy),
+@@ -1040,7 +1041,7 @@
+   GtkWidget *label19;
+   GtkWidget *label21;
+ 
+-  AboutWnd = gtk_window_new (GTK_WINDOW_DIALOG);
++  AboutWnd = gtk_window_new (GTK_WINDOW_TOPLEVEL);
+   gtk_object_set_data (GTK_OBJECT (AboutWnd), "AboutWnd", AboutWnd);
+   gtk_container_set_border_width (GTK_CONTAINER (AboutWnd), 12);
+   gtk_window_set_title (GTK_WINDOW (AboutWnd), "About Pete's GLX2 PSX GPU...");
+@@ -1061,7 +1062,7 @@
+                             (GtkDestroyNotify) gtk_widget_unref);
+   gtk_widget_show (bntAClose);
+   gtk_fixed_put (GTK_FIXED (fixed8), bntAClose, 136, 184);
+-  gtk_widget_set_uposition (bntAClose, 136, 184);
++  gtk_widget_set_uposition (bntAClose, 150, 184);
+   gtk_widget_set_usize (bntAClose, 88, 24);
+ 
+   label17 = gtk_label_new ("EMail: BlackDove@addcom.de");
