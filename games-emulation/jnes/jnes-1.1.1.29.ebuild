@@ -32,7 +32,7 @@ src_unpack()
 src_install()
 {
 
-	MERGEDIR="/opt/jnes-${PV}"
+	MERGEDIR="/opt/jnes"
 	INSTALLDIR="${D}/${MERGEDIR}"
 
 	# install Jnes
@@ -73,8 +73,8 @@ src_install()
 	echo "[Desktop Entry]" > jnes.desktop || die "Install failed!"
 	echo "Name=Jnes" >> jnes.desktop || die "Install failed!"
 	echo "Comment=NES Emulator for Windows" >> jnes.desktop || die "Install failed!"
-	echo "Exec=wine /usr/lib/jnes/Jnes.exe" >> jnes.desktop || die "Install failed!"
-	echo "Icon=/usr/lib/jnes/Jnes.ico" >> jnes.desktop || die "Install failed!"
+	echo "Exec=wine ${MERGEDIR}/Jnes.exe" >> jnes.desktop || die "Install failed!"
+	echo "Icon=${MERGEDIR}/Jnes.ico" >> jnes.desktop || die "Install failed!"
 	echo "Terminal=false" >> jnes.desktop || die "Install failed!"
 	echo "Type=Application" >> jnes.desktop || die "Install failed!"
 	echo "Categories=Game;Emulator;" >> jnes.desktop || die "Install failed!"
