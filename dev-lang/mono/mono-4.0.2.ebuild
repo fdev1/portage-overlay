@@ -90,6 +90,7 @@ src_configure() {
 		--without-ikvm-native
 		--disable-dtrace
 		--with-profile2
+		--with-profile3_5
 		--with-profile4
 		--with-libgdiplus=$(usex minimal no installed)
 		--with-gc=$(usex boehm included no)
@@ -121,7 +122,7 @@ src_install()
 {
 	autotools-utils_src_install
 	echo "#!/bin/sh" > gmcs
-	echo "exec ${ROOT}/usr/bin/mono $MONO_OPTIONS ${ROOT}/usr/lib/mono/4.5/mcs.exe \"\$\@\"" >> gmcs
+	echo "exec ${ROOT}/usr/bin/mono \$MONO_OPTIONS ${ROOT}/usr/lib/mono/4.5/mcs.exe -sdk:2 \"\$\@\"" >> gmcs
 	insopts --mode=755
 	insinto ${ROOT}/usr/bin
 	doins gmcs
