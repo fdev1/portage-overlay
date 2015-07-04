@@ -28,6 +28,7 @@ pkg_setup()
 src_prepare()
 {
 	sed -ie "s|/tmp|${WORKDIR}|g" "${S}/cibuild.sh" || die
+	sed -ie "s/test_roslyn$//g" "${S}/cibuild.sh" || die
 	for f in $(ls "${WORKDIR}/mono.linux.1/bin"); do
 		if [ -f "${WORKDIR}/mono.linux.1/bin/${f}" ]; then
 			if [ "$(file "${WORKDIR}/mono.linux.1/bin/${f}" | grep "POSIX shell")" != "" ]; then
@@ -101,6 +102,6 @@ src_compile()
 
 src_install()
 {
-	dodir "${ROOT}/usr/lib/roslyn"
-	cp "${S}"/Binaries/"${BUILD_CONFIGURATION}"/* "${ROOT}/usr/lib/roslyn" || die
+	dodir "${ROOT}/usr/lib"
+	mv "${S}/Binaries/${BUILD_CONFIGURATION}" "${D}/${ROOT}/usr/lib/roslyn" || die
 }
