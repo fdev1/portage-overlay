@@ -11,7 +11,7 @@ HOMEPAGE=""
 SRC_URI="http://download.mono-project.com/sources/nuget/nuget-2.8.1+md54+dhx1.tar.gz"
 
 LICENSE=""
-SLOT="${PV}"
+SLOT="0"
 KEYWORDS="amd64"
 IUSE=""
 
@@ -36,7 +36,7 @@ src_install()
 	#egacinstall "${S}/src/Core/bin/Release/Microsoft.Web.XmlTransform.dll" "${P}"
 
 	echo "#!/bin/sh" > nuget || die
-	echo "${ROOT}/usr/bin/mono ${ROOT}/usr/lib/mono/${P}/NuGet.exe" >> nuget || die
+	echo "${ROOT}/usr/bin/mono ${ROOT}/usr/lib/mono/${P}/NuGet.exe \$@" >> nuget || die
 	insinto "${ROOT}/usr/bin"
 	insopts --mode=755
 	doins nuget
