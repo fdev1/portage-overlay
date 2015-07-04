@@ -11,7 +11,7 @@ SRC_URI="https://github.com/fernando-rodriguez/coreclr/archive/20150703_alpha.ta
 LICENSE="MIT"
 SLOT="0"
 KEYWORDS="x86 amd64"
-IUSE=""
+IUSE="debug"
 
 DEPEND="
 	sys-devel/clang
@@ -29,12 +29,18 @@ src_prepare()
 
 src_compile()
 {
-	CFLAGS="" CXXFLAGS="" ${S}/build.sh
+	CFLAGS="" CXXFLAGS="" ${S}/build.sh \
+		$(use amd64 && printf "x64" || printf "x86") \
+		$(use debug && printf "Debug" || printf "Release")
 }
 
 src_install()
 {
+	BLDT=$(use debug && printf "Debug" || printf "Release")
+	ARCH=$(use amd64 && printf "x64" || printf "x86")
 	dodir "${ROOT}/usr/lib"
-	mv "${S}/bin/Product/Linux.x64.Debug" "${D}/${ROOT}/usr/lib/${P}" || die
-	dosym "${ROOT}/usr/lib/${P}/bin/corerun" "${ROOT}/usr/bin/corerun"
+	mv "${S}/bin/Product/Linux.${ARCH}.${BLDT}" "${D}/${ROOT}/usr/lib/${PN}" || die
+	dosym "${ROOT}/usr/lib/${PN}/corerun" "${ROOT}/usr/bin/corerun"
+	dosym "${ROOT}/usr/lib/${PN}/coreconsole" "${ROOT}/usr/bin/coreconsole"
+	dosym "${ROOT}/usr/lib/${PN}/crossgen" "${ROOT}/usr/bin/crossgen"
 }
