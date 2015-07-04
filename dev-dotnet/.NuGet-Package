@@ -1,0 +1,32 @@
+# Copyright 1999-2015 Gentoo Foundation
+# Distributed under the terms of the GNU General Public License v2
+# $Header: $
+
+EAPI=5
+
+PN="${PN%%-NuGet}"
+PN="${PN//-/.}"
+PKG="${PN%%-NuGet}-${PV}"
+
+DESCRIPTION="${PKG} NuGet Package"
+HOMEPAGE="http://nuget.org"
+SRC_URI="https://www.nuget.org/api/v2/package/${PN//-/.}/${PV} -> ${PN}.${PV}.zip"
+LICENSE="ms-eula"
+SLOT="${PV}"
+KEYWORDS="x86 amd64"
+IUSE=""
+RESTRICT="mirror"
+
+DEPEND="dev-lang/mono"
+RDEPEND="${DEPEND}"
+
+src_unpack()
+{
+	unzip -q -x "${DISTDIR}/${A}" -d "${S}" || die
+}
+
+src_install()
+{
+	dodir "${ROOT}/usr/lib/mono/NuGet-Packages" 
+	mv "${S}" "${D}/${ROOT}/usr/lib/mono/NuGet-Packages/${PKG}" || die
+}
