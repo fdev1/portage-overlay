@@ -759,7 +759,7 @@ src_install()
 
 	echo "#!/bin/sh" > epsxe-run || die "Install failed!"
 	echo "cd ${MERGEDIR}" >> epsxe-run || die "Install failed!"
-	echo "./epsxe" >> epsxe-run || die "Install failed!"
+	echo "./epsxe \$@" >> epsxe-run || die "Install failed!"
 	insopts --owner=root --group=root --mode=755
 	insinto "${MERGEDIR}"
 	doins epsxe-run
