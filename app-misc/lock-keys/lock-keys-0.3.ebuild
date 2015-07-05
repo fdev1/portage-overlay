@@ -21,7 +21,7 @@ RDEPEND="${DEPEND}
 
 src_compile()
 {
-	emake PREFIX="${ROOT}/usr" CC="${CHOST}-gcc" DESTDIR="${D}"
+	emake PREFIX="${ROOT}/usr" CC="${CHOST}-gcc" CFLAGS="${CFLAGS}" DESTDIR="${D}"
 }
 
 src_install()
