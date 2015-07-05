@@ -28,6 +28,7 @@ pkg_setup()
 src_prepare()
 {
 	sed -ie "s|/tmp|${WORKDIR}|g" "${S}/cibuild.sh" || die
+	sed -ie "s/BUILD_CONFIGURATION=Debug/BUILD_CONFIGURATION=Release/g" "${S}/cibuild.sh" || die
 	sed -ie "s/test_roslyn$//g" "${S}/cibuild.sh" || die
 	for f in $(ls "${WORKDIR}/mono.linux.1/bin"); do
 		if [ -f "${WORKDIR}/mono.linux.1/bin/${f}" ]; then
