@@ -1,0 +1,13 @@
+--- a/src/configure.in	2007-01-20 13:30:31.000000000 -0500
++++ b/src/configure.in	2015-07-04 22:10:22.000000000 -0400
+@@ -140,6 +140,10 @@
+ 
+   if test x$found_curses = xyes; then
+     LDFLAGS="$LDFLAGS -lcurses"
++    AC_CHECK_LIB(tinfo, cbreak, found_tinfo=yes,found_tinfo=no)
++    if test x$found_tinfo = xyes; then
++      LDFLAGS="$LDFLAGS -ltinfo"
++    fi
+   else
+     if test x$found_ncurses = xyes; then
+       CFLAGS="$CFLAGS -DNCURSES"
