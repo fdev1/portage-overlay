@@ -1,0 +1,11 @@
+--- a/Main.sln	2015-07-03 23:46:26.000000000 -0400
++++ b/Main.sln	2015-07-03 23:46:36.000000000 -0400
+@@ -178,8 +178,6 @@
+ EndProject
+ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "MonoDevelop.PackageManagement", "MonoDevelop.PackageManagement", "{98F4461F-84D0-4C57-A11F-47E871BD04A0}"
+ EndProject
+-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonoDevelop.PackageManagement.Tests", "src\addins\MonoDevelop.PackageManagement\MonoDevelop.PackageManagement.Tests\MonoDevelop.PackageManagement.Tests.csproj", "{2645C9F3-9ED5-4806-AB09-DAD9BE90C67B}"
+-EndProject
+ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MonoDevelop.PackageManagement", "src\addins\MonoDevelop.PackageManagement\MonoDevelop.PackageManagement.csproj", "{F218643D-2E74-4309-820E-206A54B7133F}"
+ EndProject
+ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "WindowsPlatform", "WindowsPlatform", "{4AE0B284-72F2-49C7-9B42-812EBE379FFB}"
