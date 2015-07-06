@@ -15,9 +15,7 @@ SLOT="0"
 KEYWORDS="x86 amd64"
 IUSE=""
 
-DEPEND="
-	sys-apps/sed
-"
+DEPEND=""
 RDEPEND="${DEPEND}
 	>=games-emulation/dgen-sdl-1.33
 	>=dev-lang/tcl-8.0.0
