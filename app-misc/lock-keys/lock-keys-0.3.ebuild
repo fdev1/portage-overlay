@@ -28,4 +28,14 @@ src_install()
 {
 	dodir "${ROOT}/usr/bin"
 	emake PREFIX="${ROOT}/usr" DESTDIR="${D}" install
+
+	echo "[Desktop Entry]" > lock-keys.desktop || die
+	echo "Type=Application" >> lock-keys.desktop || die
+	echo "Exec=/usr/bin/lock-keys" >> lock-keys.desktop || die
+	echo "Name=Lock Keys" >> lock-keys.desktop || die
+	echo "Comment=On-screen Capslock Indicator" >> lock-keys.desktop || die
+	echo "Terminal=false" >> lock-keys.desktop || die
+	
+	insinto "${EROOT}/etc/xdg/autostart"
+	doins lock-keys.desktop
 }
