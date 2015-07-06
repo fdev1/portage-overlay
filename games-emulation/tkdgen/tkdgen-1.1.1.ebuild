@@ -23,27 +23,26 @@ RDEPEND="${DEPEND}
 
 src_prepare()
 {
-	mv "${S}/configure" "${S}/configure.orig"
-	sed -e 's/eval "test `$WISH vertk`"/true/g' "${S}/configure.orig" | \
-	sed -e "s/\s\-\*)/\*);;\n-invalid-opt)/g" > "${S}/configure"
-	chmod +x "${S}/configure"
-
-	mv "${S}/Makefile.in" "${S}/Makefile.in.orig"
-	sed -e 's/datadir = $(prefix)\/tkdgen/datadir = $(prefix)\/share\/tkdgen/g' "${S}/Makefile.in.orig" | \
-	sed -e 's/prefix = \/usr\/local/prefix = $(DEST)\/$(strip @prefix@)/g' | \
-	sed -e 's/echo \/usr\/local/echo $(prefix)\/share/g' > "${S}/Makefile.in"
+	# remove the check for tk version as it tries to use the display
+	# patch configure so it doesn't bail out on not supported options (passed by portage)
+	# patch Makefile not to ignore installation directories
+	sed -ie 's/eval "test `$WISH vertk`"/true/g' "${S}/configure" || die
+	sed -ie "s/\s\-\*)/\*);;\n-invalid-opt)/g" "${S}/configure" || die
+	sed -ie 's/datadir = $(prefix)\/tkdgen/datadir = $(prefix)\/share\/tkdgen/g' "${S}/Makefile.in" || die
+	sed -ie 's/prefix = \/usr\/local/prefix = $(DEST)\/$(strip @prefix@)/g' "${S}/Makefile.in" || die
+	sed -ie 's/echo \/usr\/local/echo $(prefix)\/share/g' "${S}/Makefile.in" || die
 }
 
 src_install()
 {
 	emake DEST="${D}" install
-    echo "[Desktop Entry]" > tkdgen.desktop || die "Install failed!"
-    echo "Name=TkDgen" >> tkdgen.desktop || die "Install failed!"
-    echo "Comment=A Tcl/Tk front-end to Genesis Emulator DGen" >> tkdgen.desktop || die "Install failed!"
-    echo "Exec=/usr/bin/tkdgen" >> tkdgen.desktop || die "Install failed!"
-    echo "Icon=/usr/share/tkdgen/imgs/im_tkdgen.gif" >> tkdgen.desktop || die "Install failed!"
-    echo "Terminal=false" >> tkdgen.desktop || die "Install failed!"
-    echo "Type=Application" >> tkdgen.desktop || die "Install failed!"
-    echo "Categories=Game;Emulator;" >> tkdgen.desktop || die "Install failed!"
-    domenu tkdgen.desktop || die "Install failed!"
+	echo "[Desktop Entry]" > tkdgen.desktop || die "Install failed!"
+	echo "Name=TkDgen" >> tkdgen.desktop || die "Install failed!"
+	echo "Comment=A Tcl/Tk front-end to Genesis Emulator DGen" >> tkdgen.desktop || die "Install failed!"
+	echo "Exec=/usr/bin/tkdgen" >> tkdgen.desktop || die "Install failed!"
+	echo "Icon=/usr/share/tkdgen/imgs/im_tkdgen.gif" >> tkdgen.desktop || die "Install failed!"
+	echo "Terminal=false" >> tkdgen.desktop || die "Install failed!"
+	echo "Type=Application" >> tkdgen.desktop || die "Install failed!"
+	echo "Categories=Game;Emulator;" >> tkdgen.desktop || die "Install failed!"
+	domenu tkdgen.desktop || die "Install failed!"
 }
