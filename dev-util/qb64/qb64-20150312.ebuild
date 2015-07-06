@@ -26,7 +26,8 @@ src_unpack()
 
 src_prepare()
 {
-	sed -ie "s/echo \"Done compiling!!\"/exit 0/g"  "${S}/setup_lnx.sh"
+	sed -ie "s/echo \"Done compiling!!\"/exit 0/g"  "${S}/setup_lnx.sh" || die
+	sed -ie "/Compiling and installing QB64.../d" "${S}/setup_lnx.sh" || die
 }
 
 src_compile()
@@ -44,9 +45,9 @@ src_install()
 	diropts --owner=root --group=qb64 --mode=775
 	dodir "${EROOT}/opt/qb64"
 	insopts --owner=root --group=qb64 --mode=750
+	insinto "${EROOT}/opt/qb64"
 	doins qb64
 	
-	insinto "${EROOT}/opt/qb64"
 	chown -R root:qb64 internal || die
 	chmod -R 0770 internal || die
 	mv internal "${ED}/${EROOT}/opt/qb64/" || die
@@ -62,8 +63,8 @@ src_install()
 	echo "[Desktop Entry]" > qb64.desktop || die
 	echo "Name=QB64 Programming IDE" >> qb64.desktop || die
 	echo "GenericName=QB64 Programming IDE" >> qb64.desktop || die
-	echo "Exec=${EROOT}/opt/qb64/run_qb64.sh" >> qb64.desktop || die
-	echo "Icon=${EROOT}/opt/qb64/internal/qb64icon32.png" >> qb64.desktop || die
+	echo "Exec=${EROOT}/usr/bin/qb64" >> qb64.desktop || die
+	echo "Icon=${EROOT}/opt/qb64/internal/source/qb64icon32.png" >> qb64.desktop || die
 	echo "Terminal=false" >> qb64.desktop || die
 	echo "Type=Application" >> qb64.desktop || die
 	echo "Categories=Development;IDE;" >> qb64.desktop || die
