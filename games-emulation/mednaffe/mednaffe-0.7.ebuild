@@ -18,7 +18,7 @@ IUSE=""
 DEPEND=""
 RDEPEND="${DEPEND}
 	>=x11-libs/gtk+-2.0
-	games-emulation/mednafen"
+	>=games-emulation/mednafen-0.9.36"
 
 src_install()
 {
