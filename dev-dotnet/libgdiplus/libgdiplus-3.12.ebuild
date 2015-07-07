@@ -43,7 +43,6 @@ src_prepare() {
 src_configure() {
 	econf 	--disable-dependency-tracking		\
 		--disable-static			\
-		--with-cairo=system			\
 		$(use !cairo && printf %s --with-pango)
 }
 
