@@ -6,7 +6,7 @@ EAPI=5
 
 PN="${PN%%-NuGet}"
 PN="${PN//-/.}"
-PKG="${PN%%-NuGet}-${PV}"
+PKG="${PN%%-NuGet}.${PV}"
 
 DESCRIPTION="${PKG} NuGet Package"
 HOMEPAGE="http://nuget.org"
@@ -27,6 +27,6 @@ src_unpack()
 
 src_install()
 {
-	dodir "${ROOT}/usr/lib/mono/NuGet-Packages" 
-	mv "${S}" "${D}/${ROOT}/usr/lib/mono/NuGet-Packages/${PKG}" || die
+	dodir "${ROOT}/usr/lib/mono/packages" 
+	mv "${S}" "${D}/${ROOT}/usr/lib/mono/packages/${PKG}" || die
 }
