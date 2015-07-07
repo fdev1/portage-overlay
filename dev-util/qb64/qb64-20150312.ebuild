@@ -16,7 +16,10 @@ KEYWORDS="x86 amd64"
 IUSE=""
 
 DEPEND=""
-RDEPEND="${DEPEND}"
+RDEPEND="${DEPEND}
+	media-libs/glu
+	virtual/opengl
+	x11-libs/libX11"
 
 src_unpack()
 {
@@ -44,10 +47,11 @@ src_install()
 {
 	diropts --owner=root --group=qb64 --mode=775
 	dodir "${EROOT}/opt/qb64"
+	dodir "${EROOT}/opt/qb64/programs"
 	insopts --owner=root --group=qb64 --mode=750
 	insinto "${EROOT}/opt/qb64"
 	doins qb64
-	
+
 	chown -R root:qb64 internal || die
 	chmod -R 0770 internal || die
 	mv internal "${ED}/${EROOT}/opt/qb64/" || die
@@ -76,6 +80,6 @@ src_install()
 pkg_postinst()
 {
 	ewarn "In order to run qb64 you have to be in"
-	ewarn "the 'qb64' group"
+	ewarn "the 'qb64' group:"
 	ewarn "Just run 'gpasswd -a <USER> qb64'"
 }
