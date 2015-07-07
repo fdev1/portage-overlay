@@ -120,7 +120,7 @@ src_test() {
 
 src_install()
 {
-	autotools-utils_src_install
+	autotools-utils_src_install -j1
 	echo "#!/bin/sh" > gmcs
 	echo "exec ${ROOT}/usr/bin/mono \$MONO_OPTIONS ${ROOT}/usr/lib/mono/4.5/mcs.exe -sdk:2 \"\$@\"" >> gmcs
 	insopts --mode=755
