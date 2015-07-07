@@ -6,7 +6,7 @@ EAPI=5
 
 DESCRIPTION="On-screen capslock indicator for laptops"
 HOMEPAGE="https://github.com/fernando-rodriguez/lock-keys"
-SRC_URI="https://github.com/fernando-rodriguez/lock-keys/archive/0.3.tar.gz -> lock-keys-0.3.tar.gz"
+SRC_URI="https://github.com/fernando-rodriguez/lock-keys/archive/${PV}.tar.gz -> lock-keys-${PV}.tar.gz"
 RESTRICT="mirror"
 
 LICENSE="GPL"
@@ -21,7 +21,12 @@ RDEPEND="${DEPEND}
 
 src_compile()
 {
-	emake PREFIX="${ROOT}/usr" CC="${CHOST}-gcc" CFLAGS="${CFLAGS}" DESTDIR="${D}"
+	emake \
+		PREFIX="${ROOT}/usr" \
+		ENABLE_AUTOSTART=0 \
+		CC="${CHOST}-gcc" \
+		CFLAGS="${CFLAGS}" \
+		DESTDIR="${D}"
 }
 
 src_install()
