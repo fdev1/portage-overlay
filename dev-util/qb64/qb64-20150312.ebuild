@@ -57,9 +57,9 @@ src_install()
 	mv internal "${ED}/${EROOT}/opt/qb64/" || die
 
 	echo "#!/bin/sh" > qb64-run || die
+	echo "f=\"\$(pwd)/./\$1\"" >> qb64-run || die
 	echo "cd ${EROOT}/opt/qb64" >> qb64-run || die
-	echo "./qb64" >> qb64-run || die
-
+	echo "./qb64 \"\$f\"" >> qb64-run || die
 	doins qb64-run
 	dosym ${EROOT}/opt/qb64/qb64-run ${EROOT}/usr/bin/qb64
 
