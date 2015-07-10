@@ -9,7 +9,7 @@ inherit eutils
 DESCRIPTION="MPLAB® X Integrated Development Environment (IDE)"
 HOMEPAGE="http://www.microchip.com/pagehandler/en-us/family/mplabx/"
 SRC_URI="http://www.microchip.com/mplabx-ide-linux-installer -> MPLABX-v3.05-linux-installer.tar"
-RESTRICT="userpriv strip"
+RESTRICT="fetch userpriv strip"
 
 LICENSE="MICROCHIP"
 SLOT="0"
@@ -19,7 +19,10 @@ IUSE=""
 DEPEND=""
 RDEPEND="${DEPEND}
 	virtual/jdk
-	dev-pic/xc16"
+	dev-pic/xc16
+	>=dev-libs/expat-2.1.0[abi_x86_32]
+	x11-libs/libX11[abi_x86_32]
+	x11-libs/libXext[abi_x86_32]"
 
 QA_PREBUILT="usr/lib/mplabx/*"
 
@@ -28,12 +31,14 @@ src_unpack()
 	mkdir -p "${S}" || die
 	tar -xf "${DISTDIR}/MPLABX-v3.05-linux-installer.tar" -C "${S}" || die
 	cd "${S}" || die
-	cp "${FILESDIR}/do_install.sh" . || die
-	chmod +x do_install.sh || die
+	#cp "${FILESDIR}/do_install.sh" . || die
+	#chmod +x do_install.sh || die
 	"${S}/MPLABX-v3.05-linux-installer.sh" --noexec --nolibrarycheck --target . || die
-	sed -i \
-		-e "s:INSTALLDIR:${D}/usr/lib/mplabx:g" \
-		-e "s:ANSWERS:${FILESDIR}/answers:g" do_install.sh || die
+	mv "${S}/MPLABCOMM-v3.05-linux-installer.run" "${S}/MPLABCOMM-v3.05-linux-installer.runlater" || die
+	echo -e "#/bin/sh\necho 'Fuck You!!!!!!!!!!'" > "${S}/MPLABCOMM-v3.05-linux-installer.run" || die
+	#sed -i \
+	#	-e "s:INSTALLDIR:${D}/usr/lib/mplabx:g" \
+	#	-e "s:ANSWERS:${FILESDIR}/answers:g" do_install.sh || die
 }
 
 restore_preserved()
@@ -101,9 +106,10 @@ src_install()
 	fi
 
 	mkdir -p "/etc/.mplab_ide" || die
-	addpredict "/usr/share"
-	addpredict "/usr/share/applications"
-	addpredict "/usr/share/applications/mplab_ipe.desktop"
+	addwrite "/usr/share"
+	addwrite "/usr/share/applications"
+	addwrite "/usr/share/applications/mplab_ipe.desktop"
+	addwrite "/opt/microchip"
 
 	# preserve mplab_ipe.desktop
 	if [ -f /usr/share/applications/mplab_ipe.desktop ]; then
@@ -119,8 +125,19 @@ src_install()
 #		--ipe 1 \
 #		--installdir ${ED}/${EROOT}/usr/lib/mplabx
 
+	#einfo "Installing MPLABCOMM..."
+	#sudo "${S}/MPLABCOMM-v3.05-linux-installer.run" \
+	#	--unattendedmodeui none \
+	#	--mode unattended \
+	#	--installdir "${ED}/${EROOT}/usr/lib/mplabx" || die
+
+
+	sudo ${S}/MPLABX-v3.05-linux-installer.run \
+		--mode text \
+		--installdir ${ED}/${EROOT}/usr/lib/mplabx 0< ${FILESDIR}/answers
+
 	#die
-	./do_install.sh
+	#./do_install.sh
 	#${S}/MPLABX-v3.05-linux-installer.run \
 	#	--unattendedmodeui none \
 	#	--mode unattended \
@@ -128,18 +145,22 @@ src_install()
 	#	--installdir "${ED}/${EROOT}/usr/lib/mplabx" || die
 
 
-	einfo "Installing COMM drivers..."
-	"${S}/MPLABCOMM-v3.05-linux-installer.run" \
-		--unattendedmodeui none \
-		--mode unattended \
-		--installdir "${ED}/${EROOT}/usr/lib/mplabx/comm" || die
+	#einfo "Installing COMM drivers..."
+	#"${S}/MPLABCOMM-v3.05-linux-installer.run" \
+	#	--unattendedmodeui none \
+	#	--mode unattended \
+	#	--installdir "${ED}/${EROOT}/usr/lib/mplabx/comm" || die
+
+	#mplabcomm
+	mv /opt/microchip/mplabcomm/v3.05 \
+		"${ED}/${ROOT}"/usr/lib/mplabcomm || die
 
 	#jre1.7.0_67
+	einfo "Unbundling JRE..."
+	rm -rf "${ED}/usr/lib/mplabx/sys"
 	rm -f "${ED}/usr/lib/mplabx/Uninstall_MPLAB_X_IDE_v3.dat"
 	rm -f "${ED}/usr/lib/mplabx/Uninstall_MPLAB_X_IDE_v3.05.desktop"
 	rm -f "${ED}/usr/lib/mplabx/Uninstall_MPLAB_X_IDE_v3.05"
-	rm -rf "${ED}/usr/lib/mplabx/sys"
-
 	mv "${ED}/${EROOT}/usr/lib/mplabx/mplab_ide/bin/mplab_ide" \
 		"${ED}/${EROOT}/usr/lib/mplabx/mplab_ide/bin/mplab_ide-run" || die
 	do_java_wrapper mplab_ide-run mplab_ide
@@ -147,16 +168,19 @@ src_install()
 	insinto "${EROOT}/usr/lib/mplabx/mplab_ide/bin"
 	doins mplab_ide
 
+	mkdir -p "${ED}/${EROOT}/usr/share/doc"
+	mv "${ED}/${EROOT}/usr/lib/mplabx/docs" "${ED}/${EROOT}/usr/share/doc/${P}"
+
 	chmod 0644 /usr/share/applications/mplab_ipe.desktop
 	rm -f "/usr/share/applications/mplab_ipe.desktop"
 	rm -fr "${ED}/${EROOT}/usr/lib/mplabx/rollbackBackupDirectory" || die
-	rm -f "/usr/$(get_libdir)/libUSBAccessLink.so" || die
-	rm -f "/usr/$(get_libdir)/libSerialAccessLink.so" || die
-	rm -f "/usr/local/lib/libmchpusb-1.0.so"
+	#rm -f "/usr/$(get_libdir)/libUSBAccessLink.so" || die
+	#rm -f "/usr/$(get_libdir)/libSerialAccessLink.so" || die
+	#rm -f "/usr/local/lib/libmchpusb-1.0.so"
 	mv /etc/udev/rules.d/z010_mchp_tools.rules .
-	dosym "../lib/mplabx/lib/libUSBAccessLink.so" "${EROOT}/usr/$(get_libdir)/libUSBAccessLink.so"
-	dosym "../lib/mplabx/lib/libSerialAccessLink.so" "${EROOT}/usr/$(get_libdir)/libSerialAccessLink.so"
-	dosym "../lib/mplabx/lib/libmchpusb-1.0.so.0.0.0" "${EROOT}/usr/$(get_libdir)/libmchpusb-1.0.so"
+	dosym "../lib/mplabcomm/lib/libUSBAccessLink.so" "${EROOT}/usr/$(get_libdir)/libUSBAccessLink.so"
+	dosym "../lib/mplabcomm/lib/libSerialAccessLink.so" "${EROOT}/usr/$(get_libdir)/libSerialAccessLink.so"
+	dosym "../lib/mplabcomm/lib/libmchpusb-1.0.so.0.0.0" "${EROOT}/usr/$(get_libdir)/libmchpusb-1.0.so"
 
 	#insopts --mode=0644
 	#insinto /lib/udev/rules.d
@@ -200,7 +224,7 @@ src_install()
 	insinto /etc/.mplab_ide
 	insopts --mode=0744
 	doins mchpdefport
-	dosym ${EROOT}/usr/lib/mplabx/lib/mchplinusbdevice /etc/.mplab_ide/mchplinusbdevice
+	dosym ${EROOT}/usr/lib/mplabcomm/lib/mchplinusbdevice /etc/.mplab_ide/mchplinusbdevice
 	
 	# restore any preserved files
 	#mv preserved/* / || die
