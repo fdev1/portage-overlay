@@ -31,14 +31,8 @@ src_unpack()
 	mkdir -p "${S}" || die
 	tar -xf "${DISTDIR}/MPLABX-v3.05-linux-installer.tar" -C "${S}" || die
 	cd "${S}" || die
-	#cp "${FILESDIR}/do_install.sh" . || die
-	#chmod +x do_install.sh || die
 	"${S}/MPLABX-v3.05-linux-installer.sh" --noexec --nolibrarycheck --target . || die
 	mv "${S}/MPLABCOMM-v3.05-linux-installer.run" "${S}/MPLABCOMM-v3.05-linux-installer.runlater" || die
-	echo -e "#/bin/sh\necho 'Fuck You!!!!!!!!!!'" > "${S}/MPLABCOMM-v3.05-linux-installer.run" || die
-	#sed -i \
-	#	-e "s:INSTALLDIR:${D}/usr/lib/mplabx:g" \
-	#	-e "s:ANSWERS:${FILESDIR}/answers:g" do_install.sh || die
 }
 
 restore_preserved()
@@ -110,6 +104,7 @@ src_install()
 	addwrite "/usr/share/applications"
 	addwrite "/usr/share/applications/mplab_ipe.desktop"
 	addwrite "/opt/microchip"
+	addwrite "/usr/local/lib"
 
 	# preserve mplab_ipe.desktop
 	if [ -f /usr/share/applications/mplab_ipe.desktop ]; then
@@ -118,42 +113,14 @@ src_install()
 		mv /usr/share/applications/mplab_ipe.desktop preserved/usr/share/applications/
 	fi
 
-#./MPLABX-v3.05-linux-installer.sh -- --mode unattended --ide 1 --ipe 1 --installdir /opt/mplab
-#	${S}/MPLABX-v3.05-linux-installer.sh --nolibrarycheck -- \	
-#		--mode unattended \
-#		--ide 1 \
-#		--ipe 1 \
-#		--installdir ${ED}/${EROOT}/usr/lib/mplabx
-
-	#einfo "Installing MPLABCOMM..."
-	#sudo "${S}/MPLABCOMM-v3.05-linux-installer.run" \
-	#	--unattendedmodeui none \
-	#	--mode unattended \
-	#	--installdir "${ED}/${EROOT}/usr/lib/mplabx" || die
-
-
+	einfo "Installing MPLAB X..."
 	sudo ${S}/MPLABX-v3.05-linux-installer.run \
 		--mode text \
 		--installdir ${ED}/${EROOT}/usr/lib/mplabx 0< ${FILESDIR}/answers
 
-	#die
-	#./do_install.sh
-	#${S}/MPLABX-v3.05-linux-installer.run \
-	#	--unattendedmodeui none \
-	#	--mode unattended \
-	#	--ide 1 \
-	#	--installdir "${ED}/${EROOT}/usr/lib/mplabx" || die
-
-
-	#einfo "Installing COMM drivers..."
-	#"${S}/MPLABCOMM-v3.05-linux-installer.run" \
-	#	--unattendedmodeui none \
-	#	--mode unattended \
-	#	--installdir "${ED}/${EROOT}/usr/lib/mplabx/comm" || die
-
-	#mplabcomm
-	mv /opt/microchip/mplabcomm/v3.05 \
-		"${ED}/${ROOT}"/usr/lib/mplabcomm || die
+	# move libraries that where installed out of place
+	mv /opt/microchip/mplabcomm/v3.05 "${ED}/${ROOT}"/usr/lib/mplabcomm || die
+	mv /usr/local/lib/libjlinkpic32.so.4.96.7 "${ED}/${ROOT}"/usr/lib/mplabcomm/lib || die
 
 	#jre1.7.0_67
 	einfo "Unbundling JRE..."
@@ -174,13 +141,18 @@ src_install()
 	chmod 0644 /usr/share/applications/mplab_ipe.desktop
 	rm -f "/usr/share/applications/mplab_ipe.desktop"
 	rm -fr "${ED}/${EROOT}/usr/lib/mplabx/rollbackBackupDirectory" || die
-	#rm -f "/usr/$(get_libdir)/libUSBAccessLink.so" || die
-	#rm -f "/usr/$(get_libdir)/libSerialAccessLink.so" || die
-	#rm -f "/usr/local/lib/libmchpusb-1.0.so"
+	rm -f "/usr/$(get_libdir)/libUSBAccessLink.so" || die
+	rm -f "/usr/$(get_libdir)/libSerialAccessLink.so" || die
+	rm -f "/usr/local/lib/libmchpusb-1.0.so"
+	rm -f "/usr/local/lib/libjlinkpic32.so"
 	mv /etc/udev/rules.d/z010_mchp_tools.rules .
+
+	einfo "Installing library symlinks..."
 	dosym "../lib/mplabcomm/lib/libUSBAccessLink.so" "${EROOT}/usr/$(get_libdir)/libUSBAccessLink.so"
 	dosym "../lib/mplabcomm/lib/libSerialAccessLink.so" "${EROOT}/usr/$(get_libdir)/libSerialAccessLink.so"
 	dosym "../lib/mplabcomm/lib/libmchpusb-1.0.so.0.0.0" "${EROOT}/usr/$(get_libdir)/libmchpusb-1.0.so"
+	dosym "../lib/mplabcomm/lib/libjlinkpic32.so.4.96.7" "${EROOT}/usr/$(get_libdir)/libjlinkpic32.so.4.96.7"
+	dosym "../lib/mplabcomm/lib/libjlinkpic32.so.4.96.7" "${EROOT}/usr/$(get_libdir)/libjlinkpic32.so"
 
 	#insopts --mode=0644
 	#insinto /lib/udev/rules.d
@@ -195,6 +167,7 @@ src_install()
 	insinto /etc/.mplab_ide 
 	doins mchpdefport
 
+	# IPE wrapper TODO: do with wrapper func
 	rm "${ED}/${EROOT}/usr/lib/mplabx/mplab_ipe/mplab_ipe"
 	echo "#!/bin/sh" > mplab_ipe || die
 	echo "/usr/bin/java -jar /usr/lib/mplabx/mplab_ipe/ipe.jar" >> mplab_ipe || die
@@ -202,7 +175,20 @@ src_install()
 	insinto "${EROOT}/usr/lib/mplabx/mplab_ipe"
 	doins mplab_ipe
 
+	# IDE menu entry
 	insopts --mode=0644
+	echo "[Desktop Entry]" > mplab.desktop || die
+	echo "Name=MPLAB IDE" >> mplab.desktop || die
+	echo "Comment=IDE for Microchip PIC and dsPIC development" >> mplab.desktop || die
+	echo "Exec=/usr/bin/mplab_ide" >> mplab.desktop || die
+	#echo "Icon=microchip.png" >> mplab.desktop || die
+	echo "Terminal=false" >> mplab.desktop || die
+	echo "Type=Application" >> mplab.desktop || die
+	echo "Categories=Development;IDE;" >> mplab.desktop || die
+	echo "StartupNotify=true" >> mplab.desktop || die
+	domenu mplab.desktop	
+
+	# IPE menu entry
 	echo "[Desktop Entry]" > mplab_ipe.desktop || die
 	echo "Name=MPLAB IPE" >> mplab_ipe.desktop || die
 	echo "Comment=IPE for Microchip PIC and dsPIC programming" >> mplab_ipe.desktop || die
