@@ -6,10 +6,10 @@ EAPI=5
 
 DESCRIPTION="Proprietary resources needed for Microchip's XC16 Compiler."
 HOMEPAGE="http://www.microchip.com/pagehandler/en_us/devtools/mplabxc/"
-SRC_URI="xc16-v1.24-full-install-linux-installer.run"
-RESTRICT="fetch userpriv strip"
+SRC_URI="http://ww1.microchip.com/downloads/en/DeviceDoc/xc16-v1.24-full-install-linux-installer.run"
+RESTRICT="mirror userpriv strip"
 
-LICENSE="MICROCHIP-EULA"
+LICENSE="MICROCHIP"
 SLOT="0"
 KEYWORDS="x86 amd64"
 IUSE=""
