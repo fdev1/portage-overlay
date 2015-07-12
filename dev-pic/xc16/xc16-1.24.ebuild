@@ -8,7 +8,7 @@ DESCRIPTION="XC16 Compiler for Microchip's 16-bit MCU's and DSP's."
 HOMEPAGE="http://www.microchip.com/pagehandler/en_us/devtools/mplabxc/"
 SRC_URI="http://ww1.microchip.com/downloads/en/DeviceDoc/xc16-v1.24-src.zip"
 #http://www.microchip.com/pagehandler/en-us/devtools/dev-tools-parts.html
-RESTRICT="primaryuri"
+RESTRICT="primaryuri strip"
 
 LICENSE="GPL-2"
 SLOT="0"
@@ -32,7 +32,8 @@ src_prepare()
 	sed -i \
 		-e "s/--host=i386-linux/--host=${CHOST} --build=${CHOST}/g" \
 		-e "s/-cross=i686-pc-mingw32-nolm/-cross=${CHOST}/g" \
-		-e 's/EXTRA_CFLAGS=""/EXTRA_CFLAGS="-m32"/g' \
+		-e 's/EXTRA_CFLAGS=""/EXTRA_CFLAGS="-m32 -ggdb"/g' \
+		-e 's/\sCFLAGS="/CFLAGS="-m32 -ggdb /g' \
 		"${S}/src_build.sh" || die
 
 	sed -i \
@@ -64,7 +65,7 @@ xc16_wrapper()
 	echo "        shift" >> ${1} || die
 	echo "done" >> ${1} || die
 	echo "if [ \"\$XC16_CMD\" == \"\$XC16_INP\" ]; then" >> ${1} || die
-	echo "	\$XC16_CMD=\"elf-\${XC16_CMD}\"" >> ${1} || die
+	echo "        XC16_CMD=\"elf-\${XC16_CMD}\"" >> ${1} || die
 	echo "fi" >> ${1} || die
 	echo "exec \"${EROOT}/usr/lib/xc16/bin/bin/\$XC16_CMD\" \$XC16_ARGS" >> ${1} || die
 }
