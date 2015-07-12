@@ -1,10 +1,11 @@
 # Copyright 1999-2015 Gentoo Foundation
+# Copyright 2015 Fernando Rodriguez
 # Distributed under the terms of the GNU General Public License v2
 # $Header: $
 
 EAPI=5
 
-inherit eutils
+inherit eutils chroot-jail
 
 DESCRIPTION="MPLAB® X Integrated Development Environment (IDE)"
 HOMEPAGE="http://www.microchip.com/pagehandler/en-us/family/mplabx/"
@@ -18,13 +19,16 @@ IUSE="+system-jre"
 
 DEPEND=""
 RDEPEND="${DEPEND}
-	system-jre? ( || ( dev-java/oracle-jre-bin dev-java/oracle-jdk-bin ) )
+	system-jre? ( || ( >=dev-java/oracle-jre-bin-1.7.0.67 >=dev-java/oracle-jdk-bin-1.7.0.67 ) )
 	>=dev-libs/expat-2.1.0[abi_x86_32]
 	x11-libs/libX11[abi_x86_32]
 	x11-libs/libXext[abi_x86_32]"
 
 QA_PREBUILT="usr/lib/mplabx/*"
 VERBOSE=0
+
+MPLABXDIR=usr/lib/mplabx
+MPLABCOMMDIR=usr/lib/mplabcomm
 
 src_unpack()
 {
@@ -33,10 +37,9 @@ src_unpack()
 	cd "${S}" || die
 	"${S}/MPLABX-v3.05-linux-installer.sh" --noexec --nolibrarycheck --target . || die
 
-	# stupid mchp devs bundled this file twice, once inside
+	# mchp devs bundled this file twice, once inside
 	# the sh installer and again inside the MPLABX .run
 	# installer - I guess they don't feel it's large enough
-	# with the bundled jre and all
 	rm "${S}/MPLABCOMM-v3.05-linux-installer.run" || die
 
 	# no longer needed
@@ -74,73 +77,32 @@ do_java_wrapper()
 
 src_install()
 {
-	MPLABXDIR=usr/lib/mplabx
-	MPLABCOMMDIR=usr/lib/mplabcomm
-
-	einfo "Creating chroot jail..."
-	mkdir -p chroot/{bin,etc,$(get_libdir),usr/{bin,$(get_libdir),local/lib},tmp} || die
-	cp -L ${EROOT}/sbin/ldconfig chroot/bin || die
-	cp -L ${EROOT}/usr/bin/find chroot/bin || die
-	cp -L ${EROOT}/bin/{sh,ln,tar,gzip} chroot/bin || die
-	cp -L ${EROOT}/$(get_libdir)/libc.so.6 chroot/$(get_libdir) || die
-	cp -L ${EROOT}/$(get_libdir)/ld-linux.so.2 chroot/$(get_libdir) || die
-	cp -L ${EROOT}/$(get_libdir)/libdl.so.2 chroot/$(get_libdir) || die
-	cp -L ${EROOT}/$(get_libdir)/libm.so.6 chroot/$(get_libdir) || die
-	cp -L ${EROOT}/$(get_libdir)/libnsl.so.1 chroot/$(get_libdir) || die
-	cp -L ${EROOT}/$(get_libdir)/libreadline.so.6 chroot/$(get_libdir) || die
-	cp -L ${EROOT}/$(get_libdir)/libncurses.so.5 chroot/$(get_libdir) || die
-	cp -L ${EROOT}/$(get_libdir)/libacl.so.1 chroot/$(get_libdir) || die
-	cp -L ${EROOT}/$(get_libdir)/libattr.so.1 chroot/$(get_libdir) || die
-	cp -L ${EROOT}/$(get_libdir)/libpthread.so.0 chroot/$(get_libdir) || die
-	cp -L ${EROOT}/$(get_libdir)/libnss_compat.so.2 chroot/$(get_libdir) || die
-	mv MPLABX-v3.05-linux-installer.run chroot/tmp || die
-
-	# create a dummy libsandbox.so for the chroot
-	# this is not a problem because it will only be used
-	# inside the chroot
-	#echo "" | gcc -nostdlib -nostartfiles -shared -o chroot/$(get_libdir)/libsandbox.so -xc - || die
-
-	echo "root:x:0:0:root:/root:/bin/bash" > chroot/etc/passwd || die
-	echo "root:x:0:root" > chroot/etc/group || die
-	echo "/$(get_libdir)" >> chroot/etc/ld.so.conf || die
-
-	if [ "$(get_libdir)" == "lib64" ]; then
-		mkdir -p chroot/lib32 || die
-		cp -L ${EROOT}/$(get_libdir)/ld-linux-x86-64.so.2 chroot/$(get_libdir) || die
-		cp -L ${EROOT}/lib32/libc.so.6 chroot/lib32 || die
-		cp -L ${EROOT}/lib32/ld-linux.so.2 chroot/lib32 || die
-		cp -L ${EROOT}/lib32/libdl.so.2 chroot/lib32 || die
-		cp -L ${EROOT}/lib32/libm.so.6 chroot/lib32 || die
-		cp -L ${EROOT}/lib32/libnsl.so.1 chroot/lib32 || die
-		cp -L ${EROOT}/lib32/libpthread.so.0 chroot/lib32 || die
-		cp -L ${EROOT}/lib32/libnss_compat.so.2 chroot/lib32 || die
-		ln -s $(get_libdir) chroot/lib || die
-		echo "/lib32" >> chroot/etc/ld.so.conf || die
-	fi
-	
+	chroot_create_jail
+	chroot_add_bins ln tar gzip find
+	chroot_add_libs libc.so.6 libdl.so.2 libm.so.6 libnsl.so.1 libreadline.so.6 \
+		libncurses.so.5 libacl.so.1 libattr.so.1 libpthread.so.0 libnss_compat.so.2
+	chroot_mv MPLABX-v3.05-linux-installer.run /tmp
+		
 	if [ $VERBOSE == 1 ]; then
-		einfo "Running MPLAB X installer..."
-		echo -e "\n\n\n\n\n\n\n\n\n\nY\n\nY\nY\n\nY\nN\nN\nN\nN\nN\n" > chroot/tmp/answers || die
+		echo -e "\n\n\n\n\n\n\n\n\n\nY\n\nY\nY\n\nY\nN\nN\nN\nN\nN\n" > answers || die
+		chroot_mv answers /tmp
 		installcmd="/tmp/MPLABX-v3.05-linux-installer.run"
 		installcmd="$installcmd	--mode text"
 		installcmd="$installcmd --installdir /${MPLABXDIR}  0< /tmp/answers"
 	else
-		einfo "Reticulating splines..."
 		installcmd="/tmp/MPLABX-v3.05-linux-installer.run"
 		installcmd="$installcmd	--mode unattended"
 		installcmd="$installcmd --installdir /${MPLABXDIR}"
 	fi
-	env -i chroot ./chroot /bin/sh -c "export PATH=/bin && ldconfig && $installcmd" \
-		2>&1 > /dev/null || die
+	chroot_exec "$installcmd"
+	chroot_cleanup
 
 	einfo "Fixing installation..."
-	rm -fr chroot/{bin,lib,lib32,lib64,tmp} || die
 	mkdir -p chroot/lib/udev || die
 	mkdir -p chroot/${MPLABCOMMDIR} || die
 	rm -r chroot/"${MPLABCOMMDIR}" || die
 	mv -f chroot/opt/microchip/mplabcomm/v3.05 chroot/"${MPLABCOMMDIR}" || die
 	rm -r chroot/opt || die
-	rm -r chroot/etc/{group,passwd,ld.so.conf,ld.so.cache} || die
 	mv -f chroot/etc/udev/rules.d chroot/lib/udev
 	rm -r chroot/etc/udev
 	mv -f chroot/etc/.mplab_ide chroot/etc/mplabx || die
@@ -170,6 +132,7 @@ src_install()
 
 	mv libSEGGERAccessLink.so chroot/"${MPLABCOMMDIR}"/lib || die
 	mv libjlinkpic32.so.4.96.7 chroot/"${MPLABCOMMDIR}"/lib || die
+	mkdir -p chroot/usr/$(get_libdir) || die
 	ln -s ../../"${MPLABCOMMDIR}"/lib/libSEGGERAccessLink.so chroot/usr/$(get_libdir)/libSEGGERAccessLink.so || die
 	ln -s ../../"${MPLABCOMMDIR}"/lib/libjlinkpic32.so.4.96.7 chroot/usr/$(get_libdir)/libjlinkpic32.so.4.96.7 || die
 	ln -s ../../"${MPLABCOMMDIR}"/lib/libSerialAccessLink.so chroot/usr/$(get_libdir)/libSerialAccessLink.so || die
@@ -210,8 +173,7 @@ src_install()
 	fi
 
 	# install to final destination
-	einfo "Installing to image directory..."
-	find chroot -mindepth 1 -maxdepth 1 -exec mv '{}' "${ED}" \; || die
+	chroot_install
 }
 
 pkg_postinst()
@@ -219,5 +181,6 @@ pkg_postinst()
 	ewarn "In order to use MPLAB X you'll need to install"
 	ewarn "one of the following compilers:"
 	ewarn "    dev-pic/xc16"
+	ewarn "    dev-pic/xc16-bin (proprietary version)"
 	ewarn "    dev-pic/xc32"
 }
