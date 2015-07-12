@@ -1,10 +1,11 @@
 # Copyright 1999-2015 Gentoo Foundation
+# Copyright 2015 Fernando Rodriguez
 # Distributed under the terms of the GNU General Public License v2
 # $Header: $
 
 #
 # Original Author: Fernando Rodriguez
-# Purpose: Run programs (ie. installers inside a chroot jail
+# Purpose: Run programs (ie. installers) inside a chroot jail
 #
 
 inherit eutils
@@ -116,7 +117,7 @@ chroot_rm()
 		shift
 	done
 	for f in $(seq 0 $((${#RMFILES[@]} - 1))); do
-		chroot_einfo "Removing file chroot:${f}..."
+		chroot_einfo "Removing file chroot:${RMFILES[$f]}..."
 		rm ${RMOPTS} "chroot/${RMFILES[$f]}" || die "chroot_rm: Cannot remove file: ${f}!!"
 	done
 }
