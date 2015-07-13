@@ -52,7 +52,8 @@ chroot_mkdir()
 	DN=
 	for d in "${DIRARR[@]}"; do 
 		DN="${DN}/${d}"
-		CHROOT_DIRS="${CHROOT_DIRS} ${DN}"
+		chroot_einfo "Creating directory ${DN}..."
+		CHROOT_DIRS="${CHROOT_DIRS} $(echo "${DN}" | sed -e 's/^\///;s#/$##')"
 	done
 	mkdir -p chroot/${DN}
 }
