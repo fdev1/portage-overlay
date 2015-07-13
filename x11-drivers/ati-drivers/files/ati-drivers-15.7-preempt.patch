@@ -1,0 +1,84 @@
+--- a/common/lib/modules/fglrx/build_mod/firegl_public.c	2015-07-13 18:51:06.000000000 -0400
++++ b/common/lib/modules/fglrx/build_mod/firegl_public.c	2015-07-13 19:21:23.000000000 -0400
+@@ -21,6 +21,8 @@
+ !!! since it requires changes to linux/init/main.c.
+ #endif /* !MODULE */
+ 
++#include <linux/preempt.h>
++
+ // ============================================================
+ #include <linux/version.h>
+ 
+@@ -4990,7 +4992,9 @@
+ unsigned long ATI_API_CALL KAS_GetExecutionLevel(void)
+ {
+     unsigned long ret;
++    preempt_disable();
+     ret = kas_GetExecutionLevel();
++    preempt_enable();
+     return ret;
+ }
+ 
+@@ -5015,8 +5019,10 @@
+     KCL_DEBUG5(FN_FIREGL_KAS,"0x%08X, 0x%08X\n", ih_routine, ih_context);
+ 
+     //Prevent simultaneous entry on some SMP systems.
++    preempt_disable();
+     if (test_and_set_bit(0, (void *)&(kasContext.in_interrupts[smp_processor_id()])))
+     {
++    	preempt_enable();
+         KCL_DEBUG1(FN_FIREGL_KAS, "The processor is handling the interrupt\n");
+         return IRQ_NONE;
+     }
+@@ -5029,9 +5035,9 @@
+ 
+     kasSetExecutionLevel(orig_level);
+     spin_unlock(&kasContext.lock_ih); 
+-
+     clear_bit(0, (void *)&(kasContext.in_interrupts[smp_processor_id()]));
+     KCL_DEBUG5(FN_FIREGL_KAS,"%d\n", ret);
++    preempt_enable();
+ 
+     return ret;
+ }
+@@ -5249,6 +5255,7 @@
+ 
+     KCL_DEBUG5(FN_FIREGL_KAS,"0x%08X\n", hSpinLock);
+ 
++    preempt_disable();
+     spin_lock_info.routine_type = spinlock_obj->routine_type;
+     spin_lock_info.plock = &(spinlock_obj->lock);
+ 
+@@ -5256,6 +5263,7 @@
+ 
+     spinlock_obj->acquire_type = spin_lock_info.acquire_type;
+     spinlock_obj->flags = spin_lock_info.flags;
++    preempt_enable();
+ 
+     KCL_DEBUG5(FN_FIREGL_KAS,"%d\n", ret);
+     return ret;
+@@ -6027,6 +6035,8 @@
+ 
+     KCL_DEBUG5(FN_FIREGL_KAS,"0x%08X, 0x%08X, 0x%08X\n", hListHead, hListEntry, phPrevEntry);
+ 
++    preempt_disable();
++
+     /* Protect the operation with spinlock */
+     spin_lock_info.routine_type = listhead_obj->routine_type;
+     spin_lock_info.plock = &(listhead_obj->lock);
+@@ -6034,6 +6044,7 @@
+     if (!kas_spin_lock(&spin_lock_info))
+     {
+         KCL_DEBUG_ERROR("Unable to grab list spinlock\n");
++	preempt_enable();
+         return 0; /* No spinlock - no operation */
+     }
+ 
+@@ -6058,6 +6069,7 @@
+     spin_unlock_info.flags = spin_lock_info.flags;
+ 
+     ret = kas_spin_unlock(&spin_unlock_info);
++    preempt_enable();
+     KCL_DEBUG5(FN_FIREGL_KAS,"%d", ret);
+     return ret;
+ }
