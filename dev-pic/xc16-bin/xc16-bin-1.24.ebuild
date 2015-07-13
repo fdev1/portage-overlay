@@ -1,4 +1,4 @@
-# Copyright 1999-2015 Gentoo Foundation
+# Copyright 2015 Fernando Rodriguez
 # Distributed under the terms of the GNU General Public License v2
 # $Header: $
 
@@ -14,13 +14,13 @@ RESTRICT="mirror userpriv strip"
 LICENSE="MICROCHIP"
 SLOT="0"
 KEYWORDS="x86 amd64"
-IUSE="+system-jre"
+IUSE=""
 
-DEPEND="app-shells/bash"
+DEPEND=""
 RDEPEND="${DEPEND}"
 
-XC16DIR=opt/"${P}"
-QA_PREBUILT="${XC16DIR}/*"
+INSTALLDIR=opt/"${P}"
+QA_PREBUILT="${INSTALLDIR}/*"
 CHROOT_JAIL_VERBOSE=1
 VERBOSE=0
 
@@ -47,28 +47,28 @@ src_install()
 		chroot_add_file answers /tmp
 		installcmd="/tmp/xc16-v1.24-full-install-linux-installer.run"
 		installcmd="$installcmd	--mode text"
-		installcmd="$installcmd --installdir /${XC16DIR}  0< /tmp/answers"
+		installcmd="$installcmd --installdir /${INSTALLDIR}  0< /tmp/answers"
 	else
 		installcmd="/tmp/xc16-v1.24-full-install-linux-installer.run"
 		installcmd="$installcmd	--mode unattended"
 		installcmd="$installcmd --netservername ''"
-		installcmd="$installcmd --installdir /${XC16DIR}"
+		installcmd="$installcmd --installdir /${INSTALLDIR}"
 	fi
 	
 	chroot_exec "$installcmd"
 	chroot_cleanup
 
 	# remove unnecessary files
-	chroot_rm "${XC16DIR}/Uninstall MPLAB XC16 C Compiler.desktop"
-	chroot_rm "${XC16DIR}/Uninstall-xc16-v1.dat"
-	chroot_rm "${XC16DIR}/Uninstall-xc16-v1.24"
-	chmod -R 0644 chroot/${XC16DIR}/docs || die
-	chmod -R 0644 chroot/${XC16DIR}/lib || die
-	chmod -R 0644 chroot/${XC16DIR}/errata-lib || die
-	chmod -R 0644 chroot/${XC16DIR}/include || die
-	chmod -R 0644 chroot/${XC16DIR}/support || die
-	chmod -R 0644 chroot/${XC16DIR}/src || die
-	chmod -R 0644 chroot/${XC16DIR}/examples || die
+	chroot_rm "${INSTALLDIR}/Uninstall MPLAB XC16 C Compiler.desktop"
+	chroot_rm "${INSTALLDIR}/Uninstall-xc16-v1.dat"
+	chroot_rm "${INSTALLDIR}/Uninstall-xc16-v1.24"
+	chmod -R 0644 chroot/${INSTALLDIR}/docs || die
+	chmod -R 0644 chroot/${INSTALLDIR}/lib || die
+	chmod -R 0644 chroot/${INSTALLDIR}/errata-lib || die
+	chmod -R 0644 chroot/${INSTALLDIR}/include || die
+	chmod -R 0644 chroot/${INSTALLDIR}/support || die
+	chmod -R 0644 chroot/${INSTALLDIR}/src || die
+	chmod -R 0644 chroot/${INSTALLDIR}/examples || die
 
 	chroot_install
 }

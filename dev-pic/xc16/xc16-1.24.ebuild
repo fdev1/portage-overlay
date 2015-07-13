@@ -1,4 +1,4 @@
-# Copyright 1999-2015 Gentoo Foundation
+# Copyright 2015 Fernando Rodriguez
 # Distributed under the terms of the GNU General Public License v2
 # $Header: $
 
@@ -31,18 +31,31 @@ src_prepare()
 {
 	sed -i \
 		-e "s/--host=i386-linux/--host=${CHOST} --build=${CHOST}/g" \
-		-e "s/-cross=i686-pc-mingw32-nolm/-cross=${CHOST}/g" \
-		-e 's/EXTRA_CFLAGS=""/EXTRA_CFLAGS="-m32 -ggdb"/g' \
-		-e 's/\sCFLAGS="/CFLAGS="-m32 -ggdb /g' \
+		-e "s/-cross=i686-pc-mingw32-nolm//g" \
+		-e 's/EXTRA_CFLAGS=""/EXTRA_CFLAGS="-m32 -ggdb -D_FORTIFY_SOURCE=0"/g' \
+		-e 's/\sCFLAGS="/CFLAGS="-m32 -ggdb -D_FORTIFY_SOURCE=0 /g' \
+		-e 's/-DMCHP_VERSION=v0_00/-DMCHP_VERSION=v1.24/g' \
 		"${S}/src_build.sh" || die
 
 	sed -i \
 		-e "s/--host=\${TARGET_OS}/--host=${CHOST} --build=${CHOST}/g" \
 		-e "s/--host=i386-\${TARGET_OS}/--host=${CHOST} --build=${CHOST}/g" \
+		-e "s/--build=\$BUILD_OS/--build=${CHOST} --host=${CHOST}/g" \
+		-e "s/export CFLAGS=-m32//g" \
+		-e "s/export CXXFLAGS=-m32//g" \
+		-e 's|email:`whoami`\@`hostname`|https://github.com/fernando-rodriguez/freexc16/issues|g' \
 		-e "s/gcc -o/${CHOST}-gcc -o/g" \
 		-e "s/-j 2/${MAKEOPTS}/g" \
 		-e "s/ZLIB_TOOLS=\".*{TARGET_OS}\"/ZLIB_TOOLS=\"${CHOST}\"/g" \
+		-e 's/EXTRA_DEFINES="-DRESOURCE_MISMATCH_OK"/EXTRA_DEFINES=""/g' \
+		-e "s/--disable-rpath//g" \
 		"${S}/build_XC16_451" || die
+
+	# copy necessary resource files	
+	cp -f /usr/lib/xc16/bin/c30_device.info "${S}"/src/c30_resource/src/c30/ || die
+	cp -f /usr/lib/xc16/bin/deviceSupport.xml "${S}"/src/c30_resource/src/c30/ || die
+	cp -r /usr/lib/xc16/bin/device_files "${S}"/src/c30_resource/src/c30/ || die
+	
 }
 
 src_compile()

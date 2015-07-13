@@ -14,13 +14,13 @@ RESTRICT="mirror userpriv strip"
 LICENSE="MICROCHIP"
 SLOT="0"
 KEYWORDS="x86 amd64"
-IUSE="+system-jre"
+IUSE=""
 
-DEPEND="app-shells/bash"
+DEPEND=""
 RDEPEND="${DEPEND}"
 
-XC32DIR=opt/"${P}"
-QA_PREBUILT="${XC32DIR}/*"
+INSTALLDIR=opt/"${P}"
+QA_PREBUILT="${INSTALLDIR}/*"
 CHROOT_JAIL_VERBOSE=0
 VERBOSE=0
 
@@ -47,7 +47,7 @@ src_install()
 		libpthread.so.0 libnss_compat.so.2 librt.so.1
 	chroot_mv xc32-v1.40-full-install-linux-installer.run /tmp
 	installcmd="/tmp/xc32-v1.40-full-install-linux-installer.run"
-	installcmd="${installcmd} --installdir /${XC32DIR}"
+	installcmd="${installcmd} --installdir /${INSTALLDIR}"
 	installcmd="${installcmd} --netservername ''"
 
 	if [ $VERBOSE == 1 ]; then
@@ -63,25 +63,25 @@ src_install()
 	chroot_cleanup
 
 	# remove unnecessary files
-	chroot_rm "${XC32DIR}/Uninstall MPLAB XC32 Compiler.desktop"
-	chroot_rm "${XC32DIR}/Uninstall-xc32-v1.dat"
-	chroot_rm "${XC32DIR}/Uninstall-xc32-v1.40"
+	chroot_rm "${INSTALLDIR}/Uninstall MPLAB XC32 Compiler.desktop"
+	chroot_rm "${INSTALLDIR}/Uninstall-xc32-v1.dat"
+	chroot_rm "${INSTALLDIR}/Uninstall-xc32-v1.40"
 
 	# fix permissions
 	einfo "Fixing permissions..."
-	find chroot/"${XC32DIR}"/docs -type f -exec chmod 0644 {} \;
-	find chroot/"${XC32DIR}"/docs -type d -exec chmod 0755 {} \;
-	find chroot/"${XC32DIR}"/examples -type f -exec chmod 0644 {} \;
-	find chroot/"${XC32DIR}"/examples -type d -exec chmod 0755 {} \;
-	find chroot/"${XC32DIR}"/lib -type f -exec chmod 0644 {} \;
-	find chroot/"${XC32DIR}"/lib -type d -exec chmod 0755 {} \;
-	find chroot/"${XC32DIR}"/pic32-libs -type f -exec chmod 0644 {} \;
-	find chroot/"${XC32DIR}"/pic32-libs -type d -exec chmod 0755 {} \;
-	find chroot/"${XC32DIR}"/pic32mx -type f -exec chmod 0644 {} \;
-	find chroot/"${XC32DIR}"/pic32mx -type d -exec chmod 0755 {} \;
-	find chroot/"${XC32DIR}"/etc -type f -exec chmod 0664 {} \;
-	find chroot/"${XC32DIR}"/etc -type d -exec chmod 0775 {} \;
-	chown -R root:xclm chroot/"${XC32DIR}"/etc
+	find chroot/"${INSTALLDIR}"/docs -type f -exec chmod 0644 {} \;
+	find chroot/"${INSTALLDIR}"/docs -type d -exec chmod 0755 {} \;
+	find chroot/"${INSTALLDIR}"/examples -type f -exec chmod 0644 {} \;
+	find chroot/"${INSTALLDIR}"/examples -type d -exec chmod 0755 {} \;
+	find chroot/"${INSTALLDIR}"/lib -type f -exec chmod 0644 {} \;
+	find chroot/"${INSTALLDIR}"/lib -type d -exec chmod 0755 {} \;
+	find chroot/"${INSTALLDIR}"/pic32-libs -type f -exec chmod 0644 {} \;
+	find chroot/"${INSTALLDIR}"/pic32-libs -type d -exec chmod 0755 {} \;
+	find chroot/"${INSTALLDIR}"/pic32mx -type f -exec chmod 0644 {} \;
+	find chroot/"${INSTALLDIR}"/pic32mx -type d -exec chmod 0755 {} \;
+	find chroot/"${INSTALLDIR}"/etc -type f -exec chmod 0664 {} \;
+	find chroot/"${INSTALLDIR}"/etc -type d -exec chmod 0775 {} \;
+	chown -R root:xclm chroot/"${INSTALLDIR}"/etc
 
 	chroot_install
 	keepdir /opt/microchip/xclm/license
