@@ -4,9 +4,9 @@
 
 EAPI=5
 
-inherit eutils chroot-jail
+inherit eutils chroot-jail user
 
-DESCRIPTION="XC16 Compiler for Microchip's 16-bit MCU's and DSP's."
+DESCRIPTION="Microchip's MPLAB® XC16 Compiler"
 HOMEPAGE="http://www.microchip.com/pagehandler/en-us/devtools/mplabxc/"
 SRC_URI="http://ww1.microchip.com/downloads/en/DeviceDoc/xc16-v1.24-full-install-linux-installer.run"
 RESTRICT="mirror userpriv strip"
@@ -21,8 +21,13 @@ RDEPEND="${DEPEND}"
 
 INSTALLDIR=opt/"${P}"
 QA_PREBUILT="${INSTALLDIR}/*"
-CHROOT_JAIL_VERBOSE=1
+CHROOT_JAIL_VERBOSE=0
 VERBOSE=0
+
+pkg_setup()
+{
+	enewgroup xclm
+}
 
 src_unpack()
 {
@@ -38,7 +43,6 @@ src_install()
 	chroot_create_jail
 	chroot_add_bins bash ln tar gzip ls find
 	chroot_add_libs libc.so.6 libdl.so.2 libm.so.6 libnsl.so.1 \
-		libreadline.so.6 libncurses.so.5 libacl.so.1 libattr.so.1 \
 		libpthread.so.0 libnss_compat.so.2 librt.so.1
 	chroot_mv xc16-v1.24-full-install-linux-installer.run /tmp
 	
@@ -62,14 +66,36 @@ src_install()
 	chroot_rm "${INSTALLDIR}/Uninstall MPLAB XC16 C Compiler.desktop"
 	chroot_rm "${INSTALLDIR}/Uninstall-xc16-v1.dat"
 	chroot_rm "${INSTALLDIR}/Uninstall-xc16-v1.24"
-	chmod -R 0644 chroot/${INSTALLDIR}/docs || die
-	chmod -R 0644 chroot/${INSTALLDIR}/lib || die
-	chmod -R 0644 chroot/${INSTALLDIR}/errata-lib || die
-	chmod -R 0644 chroot/${INSTALLDIR}/include || die
-	chmod -R 0644 chroot/${INSTALLDIR}/support || die
-	chmod -R 0644 chroot/${INSTALLDIR}/src || die
-	chmod -R 0644 chroot/${INSTALLDIR}/examples || die
+
+    # fix permissions
+    einfo "Fixing permissions..."
+    find chroot/"${INSTALLDIR}"/docs -type f -exec chmod 0644 {} \; 
+    find chroot/"${INSTALLDIR}"/docs -type d -exec chmod 0755 {} \; 
+    find chroot/"${INSTALLDIR}"/examples -type f -exec chmod 0644 {} \; 
+    find chroot/"${INSTALLDIR}"/examples -type d -exec chmod 0755 {} \; 
+    find chroot/"${INSTALLDIR}"/lib -type f -exec chmod 0644 {} \; 
+    find chroot/"${INSTALLDIR}"/lib -type d -exec chmod 0755 {} \; 
+    find chroot/"${INSTALLDIR}"/src -type f -exec chmod 0644 {} \; 
+    find chroot/"${INSTALLDIR}"/src -type d -exec chmod 0755 {} \; 
+    find chroot/"${INSTALLDIR}"/errata-lib -type f -exec chmod 0644 {} \; 
+    find chroot/"${INSTALLDIR}"/errata-lib -type d -exec chmod 0755 {} \; 
+    find chroot/"${INSTALLDIR}"/include -type f -exec chmod 0644 {} \; 
+    find chroot/"${INSTALLDIR}"/include -type d -exec chmod 0755 {} \; 
+    find chroot/"${INSTALLDIR}"/support -type f -exec chmod 0644 {} \; 
+    find chroot/"${INSTALLDIR}"/support -type d -exec chmod 0755 {} \; 
+    find chroot/"${INSTALLDIR}"/etc -type f -exec chmod 0664 {} \; 
+    find chroot/"${INSTALLDIR}"/etc -type d -exec chmod 0775 {} \; 
+    chown -R root:xclm chroot/"${INSTALLDIR}"/etc
 
 	chroot_install
+    keepdir /opt/microchip/xclm/license
+    chown root:xclm "${ED}/opt/microchip/xclm/license"
+    chmod 0775 "${ED}/opt/microchip/xclm/license"
 }
 
+pkg_postinst()
+{
+	ewarn "In order to manage XC16 licenses you must"
+	ewarn "be in the group xclm."
+	ewarn "Just do 'gpasswd -a <USER> xclm'"
+}
