@@ -15,6 +15,7 @@ CHROOT_JAIL_VERBOSE=0
 CHROOT_LIBS=
 CHROOT_DIRS=
 CHROOT_FILES=
+CHROOT_DIR=chroot
 
 chroot_einfo()
 {
@@ -58,16 +59,35 @@ chroot_mkdir()
 	mkdir -p chroot/${DN}
 }
 
+# copies a binary and all it's library dependencies
+# to the chroot
+#
 chroot_add_bins()
 {
 	while [ $# != 0 ]; do
 		chroot_einfo "Adding binary ${1} to chroot jail..."
 		CHROOT_FILES="${CHROOT_FILES} bin/$1"
 		cp -L  `which $1` chroot/bin || die
+		for l in $(ldd `which $1` | grep "=>" | cut -d ">" -f2 | cut -d "(" -f1 | sed -e "s/^\s\/*//g;s/\s*$//g"); do
+			if [ ! -f "chroot/${l}" ]; then
+				chroot_einfo "Adding ${l} to chroot/$(dirname $l)..."
+				CHROOT_FILES="${CHROOT_FILES} ${l}"
+				cp -L /"${l}" chroot/"$(dirname $l)" || die
+			fi
+		done
 		shift
 	done
 }
 
+# copies a library to the chroot. On a multilib amd64 system
+# this will copy both the 32 and 64-bit libraries if they
+# exists.
+#
+# This is only needed when an executable installer will unpack
+# binaries that require libraries. For binaries added with
+# chroot_add_bins the required libraries will be added 
+# automagically.
+#
 chroot_add_libs()
 {
 	while [ $# != 0 ]; do
