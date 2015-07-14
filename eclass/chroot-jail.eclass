@@ -1,4 +1,3 @@
-# Copyright 1999-2015 Gentoo Foundation
 # Copyright 2015 Fernando Rodriguez
 # Distributed under the terms of the GNU General Public License v2
 # $Header: $
@@ -70,7 +69,7 @@ chroot_add_bins()
 		cp -L  `which $1` chroot/bin || die
 		for l in $(ldd `which $1` | grep "=>" | cut -d ">" -f2 | cut -d "(" -f1 | sed -e "s/^\s\/*//g;s/\s*$//g"); do
 			if [ ! -f "chroot/${l}" ]; then
-				chroot_einfo "Adding ${l} to chroot/$(dirname $l)..."
+				chroot_einfo "Adding dependency ${l} to chroot:/$(dirname $l)..."
 				CHROOT_FILES="${CHROOT_FILES} ${l}"
 				cp -L /"${l}" chroot/"$(dirname $l)" || die
 			fi
@@ -108,7 +107,7 @@ chroot_add_libs()
 
 chroot_cp()
 {
-	einfo "Adding file $1 to $2..."
+	einfo "Adding file ${1} to chroot:${2}..."
 	CHROOT_FILES="${CHROOT_FILES} ${2}/${1}"
 	chroot_mkdir ${2}
 	cp -L ${1} chroot/${2} || die
