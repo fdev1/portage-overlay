@@ -1,2 +1,3 @@
 cross-i686-pc-mingw32
 dev-pic
+cross-x86_64-pc-mingw64
