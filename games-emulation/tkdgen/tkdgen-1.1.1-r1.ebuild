@@ -32,12 +32,18 @@ src_prepare()
 	sed -ie 's/prefix = \/usr\/local/prefix = $(DEST)\/$(strip @prefix@)/g' "${S}/Makefile.in" || die
 	sed -ie 's/echo \/usr\/local/echo $(prefix)\/share/g' "${S}/Makefile.in" || die
 
+	# fix compat issues with dgen 1.33
 	sed -i \
 		-e "s/bool_splitscreen_startup/#removed_opt/g" \
 		-e "s/bool_16bit/#removed_opt/g" \
 		-e "s/splitscreen_startup//g" \
 		-e "s/16bit//g" \
-		"${S}"/tkdgen_opav.tcl
+		"${S}"/tkdgen_opav.tcl || die
+	sed -i \
+		-e "s/1.23/1.33/g" \
+		-e "s/ToBin tobin/ToBin dgen_tobin/g" \
+		-e "s/\*tobin from.smd to.bin\*/\*tobin \{from.smd\} \{to.bin\}\*/g" \
+		tkdgen.tcl || die
 }
 
 src_install()
