@@ -13,10 +13,11 @@ SRC_URI="
 LICENSE="CeCILL"
 SLOT="0"
 KEYWORDS="x86 amd64"
-IUSE="system-jre"
+IUSE="+system-jre"
 
 DEPEND=""
-RDEPEND="${DEPEND}"
+RDEPEND="${DEPEND}
+	system-jre? ( || ( >=dev-java/oracle-jre-bin-1.6.0.41 >=dev-java/oracle-jdk-bin-1.6.0.41 ) )"
 QA_PREBUILT="opt/${P}/*"
 
 src_unpack()
@@ -38,6 +39,7 @@ src_install()
 
 	find applications/ -name '*.desktop' -exec sed -ie "/\]\=/d" '{}' \; || die
 	find applications/ -name '*.desktop' -exec sed -ie "s/Science;Math;/Development;Science;Math;/g" '{}' \; || die
+	find applications/ -name '*.desktop' -exec sed -ie "s/StartupNotify=false/StartupNotify=true/g" '{}' \; || die
 	find applications/ -maxdepth 1 -mindepth 1 -name '*.desktop' \
 		-exec mv '{}' "${ED}"/usr/share/applications \; || die
 
@@ -62,6 +64,39 @@ src_install()
 	ln -s /opt/"${P}"/bin/scilab-adv-cli "${ED}"/usr/bin/scilab-adv-cli || die
 
 	if use system-jre; then
-		die "TODO: Unbundle JRE..." 
+		cat >> find-jre << "EOF"
+        for f in $(ls /opt); do 
+                n=${f%-*}
+                if [ "$n" == "oracle-jdk-bin" ]; then 
+                        JAVA_HOME=/opt/$f
+                        JRE_HOME=/opt/$f/jre
+                elif [ "$n" == "oracle-jre-bin" ]; then 
+                        JAVA_HOME=/opt/$f
+                        JRE_HOME=/opt/$f
+                fi   
+        done 
+EOF
+		rm -r "${ED}"/opt/"${P}"/thirdparty/java || die
+		
+		mv "${ED}"/opt/"${P}"/bin/scilab scilab.orig || die
+		sed '/# Check if the lib exists or not/,$d' scilab.orig > scilab || die
+		cat find-jre >> scilab || die
+		sed -n '/^# Check if the lib exists or not/,$p' scilab.orig >> scilab || die
+		chmod 0755 scilab || die
+		mv scilab "${ED}"/opt/"${P}"/bin || die
+		
+		mv "${ED}"/opt/"${P}"/bin/scinotes scinotes.orig || die
+		sed '/# Check if the lib exists or not/,$d' scinotes.orig > scinotes || die
+		cat find-jre >> scinotes || die
+		sed -n '/^# Check if the lib exists or not/,$p' scinotes.orig >> scinotes || die
+		chmod 0755 scinotes || die
+		mv scinotes "${ED}"/opt/"${P}"/bin || die
+
+		mv "${ED}"/opt/"${P}"/bin/xcos xcos.orig || die
+		sed '/# Check if the lib exists or not/,$d' xcos.orig > xcos || die
+		cat find-jre >> xcos || die
+		sed -n '/^# Check if the lib exists or not/,$p' xcos.orig >> xcos || die
+		chmod 0755 xcos || die
+		mv xcos "${ED}"/opt/"${P}"/bin || die
 	fi
 }
