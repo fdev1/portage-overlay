@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "http://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<longdescription>Watch Movies and TV Shows instantly</longdescription>
+	<use>
+		<flag name="chromium-ffmpeg">
+			Use Chromium's libffmpegsumo.so instead of bundled one. Note: This
+			will pull www-client/chromium as a dependency!
+		</flag>
+	</use>
+</pkgmetadata>
