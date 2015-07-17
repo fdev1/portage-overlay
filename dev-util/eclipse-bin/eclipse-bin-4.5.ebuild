@@ -66,7 +66,7 @@ src_install()
 
 	# menu entry
 	echo "[Desktop Entry]" > eclipse.desktop || die
-	echo "Name=Eclipse MARS" >> eclipse.desktop || die
+	echo "Name=Eclipse Mars" >> eclipse.desktop || die
 	echo "GenericName=Eclipse IDE for Java Developers" >> eclipse.desktop || die
 	echo "Comment=Eclipse IDE for Java Developers" >> eclipse.desktop || die
 	echo "Icon=${EROOT}/opt/${P}/icon.xpm" >> eclipse.desktop || die
@@ -75,6 +75,7 @@ src_install()
 	echo "Terminal=false" >> eclipse.desktop || die
 	echo "Type=Application" >> eclipse.desktop || die
 	echo "Categories=Development;IDE;" >> eclipse.desktop || die
+	sed -ie "s://:/:g" eclipse.desktop || die
 	domenu eclipse.desktop
 }
 
