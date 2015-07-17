@@ -28,7 +28,7 @@ IUSE="+enterprise"
 
 DEPEND=""
 RDEPEND="${DEPEND}
-	virtual/java"
+	virtual/jre"
 
 pkg_setup()
 {
