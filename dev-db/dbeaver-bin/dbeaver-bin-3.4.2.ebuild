@@ -1,4 +1,4 @@
-# Copyright 1999-2015 Gentoo Foundation
+# Copyright 2015 Fernando Rodriguez
 # Distributed under the terms of the GNU General Public License v2
 # $Header: $
 
@@ -43,12 +43,14 @@ src_unpack()
 src_install()
 {
 	mkdir -p "${ED}"/opt || die
+	mkdir -p "${ED}"/usr/bin || die
 	chown -R root:dbeaver "${S}"/dbeaver || die
 	find "${S}"/dbeaver/configuration -type d -exec chmod 0775 '{}' \; || die
 	find "${S}"/dbeaver/configuration -type f -exec chmod 0664 '{}' \; || die
 	find "${S}"/dbeaver/plugins -type d -exec chmod 0775 '{}' \; || die
 	find "${S}"/dbeaver/plugins -type f -exec chmod 0664 '{}' \; || die
 	mv "${S}"/dbeaver "${ED}"/opt/"${P}" || die
+	ln -s "${EROOT}"/opt/"${P}"/dbeaver "${ED}"/usr/bin/dbeaver || die
 
 	echo "[Desktop Entry]" > dbeaver.desktop || die
 	echo "Name=DBeaver" >> dbeaver.desktop || die

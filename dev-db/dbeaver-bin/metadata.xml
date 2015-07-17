@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "http://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<longdescription>Free Universal Database Manager</longdescription>
+	<use>
+		<flag name="enterprise">Install enterprise edition (also free, includes NoSQL support)</flag>
+	</use>
+</pkgmetadata>
