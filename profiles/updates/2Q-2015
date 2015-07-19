@@ -4,3 +4,10 @@ move dev-pic/xc16-bin sci-electronics/xc16-bin
 move dev-pic/xc16-resources sci-electronics/xc16-resources
 move dev-pic/xc8-bin sci-electronics/xc8-bin
 move dev-pic/xc32-bin sci-electronics/xc32-bin
+
+move sci-electronics/mplabx dev-embedded/mplabx
+move sci-electronics/xc16 dev-embedded/xc16
+move sci-electronics/xc16-bin dev-embedded/xc16-bin
+move sci-electronics/xc16-resources dev-embedded/xc16-resources
+move sci-electronics/xc8-bin dev-embedded/xc8-bin
+move sci-electronics/xc32-bin dev-embedded/xc32-bin

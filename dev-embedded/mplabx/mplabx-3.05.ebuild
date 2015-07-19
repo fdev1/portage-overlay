@@ -180,8 +180,8 @@ pkg_postinst()
 {
 	ewarn "In order to use MPLAB X you'll need to install"
 	ewarn "one of the following compilers:"
-	ewarn "    sci-electronics/xc8-bin"
-	ewarn "    sci-electronics/xc16 (GPL version)"
-	ewarn "    sci-electronics/xc16-bin"
-	ewarn "    sci-electronics/xc32-bin"
+	ewarn "    sci-embedded/xc8-bin"
+	ewarn "    sci-embedded/xc16 (GPL version)"
+	ewarn "    sci-embedded/xc16-bin"
+	ewarn "    sci-embedded/xc32-bin"
 }
