@@ -112,11 +112,11 @@ src_install()
 	
 	sed -i \
 		-e "s/.png//g" \
-		-e "s/Application;Development;Programming;/Development;IDE;/g" \
+		-e "s/Application;Development;Programming;/Electronics;Development;IDE;/g" \
 		chroot/usr/share/applications/mplab.desktop || die
 	sed -i \
 		-e "s/.png//g" \
-		-e "s/Application;Development;Programming;/Development;IDE;/g" \
+		-e "s/Application;Development;Programming;/Electronics;Development;IDE;/g" \
 		chroot/usr/share/applications/mplab_ipe.desktop || die
 
 	# fix /usr/bin symlinks
@@ -180,7 +180,8 @@ pkg_postinst()
 {
 	ewarn "In order to use MPLAB X you'll need to install"
 	ewarn "one of the following compilers:"
-	ewarn "    dev-pic/xc16"
-	ewarn "    dev-pic/xc16-bin (proprietary version)"
-	ewarn "    dev-pic/xc32"
+	ewarn "    sci-electronics/xc8-bin"
+	ewarn "    sci-electronics/xc16 (GPL version)"
+	ewarn "    sci-electronics/xc16-bin"
+	ewarn "    sci-electronics/xc32-bin"
 }

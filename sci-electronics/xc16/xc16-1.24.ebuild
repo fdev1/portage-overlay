@@ -19,7 +19,7 @@ DEPEND="
 	app-arch/unzip
 "
 RDEPEND="${DEPEND}
-	=dev-pic/xc16-resources-1.24"
+	=sci-electronics/xc16-resources-1.24"
 
 src_unpack()
 {
