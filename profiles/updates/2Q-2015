@@ -1,0 +1,6 @@
+move dev-pic/mplabx sci-electronics/mplabx
+move dev-pic/xc16 sci-electronics/xc16
+move dev-pic/xc16-bin sci-electronics/xc16-bin
+move dev-pic/xc16-resources sci-electronics/xc16-resources
+move dev-pic/xc8-bin sci-electronics/xc8-bin
+move dev-pic/xc32-bin sci-electronics/xc32-bin
