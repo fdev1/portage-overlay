@@ -14,7 +14,7 @@ HOMEPAGE="https://projects.kde.org/projects/playground/base/kwallet-pam/reposito
 SRC_URI="https://github.com/fernando-rodriguez/${PN}/archive/${PV}.tar.gz -> kwallet-pam-${PV}.tar.gz"
 RESTRICT="primaryuri"
 
-LICENSE="MIT"
+LICENSE="BSD"
 SLOT="0"
 KEYWORDS="x86 amd64"
 IUSE=""
