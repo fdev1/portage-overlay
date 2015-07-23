@@ -11,3 +11,5 @@ move sci-electronics/xc16-bin dev-embedded/xc16-bin
 move sci-electronics/xc16-resources dev-embedded/xc16-resources
 move sci-electronics/xc8-bin dev-embedded/xc8-bin
 move sci-electronics/xc32-bin dev-embedded/xc32-bin
+
+move kde-base/kwallet-pam sys-auth/kwallet-pam
