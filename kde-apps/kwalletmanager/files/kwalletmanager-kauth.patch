@@ -8,7 +8,7 @@ diff -rupN a/src/manager/CMakeLists.txt b/src/manager/CMakeLists.txt
 +kde4_install_auth_actions(org.kde.kwallet kwalletmanager.actions)
 diff -rupN a/src/manager/kwalleteditor.cpp b/src/manager/kwalleteditor.cpp
 --- a/src/manager/kwalleteditor.cpp	2014-10-09 03:07:50.000000000 -0400
-+++ b/src/manager/kwalleteditor.cpp	2015-07-22 22:02:34.000000000 -0400
++++ b/src/manager/kwalleteditor.cpp	2015-07-23 17:25:38.000000000 -0400
 @@ -61,6 +61,7 @@
  #include <kicon.h>
  #include <KAction>
@@ -17,19 +17,36 @@ diff -rupN a/src/manager/kwalleteditor.cpp b/src/manager/kwalleteditor.cpp
  
  QAction *KWalletEditor::_newFolderAction =0;
  QAction *KWalletEditor::_deleteFolderAction =0;
-@@ -929,7 +930,10 @@ void KWalletEditor::hidePasswordContents
+@@ -929,13 +930,26 @@ void KWalletEditor::hidePasswordContents
  
  
  void KWalletEditor::showPasswordContents() {
 -	_entryStack->setCurrentIndex(1);
-+	KAuth::Action viewAction("org.kde.kwallet.viewpass");
++	KAuth::Action viewAction("org.kde.kwallet.viewdata");
 +	KAuth::ActionReply reply = viewAction.execute();
-+	if (!reply.failed())
++	if (!reply.failed()) {
 +		_entryStack->setCurrentIndex(1);
++	} else {
++		_alwaysShowContents = false;
++		_alwaysShowContentsAction->setChecked(false);
++	}
  }
  
  
-@@ -1186,6 +1190,11 @@ void KWalletEditor::importXML() {
+ void KWalletEditor::showHideMapEditorValue(bool show) {
+ 	if (show) {
+-		_mapEditor->showColumn(2);
++		KAuth::Action viewAction("org.kde.kwallet.viewdata");
++		KAuth::ActionReply reply = viewAction.execute();
++		if (!reply.failed()) {
++			_mapEditor->showColumn(2);
++		} else {
++			_mapEditorShowHide->setChecked(false);
++		}
+ 	} else {
+ 		_mapEditor->hideColumn(2);
+ 	}
+@@ -1186,6 +1200,11 @@ void KWalletEditor::importXML() {
  
  
  void KWalletEditor::exportXML() {
@@ -43,7 +60,7 @@ diff -rupN a/src/manager/kwalleteditor.cpp b/src/manager/kwalleteditor.cpp
  	QXmlStreamWriter xml(&tf);
 diff -rupN a/src/manager/kwalletmanager.actions b/src/manager/kwalletmanager.actions
 --- a/src/manager/kwalletmanager.actions	1969-12-31 19:00:00.000000000 -0500
-+++ b/src/manager/kwalletmanager.actions	2015-07-22 22:11:30.000000000 -0400
++++ b/src/manager/kwalletmanager.actions	2015-07-23 17:24:28.000000000 -0400
 @@ -0,0 +1,70 @@
 +[Domain]
 +Name=KDE Wallet system
@@ -89,13 +106,13 @@ diff -rupN a/src/manager/kwalletmanager.actions b/src/manager/kwalletmanager.act
 +Name[zh_TW]=KDE 錢包系統
 +Icon=kwalletmanager
 +
-+[org.kde.kwallet.viewpass]
-+Name=View saved passwords
-+Name[en_GB]=View saved passwords
-+Name[es]=Ver contraseñas en la cartera
-+Description=Allow viewing saved passwords
-+Description[en_GB]=Allow viewing saved passwords
-+Description[es]=Permitir que se vean las contraseñas en la cartera
++[org.kde.kwallet.viewdata]
++Name=View saved data
++Name[en_GB]=View saved data
++Name[es]=Ver información guardada en la cartera
++Description=Allow viewing of data saved in wallet
++Description[en_GB]=Allow viewing of data saved in wallet
++Description[es]=Permitir ver la información guardada en la cartera
 +Policy=auth_self
 +
 +[org.kde.kwallet.changepass]
