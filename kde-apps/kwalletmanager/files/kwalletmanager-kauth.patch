@@ -8,7 +8,7 @@ diff -rupN a/src/manager/CMakeLists.txt b/src/manager/CMakeLists.txt
 +kde4_install_auth_actions(org.kde.kwallet kwalletmanager.actions)
 diff -rupN a/src/manager/kwalleteditor.cpp b/src/manager/kwalleteditor.cpp
 --- a/src/manager/kwalleteditor.cpp	2014-10-09 03:07:50.000000000 -0400
-+++ b/src/manager/kwalleteditor.cpp	2015-07-23 17:25:38.000000000 -0400
++++ b/src/manager/kwalleteditor.cpp	2015-08-01 15:39:05.000000000 -0400
 @@ -61,6 +61,7 @@
  #include <kicon.h>
  #include <KAction>
@@ -17,7 +17,27 @@ diff -rupN a/src/manager/kwalleteditor.cpp b/src/manager/kwalleteditor.cpp
  
  QAction *KWalletEditor::_newFolderAction =0;
  QAction *KWalletEditor::_deleteFolderAction =0;
-@@ -929,13 +930,26 @@ void KWalletEditor::hidePasswordContents
+@@ -560,6 +561,7 @@ void KWalletEditor::entrySelectionChange
+                     }
+ 				} else if (ci->entryType() == KWallet::Wallet::Map) {
+ 					_entryStack->setCurrentIndex(2);
++					showHideMapEditorValue(false);
+ 					if (_w->readMap(item->text(0), _currentMap) == 0) {
+ 						_mapEditor->reload();
+ 						_entryName->setText(i18n("Name-Value Map: %1", item->text(0)));
+@@ -742,6 +744,11 @@ void KWalletEditor::listContextMenuReque
+ 
+ 
+ void KWalletEditor::copyPassword() {
++	KAuth::Action viewAction("org.kde.kwallet.viewdata");
++	KAuth::ActionReply reply = viewAction.execute();
++	if (reply.failed())
++		return;
++
+ 	QTreeWidgetItem *item = _entryList->currentItem();
+ 	if (_w && item) {
+ 		QString pass;
+@@ -929,13 +936,26 @@ void KWalletEditor::hidePasswordContents
  
  
  void KWalletEditor::showPasswordContents() {
@@ -46,7 +66,7 @@ diff -rupN a/src/manager/kwalleteditor.cpp b/src/manager/kwalleteditor.cpp
  	} else {
  		_mapEditor->hideColumn(2);
  	}
-@@ -1186,6 +1200,11 @@ void KWalletEditor::importXML() {
+@@ -1186,6 +1206,11 @@ void KWalletEditor::importXML() {
  
  
  void KWalletEditor::exportXML() {
