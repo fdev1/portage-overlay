@@ -13,6 +13,8 @@ SLOT="0"
 KEYWORDS="x86 amd64"
 IUSE=""
 
-DEPEND=""
+DEPEND="
+	>=sys-fs/cryptsetup-1.6.5
+	virtual/udev"
 RDEPEND="${DEPEND}"
 
