@@ -46,10 +46,10 @@ pkg_setup()
 src_install()
 {
 	diropts --owner=root --group=qb64 --mode=775
-	dodir "${EROOT}/opt/qb64"
-	dodir "${EROOT}/opt/qb64/programs"
+	dodir /opt/qb64
+	dodir /opt/qb64/programs
 	insopts --owner=root --group=qb64 --mode=750
-	insinto "${EROOT}/opt/qb64"
+	insinto /opt/qb64
 	doins qb64
 
 	chown -R root:qb64 internal || die
@@ -61,7 +61,7 @@ src_install()
 	echo "cd ${EROOT}/opt/qb64" >> qb64-run || die
 	echo "./qb64 \"\$f\"" >> qb64-run || die
 	doins qb64-run
-	dosym ${EROOT}/opt/qb64/qb64-run ${EROOT}/usr/bin/qb64
+	dosym /opt/qb64/qb64-run /usr/bin/qb64
 
 	insopts --owner=root --group=qb64 --mode=640
 	echo "[Desktop Entry]" > qb64.desktop || die

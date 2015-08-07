@@ -85,7 +85,7 @@ xc16_wrapper()
 
 src_install()
 {
-	dodir "${EROOT}/usr/lib/xc16/bin"
+	dodir /usr/lib/xc16/bin
 	mv "${S}/install/bin/bin" "${ED}/${EROOT}/usr/lib/xc16/bin" || die
 	#mv "${S}/install/bin/c30_device.info" "${ED}/${EROOT}/usr/lib/xc16/bin" || die
 
@@ -99,7 +99,7 @@ src_install()
 	xc16_wrapper xc16-objdump
 	xc16_wrapper xc16-strip
 	insopts --mode=0755
-	insinto "${EROOT}/usr/lib/xc16/bin"
+	insinto /usr/lib/xc16/bin
 	doins xc16-as
 	doins xc16-ar
 	doins xc16-bin2hex
@@ -110,12 +110,12 @@ src_install()
 	doins xc16-strip
 
 	# create symlinks in /usr/bin
-	dosym "${EROOT}/usr/lib/xc16/bin/xc16-as" "${EROOT}/usr/bin/xc16-as"
-	dosym "${EROOT}/usr/lib/xc16/bin/xc16-ar" "${EROOT}/usr/bin/xc16-ar"
-	dosym "${EROOT}/usr/lib/xc16/bin/xc16-bin2hex" "${EROOT}/usr/bin/xc16-bin2hex"
-	dosym "${EROOT}/usr/lib/xc16/bin/xc16-cc1" "${EROOT}/usr/bin/xc16-cc1"
-	dosym "${EROOT}/usr/lib/xc16/bin/xc16-gcc" "${EROOT}/usr/bin/xc16-gcc"
-	dosym "${EROOT}/usr/lib/xc16/bin/xc16-ld" "${EROOT}/usr/bin/xc16-ld"
-	dosym "${EROOT}/usr/lib/xc16/bin/xc16-objdump" "${EROOT}/usr/bin/xc16-objdump"
-	dosym "${EROOT}/usr/lib/xc16/bin/xc16-strip" "${EROOT}/usr/bin/xc16-strip"
+	dosym "/usr/lib/xc16/bin/xc16-as" "${EROOT}/usr/bin/xc16-as"
+	dosym "/usr/lib/xc16/bin/xc16-ar" "${EROOT}/usr/bin/xc16-ar"
+	dosym "/usr/lib/xc16/bin/xc16-bin2hex" "${EROOT}/usr/bin/xc16-bin2hex"
+	dosym "/usr/lib/xc16/bin/xc16-cc1" "${EROOT}/usr/bin/xc16-cc1"
+	dosym "/usr/lib/xc16/bin/xc16-gcc" "${EROOT}/usr/bin/xc16-gcc"
+	dosym "/usr/lib/xc16/bin/xc16-ld" "${EROOT}/usr/bin/xc16-ld"
+	dosym "/usr/lib/xc16/bin/xc16-objdump" "${EROOT}/usr/bin/xc16-objdump"
+	dosym "/usr/lib/xc16/bin/xc16-strip" "${EROOT}/usr/bin/xc16-strip"
 }

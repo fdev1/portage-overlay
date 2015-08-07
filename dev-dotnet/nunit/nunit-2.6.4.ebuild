@@ -26,18 +26,18 @@ src_unpack()
 
 src_install()
 {
-	dodir "${ROOT}/usr/lib/mono/${P}/bin"
-	insinto "${ROOT}/usr/lib/mono/${P}/bin"
+	dodir /usr/lib/mono/${P}/bin
+	insinto /usr/lib/mono/${P}/bin
 	for f in $(ls "${S}/bin"); do
 		[ -f "${S}/bin/${f}" ] && doins "${S}/bin/${f}"	
 	done
-	dodir "${ROOT}/usr/lib/mono/${P}/bin/lib"
-	insinto "${ROOT}/usr/lib/mono/${P}/bin/lib"
+	dodir /usr/lib/mono/${P}/bin/lib
+	insinto /usr/lib/mono/${P}/bin/lib
 	for f in $(ls "${S}/bin/lib"); do
 		doins "${S}/bin/lib/${f}"
 	done
-	dodir "${ROOT}/usr/lib/mono/${P}/bin/framework"
-	insinto "${ROOT}/usr/lib/mono/${P}/bin/framework"
+	dodir /usr/lib/mono/${P}/bin/framework
+	insinto /usr/lib/mono/${P}/bin/framework
 	for f in $(ls "${S}/bin/framework"); do
 		doins "${S}/bin/framework/${f}"
 	done
@@ -50,8 +50,8 @@ src_install()
 	egacinstall "${S}/bin/lib/Rhino.Mocks.dll" "${P}"
 	egacinstall "${S}/bin/lib/log4net.dll" "${P}"
 
-	dodir "${ROOT}/usr/lib/mono/${P}/bin/tests"
-	insinto "${ROOT}/usr/lib/mono/${P}/bin/tests"
+	dodir /usr/lib/mono/${P}/bin/tests
+	insinto /usr/lib/mono/${P}/bin/tests
 	for f in $(ls "${S}/bin/tests"); do
 		doins "${S}/bin/tests/${f}"
 	done

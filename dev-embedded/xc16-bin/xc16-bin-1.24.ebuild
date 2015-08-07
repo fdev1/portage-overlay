@@ -6,7 +6,7 @@ EAPI=5
 
 inherit eutils chroot-jail user
 
-DESCRIPTION="Microchip's MPLAB® XC16 Compiler"
+DESCRIPTION="Microchip's MPLAB XC16 Compiler"
 HOMEPAGE="http://www.microchip.com/pagehandler/en-us/devtools/mplabxc/"
 SRC_URI="http://ww1.microchip.com/downloads/en/DeviceDoc/xc16-v1.24-full-install-linux-installer.run"
 RESTRICT="mirror userpriv strip"

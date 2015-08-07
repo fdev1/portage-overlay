@@ -82,16 +82,16 @@ src_install()
 	die
 
 
-	dodir "${EROOT}/usr/lib/xc16/"
+	dodir /usr/lib/xc16/
 	chmod -R 0755 "${S}/install" || die
-	mv "${S}/install/examples" "${ED}/${EROOT}/usr/lib/xc16" || die
-	mv "${S}/install/include" "${ED}/${EROOT}/usr/lib/xc16" || die
-	mv "${S}/install/lib" "${ED}/${EROOT}/usr/lib/xc16" || die
-	mv "${S}/install/support" "${ED}/${EROOT}/usr/lib/xc16" || die
-	mv "${S}/install/src" "${ED}/${EROOT}/usr/lib/xc16" || die
-	mv "${S}/install/errata-lib" "${ED}/${EROOT}/usr/lib/xc16" || die
+	mv "${S}/install/examples" "${ED}/usr/lib/xc16" || die
+	mv "${S}/install/include" "${ED}/usr/lib/xc16" || die
+	mv "${S}/install/lib" "${ED}/usr/lib/xc16" || die
+	mv "${S}/install/support" "${ED}/usr/lib/xc16" || die
+	mv "${S}/install/src" "${ED}/usr/lib/xc16" || die
+	mv "${S}/install/errata-lib" "${ED}/usr/lib/xc16" || die
 	
-	dodir "${EROOT}/usr/share/doc/xc16-1.24"
+	dodir /usr/share/doc/xc16-1.24
 	find "${S}/install/docs/." \
 		-exec cp -r '{}' "${ED}/${EROOT}/usr/share/doc/xc16-1.24/" \; || die
 	cp -r "${S}/install/MPLAB_XC16_Compiler_License.txt" \

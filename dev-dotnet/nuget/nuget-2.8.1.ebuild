@@ -25,9 +25,9 @@ src_compile()
 
 src_install()
 {
-	dodir "${ROOT}/usr/lib/mono/${P}"
+	dodir /usr/lib/mono/${P}
 	insopts --mode=755
-	insinto "${ROOT}/usr/lib/mono/${P}"
+	insinto /usr/lib/mono/${P}
 	doins "${S}/src/CommandLine/bin/Release/NuGet.exe"
 	doins "${S}/src/Core/bin/Release/NuGet.Core.dll"
 	doins "${S}/src/Core/bin/Release/Microsoft.Web.XmlTransform.dll"
@@ -36,8 +36,8 @@ src_install()
 	#egacinstall "${S}/src/Core/bin/Release/Microsoft.Web.XmlTransform.dll" "${P}"
 
 	echo "#!/bin/sh" > nuget || die
-	echo "${ROOT}/usr/bin/mono ${ROOT}/usr/lib/mono/${P}/NuGet.exe \$@" >> nuget || die
-	insinto "${ROOT}/usr/bin"
+	echo "${EROOT}/usr/bin/mono ${EROOT}/usr/lib/mono/${P}/NuGet.exe \$@" >> nuget || die
+	insinto /usr/bin
 	insopts --mode=755
 	doins nuget
 }

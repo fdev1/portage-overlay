@@ -38,9 +38,9 @@ src_install()
 {
 	BLDT=$(use debug && printf "Debug" || printf "Release")
 	ARCH=$(use amd64 && printf "x64" || printf "x86")
-	dodir "${ROOT}/usr/lib"
+	dodir /usr/lib
 	mv "${S}/bin/Product/Linux.${ARCH}.${BLDT}" "${D}/${ROOT}/usr/lib/${PN}" || die
-	dosym "${ROOT}/usr/lib/${PN}/corerun" "${ROOT}/usr/bin/corerun"
-	dosym "${ROOT}/usr/lib/${PN}/coreconsole" "${ROOT}/usr/bin/coreconsole"
-	dosym "${ROOT}/usr/lib/${PN}/crossgen" "${ROOT}/usr/bin/crossgen"
+	dosym /usr/lib/${PN}/corerun /usr/bin/corerun
+	dosym /usr/lib/${PN}/coreconsole /usr/bin/coreconsole
+	dosym /usr/lib/${PN}/crossgen /usr/bin/crossgen
 }

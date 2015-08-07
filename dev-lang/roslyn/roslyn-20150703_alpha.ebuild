@@ -103,6 +103,6 @@ src_compile()
 
 src_install()
 {
-	dodir "${ROOT}/usr/lib"
+	dodir /usr/lib
 	mv "${S}/Binaries/${BUILD_CONFIGURATION}" "${D}/${ROOT}/usr/lib/roslyn" || die
 }

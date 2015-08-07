@@ -4,13 +4,13 @@
 
 EAPI=5
 
-PN="${PN%%-NuGet}"
-PN="${PN//-/.}"
-PKG="${PN%%-NuGet}.${PV}"
+EPN="${PN%%-NuGet}"
+EN="${EPN//-/.}"
+PKG="${EPN%%-NuGet}.${PV}"
 
 DESCRIPTION="${PKG} NuGet Package"
 HOMEPAGE="http://nuget.org"
-SRC_URI="https://www.nuget.org/api/v2/package/${PN//-/.}/${PV} -> ${PN}.${PV}.zip"
+SRC_URI="https://www.nuget.org/api/v2/package/${EPN//-/.}/${PV} -> ${EPN}.${PV}.zip"
 LICENSE="ms-eula"
 SLOT="${PV}"
 KEYWORDS="x86 amd64"
@@ -27,6 +27,6 @@ src_unpack()
 
 src_install()
 {
-	dodir "${ROOT}/usr/lib/mono/packages" 
-	mv "${S}" "${D}/${ROOT}/usr/lib/mono/packages/${PKG}" || die
+	dodir /usr/lib/mono/packages
+	mv "${S}" "${ED}/${EROOT}/usr/lib/mono/packages/${PKG}" || die
 }

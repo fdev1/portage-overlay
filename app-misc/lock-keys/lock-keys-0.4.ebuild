@@ -22,17 +22,17 @@ RDEPEND="${DEPEND}
 src_compile()
 {
 	emake \
-		PREFIX="${ROOT}/usr" \
+		PREFIX="${EROOT}/usr" \
 		ENABLE_AUTOSTART=0 \
 		CC="${CHOST}-gcc" \
 		CFLAGS="${CFLAGS}" \
-		DESTDIR="${D}"
+		DESTDIR="${ED}"
 }
 
 src_install()
 {
-	dodir "${ROOT}/usr/bin"
-	emake PREFIX="${ROOT}/usr" DESTDIR="${D}" install
+	dodir /usr/bin
+	emake PREFIX="${EROOT}/usr" DESTDIR="${ED}" install
 
 	echo "[Desktop Entry]" > lock-keys.desktop || die
 	echo "Type=Application" >> lock-keys.desktop || die
@@ -41,6 +41,6 @@ src_install()
 	echo "Comment=On-screen Capslock Indicator" >> lock-keys.desktop || die
 	echo "Terminal=false" >> lock-keys.desktop || die
 	
-	insinto "${EROOT}/etc/xdg/autostart"
+	insinto /etc/xdg/autostart
 	doins lock-keys.desktop
 }

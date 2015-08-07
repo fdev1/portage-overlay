@@ -102,6 +102,19 @@ src_configure() {
 	sed -i -E -e 's#(EXE_PATH=")(.*)(/lib/monodevelop/bin/MonoDevelop.exe")#\1'${EPREFIX}'/usr\3#g' "${S}/monodevelop" || die
 }
 
+src_install()
+{
+	default
+	mv "${D}/usr/share/applications/monodevelop.desktop" monodevelopide.desktop || die
+	#sed -ie "s/Categories=GNOME;GTK;Development;IDE;/Categories=Development;IDE;/g" monodevelop.desktop || die
+	#sed -ie "/^Cat/ s/GNOME;GTK;//g" monodevelop.desktop || die
+	#sed -ie "/^X-/d" monodevelop.desktop || die
+	#sed -ie "/^MimeType=/d" monodevelop.desktop || die
+	#sed -ie "/\]=/d" monodevelop.desktop || die
+	#sed -ie "/Encoding=/d" monodevelop.desktop || die
+	domenu monodevelopide.desktop
+}
+
 pkg_preinst() {
 	gnome2_icon_savelist
 }

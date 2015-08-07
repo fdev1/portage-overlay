@@ -7,7 +7,7 @@ EAPI=5
 inherit eutils chroot-jail user
 
 INSTALLER="xc8-v1.34-full-install-linux-installer.run"
-DESCRIPTION="Microchip's MPLAB® XC8 Compiler"
+DESCRIPTION="Microchip's MPLAB XC8 Compiler"
 HOMEPAGE="http://www.microchip.com/pagehandler/en-us/devtools/mplabxc/"
 SRC_URI="http://ww1.microchip.com/downloads/en/DeviceDoc/xc8-v1.34-full-install-linux-installer.run"
 RESTRICT="mirror userpriv strip"
