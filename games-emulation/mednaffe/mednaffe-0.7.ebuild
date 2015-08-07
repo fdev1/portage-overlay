@@ -26,4 +26,3 @@ src_install()
 	mv "${ED}/usr/share/games/applications" "${ED}/usr/share" || die
 	mv "${ED}/usr/share/games/icons" "${ED}/usr/share/icons" || die
 }
-

@@ -5,7 +5,7 @@
 EAPI=5
 
 # Watch the order of these!
-inherit autotools apache-module multilib eutils mono
+inherit apache-module multilib eutils mono
 
 KEYWORDS="~amd64 ~ppc ~x86"
 

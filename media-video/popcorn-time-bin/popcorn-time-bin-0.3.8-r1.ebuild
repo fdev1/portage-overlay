@@ -38,7 +38,7 @@ RDEPEND="${DEPEND}
 	>=x11-libs/pango-1.36.8
 	>=media-libs/freetype-2.5.5
 	>=media-libs/fontconfig-2.11.1
-	>=x11-libs/libXi-1.7.4 
+	>=x11-libs/libXi-1.7.4
 	>=x11-libs/libXcomposite-0.4.4
 	>=dev-libs/nss-3.19
 	>=dev-libs/nspr-4.10.8
@@ -67,11 +67,11 @@ src_install()
 	insinto "${MERGEDIR}"
 	insopts --owner=root --group=root --mode=755
 	doins "${S}/Popcorn-Time"
-	dosym "${MERGEDIR}/Popcorn-Time" ${EROOT}/usr/bin/Popcorn-Time
+	dosym "${MERGEDIR}"/Popcorn-Time "${EROOT}"/usr/bin/Popcorn-Time
 	insopts --owner=root --group=root --mode=664
-	doins "${S}/nw.pak"
-	doins "${S}/icudtl.dat"
-	doins "${S}/package.json"
+	doins "${S}"/nw.pak
+	doins "${S}"/icudtl.dat
+	doins "${S}"/package.json
 
 	if use chromium-ffmpeg; then
 		dosym /usr/$(get_libdir)/chromium-browser/libffmpegsumo.so "${MERGEDIR}/libffmpegsumo.so"
@@ -109,4 +109,3 @@ src_install()
 	echo "Categories=AudioVideo;Player;Recorder;" >> Popcorn-Time.desktop || die
 	domenu Popcorn-Time.desktop || die
 }
-

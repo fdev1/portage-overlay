@@ -116,4 +116,3 @@ src_install()
 	sed -ie "s://:/:g" jnes.desktop || die
 	domenu jnes.desktop
 }
-

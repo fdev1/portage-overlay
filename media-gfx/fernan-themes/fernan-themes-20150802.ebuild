@@ -24,7 +24,7 @@ RDEPEND="${DEPEND}"
 
 src_unpack()
 {
-	tar -xf "${DISTDIR}"/"${A}" || die
+	tar -xf "${DISTDIR}"/${A} || die
 	mv "${WORKDIR}/themes-${PV}" "${S}" || die
 }
 
@@ -56,7 +56,7 @@ src_install()
 		find "${S}"/kde4 -maxdepth 1 -mindepth 1 \
 			-exec mv '{}' "${ED}"/usr/share/apps/desktoptheme \; || die
 	fi
-	
+
 	if use plymouth; then
 		mkdir -p "${ED}"/usr/share/plymouth/themes || die
 		find "${S}"/plymouth -maxdepth 1 -mindepth 1 \

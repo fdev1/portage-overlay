@@ -38,7 +38,7 @@ RDEPEND="${DEPEND}
 	>=x11-libs/pango-1.36.8
 	>=media-libs/freetype-2.5.5
 	>=media-libs/fontconfig-2.11.1
-	>=x11-libs/libXi-1.7.4 
+	>=x11-libs/libXi-1.7.4
 	>=x11-libs/libXcomposite-0.4.4
 	>=dev-libs/nss-3.19
 	>=dev-libs/nspr-4.10.8
@@ -65,19 +65,19 @@ src_install()
 	dodir "${MERGEDIR}"
 	insinto "${MERGEDIR}"
 	insopts --owner=root --group=root --mode=755
-	doins "${S}/Popcorn-Time"
-	dosym "${MERGEDIR}/Popcorn-Time" ${EROOT}/usr/bin/Popcorn-Time
+	doins "${S}"/Popcorn-Time
+	dosym "${MERGEDIR}"/Popcorn-Time "${EROOT}"/usr/bin/Popcorn-Time
 	insopts --owner=root --group=root --mode=664
 	doins "${S}/nw.pak"
 	doins "${S}/icudtl.dat"
-	doins "${S}/libffmpegsumo.so"
+	doins "${S}"/libffmpegsumo.so
 	doins "${S}/package.json"
 	mv "${S}/node_modules" "${ED}/${MERGEDIR}/" || die
 	mv "${S}/src" "${ED}/${MERGEDIR}/" || die
 
-	dodir "${MERGEDIR}/locales"
-	insinto "${MERGEDIR}/locales"
-	find "${S}/locales" -mindepth 1 -maxdepth 1 \
+	dodir "${MERGEDIR}"/locales
+	insinto "${MERGEDIR}"/locales
+	find "${S}"/locales -mindepth 1 -maxdepth 1 \
 		-exec mv '{}' "${ED}/${MERGEDIR}/locales" \; || die
 
 	# install docs
@@ -87,8 +87,8 @@ src_install()
 
 	# install icon
 	insopts --owner=root --group=root --mode=644
-	insinto "/usr/share/icons"
-	doins "${S}/popcorntime.png"
+	insinto /usr/share/icons
+	doins "${S}"/popcorntime.png
 	
 	# install menu item
 	echo "[Desktop Entry]" > Popcorn-Time.desktop || die
@@ -102,4 +102,3 @@ src_install()
 	echo "Categories=AudioVideo;Player;Recorder;" >> Popcorn-Time.desktop || die
 	domenu Popcorn-Time.desktop || die
 }
-

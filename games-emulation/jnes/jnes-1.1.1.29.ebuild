@@ -114,4 +114,3 @@ src_install()
 	echo "Categories=Game;Emulator;" >> jnes.desktop || die "Install failed!"
 	domenu jnes.desktop || die "Install failed!"
 }
-

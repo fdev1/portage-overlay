@@ -5,10 +5,10 @@
 EAPI=5
 
 DESCRIPTION="Apparmor Policies"
-HOMEPAGE=""
+HOMEPAGE="http://github.com/fernando-rodriguez/apparmor-policy/"
 SRC_URI="https://github.com/fernando-rodriguez/${PN}/archive/${PV}.tar.gz -> ${P}.tar.gz"
 
-LICENSE="WTFPL"
+LICENSE="WTFPL-2"
 SLOT="0"
 KEYWORDS="x86 amd64"
 IUSE=""

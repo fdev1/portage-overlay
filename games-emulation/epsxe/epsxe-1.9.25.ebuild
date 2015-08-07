@@ -11,25 +11,25 @@ HOMEPAGE="http://www.epsxe.com"
 SRC_URI="http://www.epsxe.com/files/epsxe1925lin.zip
 menu? ( http://www.epsxe.com/files/ePSXe1925.zip )
 bios? ( https://drive.google.com/uc?export=download&id=0BzPt9N2PyrQGenh0MGxCa1pxejQ -> playstation-bios.tar.xz )
-xgl2? ( 
-	http://www.pbernert.com/gpupetexgl209.tar.gz 
+xgl2? (
+	http://www.pbernert.com/gpupetexgl209.tar.gz
 	bin? ( http://www.pbernert.com/petegpucfg_V2-9_V1-77_V1-18.tar.gz )
 	!bin? ( http://www.pbernert.com/gpu_xgl2_cfg_2_08.tar.gz )
 )
-mesa? ( 
+mesa? (
 	bin? ( http://www.pbernert.com/gpupeopsmesagl178.tar.gz )
 	!bin? ( http://www.pbernert.com/PeopsOpenGLGpu178Sources.zip )
 )
-softgpu? ( 
-	bin? ( 
-		http://www.pbernert.com/gpupeopssoftx118.tar.gz 
+softgpu? (
+	bin? (
+		http://www.pbernert.com/gpupeopssoftx118.tar.gz
 		http://www.pbernert.com/petegpucfg_V2-9_V1-77_V1-18.tar.gz
 	)
-	!bin? ( 
+	!bin? (
 		http://downloads.sourceforge.net/project/peops/peopssoftgpu/P.E.Op.S.%20Soft%20GPU%201.18/PeopsSoftGpu118.zip?r=http%3A%2F%2Fsourceforge.net%2Fprojects%2Fpeops%2Ffiles%2Fpeopssoftgpu%2FP.E.Op.S.%2520Soft%2520GPU%25201.18%2F&ts=1435692248&use_mirror=iweb -> PeopsSoftGPU118.zip
 	)
 )
-oss? ( 
+oss? (
 	bin? ( http://www.pbernert.com/spupeopsoss109.tar.gz )
 	!bin? ( http://downloads.sourceforge.net/project/peops/peopsspu/P.E.Op.S.%20Sound%20SPU%201.9/PeopsSpu109.tar.gz )
 )
@@ -74,7 +74,7 @@ src_unpack()
 	# unpack epsxe
 	mkdir -p "${S}" || die "Unpack failed!"
 	unzip -x "${DISTDIR}/epsxe1925lin.zip" -d "${S}" >/dev/null || die "Unpack failed!"
-	
+
 	use bios && tar -xf "${DISTDIR}/playstation-bios.tar.xz" -C "${S}"
 
 	if use xgl2; then
@@ -101,7 +101,7 @@ src_unpack()
 		if use bin; then
 			tar -xf "${DISTDIR}/gpupeopssoftx118.tar.gz" -C "${S}"
 		else
-			unzip -q -x "${DISTDIR}/PeopsSoftGPU118.zip" -d "${S}" 
+			unzip -q -x "${DISTDIR}/PeopsSoftGPU118.zip" -d "${S}"
 		fi
 	fi
 
@@ -155,7 +155,7 @@ do_fix_line_endings()
 	cd "${1}"
 	for f in $(ls); do
 		if [ -f "${f}" ]; then
-			dos2unix -q "${f}" 
+			dos2unix -q "${f}"
 		elif [ -d "${f}" ]; then
 			do_fix_line_endings "${f}"
 		fi
@@ -181,7 +181,7 @@ do_patch_spu_plugin()
 		# Fix line endings
 		do_fix_line_endings "${1}/src/linuxcfg"
 		do_fix_line_endings "${1}/src/linuxcfg/src"
-			
+
 		# use gtk+2 patch
 		cd "${1}/src/linuxcfg"
 		epatch "${FILESDIR}/PeopsSpu109-linuxcfg-gtk.patch"
@@ -206,7 +206,7 @@ do_patch_spu_plugin()
 }
 
 src_prepare()
-{	
+{
 	# unupx it
 	einfo "Unpacking ePSXe executable..."
 	mv "${S}/epsxe" "${S}/epsxe.bak"
@@ -349,7 +349,7 @@ src_prepare()
 		sed -e "s/-Wall -mpentium -O3 -ffast-math -fomit-frame-pointer/${CFLAGS}/g" | \
 		sed -e "s/libspuPeopsALSA.so/libspuPeopsPA.so/g" | \
 		sed -e "s/LINKFLAGS = /LINKFLAGS = -m32 /g" > "${S}/pulse/src/Makefile"
-	
+
 		# patch to use pulseaudio
 		cp "${S}/pulse/src/alsa.c" "${S}/pulse/src/alsa.c.orig"
 		sed -e "s/default/pulse/g" "${S}/pulse/src/alsa.c.orig" > "${S}/pulse/src/alsa.c"
@@ -766,4 +766,3 @@ src_install()
 	dosym "${MERGEDIR}/epsxe-run" /usr/bin/epsxe
 
 }
-

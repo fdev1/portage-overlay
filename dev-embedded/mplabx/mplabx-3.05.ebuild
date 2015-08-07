@@ -7,7 +7,7 @@ EAPI=5
 
 inherit eutils chroot-jail
 
-DESCRIPTION="MPLAB® X Integrated Development Environment (IDE)"
+DESCRIPTION="MPLAB X Integrated Development Environment (IDE)"
 HOMEPAGE="http://www.microchip.com/pagehandler/en-us/family/mplabx/"
 SRC_URI="http://ww1.microchip.com/downloads/en/DeviceDoc/MPLABX-v3.05-linux-installer.tar"
 RESTRICT="mirror userpriv strip"
