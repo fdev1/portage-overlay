@@ -311,6 +311,7 @@ src_prepare() {
 	epatch "${FILESDIR}/use-kernel_fpu_begin.patch"
 	epatch "${FILESDIR}/ati-drivers-15.7-preempt.patch"
 	epatch "${FILESDIR}/ati-drivers-cr4.patch"
+	epatch "${FILESDIR}/ati-drivers-license.patch"
 
 	epatch_user
 
