@@ -5,7 +5,7 @@
  #endif
  
 +
-+#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,0,0)
++#if LINUX_VERSION_CODE > KERNEL_VERSION(3,18,16)
 +#define read_cr4()	__read_cr4()
 +#define write_cr4(x)	__write_cr4(x)
 +#endif
