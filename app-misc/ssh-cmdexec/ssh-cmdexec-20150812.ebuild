@@ -8,7 +8,7 @@ inherit eutils
 
 DESCRIPTION="A small program to remove IP from xt_recent list upon connection via ssh."
 HOMEPAGE="https://github.com/fernando-rodriguez/misc/blob/master/ssh-cmdexec.c"
-SRC_URI="https://raw.githubusercontent.com/fernando-rodriguez/misc/e8d1211733/ssh-cmdexec.c -> ssh-cmdexec-${PV}.c"
+SRC_URI="https://raw.githubusercontent.com/fernando-rodriguez/misc/a61bcee/ssh-cmdexec.c -> ssh-cmdexec-${PV}.c"
 RESTRICT="primaryuri"
 
 LICENSE="GPL-2"
@@ -28,7 +28,7 @@ src_unpack()
 
 src_compile()
 {
-	${CHOST}-gcc -Wall -DRECENT_LIST=ssh_bad ssh-cmdexec.c -o ssh-cmdexec || die
+	${CHOST}-gcc ${CFLAGS} -Wall -DRECENT_LIST=ssh_bad ssh-cmdexec.c -o ssh-cmdexec || die
 }
 
 src_install()
