@@ -14,7 +14,9 @@ KEYWORDS="x86 amd64"
 IUSE=""
 
 DEPEND=""
-RDEPEND="${DEPEND}"
+RDEPEND="${DEPEND}
+	sys-apps/apparmor
+	sys-apps/apparmor-utils"
 
 src_install()
 {
