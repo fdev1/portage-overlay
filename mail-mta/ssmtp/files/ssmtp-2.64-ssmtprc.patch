@@ -1,0 +1,179 @@
+From 34d26fa98f93cc30a9a5ac8349f5466a7bf87300 Mon Sep 17 00:00:00 2001
+From: Fernando Rodriguez <frodriguez.developer@outlook.com>
+Date: Fri, 14 Aug 2015 01:25:14 -0400
+Subject: [PATCH] Add support for individual user configuration
+
+This commit adds support for overriding the global
+configuration through ~/.ssmtprc. When this file is
+found the config file in /etc is not used.
+
+It also adds a new keywork "EmailAddress" that is only
+valid in the individual configuration file and sets the
+address to be used in the From: field of messages sent
+by the user.
+
+Man pages are modified to reflect the new feature.
+---
+ ssmtp.8      |  5 ++++-
+ ssmtp.c      | 53 ++++++++++++++++++++++++++++++++++++++++++++---------
+ ssmtp.conf.5 | 20 ++++++++++++++++++--
+ 3 files changed, 66 insertions(+), 12 deletions(-)
+
+diff --git a/ssmtp.8 b/ssmtp.8
+index 26f9c47..f8cf9ee 100644
+--- a/ssmtp.8
++++ b/ssmtp.8
+@@ -22,7 +22,8 @@ placed in dead.letter in the sender's home directory.
+ .PP
+ Config files allow one to specify the address to receive mail from
+ root, daemon, etc.; a default mailhub; a default domain to be used in
+-From: lines; and per-user From: addresses and mailhub names.
++From: lines; and per-user From: addresses and mailhub names. Individual
++users may override the global configuration through ~/.ssmtprc.
+ .sp
+ .PP
+ It does not attempt to provide all the functionality of sendmail: it is
+@@ -271,6 +272,8 @@ through mail.isp.com.
+  /etc/ssmtp/ssmtp.conf - configuration file
+ .br
+  /etc/ssmtp/revaliases - reverse aliases file
++.br
++ ~/.ssmtprc - individual configuration file
+ 
+ .SH SEE ALSO
+ RFC821, RFC822, ssmtp.conf(5).
+diff --git a/ssmtp.c b/ssmtp.c
+index 849b6a0..59b0a5f 100644
+--- a/ssmtp.c
++++ b/ssmtp.c
+@@ -870,12 +870,30 @@ read_config() -- Open and parse config file and extract values of variables
+ bool_t read_config()
+ {
+ 	char buf[(BUF_SZ + 1)], *p, *q, *r;
++	bool_t user_config = True;
+ 	FILE *fp;
+ 
+ 	if(config_file == (char *)NULL) {
+-		config_file = strdup(CONFIGURATION_FILE);
++		char *home_config = getenv("HOME");
++		if (home_config != (char*)NULL) {
++			config_file = malloc(strlen(home_config)+10);
++			if (config_file == (char*)NULL) {
++				die("parse_config() -- malloc() failed");
++			}
++			config_file = strcpy(config_file, home_config);
++			config_file = strcat(config_file, "/.ssmtprc");
++			if (access(config_file, F_OK) == -1) {
++				free(config_file);
++				config_file = NULL;
++			}
++		}
++
+ 		if(config_file == (char *)NULL) {
+-			die("parse_config() -- strdup() failed");
++			user_config = False;
++			config_file = strdup(CONFIGURATION_FILE);
++			if(config_file == (char *)NULL) {
++				die("parse_config() -- strdup() failed");
++			}
+ 		}
+ 	}
+ 
+@@ -902,12 +920,25 @@ bool_t read_config()
+ 		}
+ 		if(p && q) {
+ 			if(strcasecmp(p, "Root") == 0) {
+-				if((root = strdup(q)) == (char *)NULL) {
+-					die("parse_config() -- strdup() failed");
++				if (user_config == True) {
++					log_event(LOG_ERR, "Set Root=\"%s\" is invalid in .ssmtprc\n", q);
+ 				}
++				else {
++					if((root = strdup(q)) == (char *)NULL) {
++						die("parse_config() -- strdup() failed");
++					}
+ 
++					if(log_level > 0) {
++						log_event(LOG_INFO, "Set Root=\"%s\"\n", root);
++					}
++				}
++			}
++			else if(user_config == True && strcasecmp(p, "EmailAddress") == 0) {
++				if((uad = strdup(q)) == (char *)NULL) {
++					die("parse_config() -- strdup() failed");
++				}
+ 				if(log_level > 0) {
+-					log_event(LOG_INFO, "Set Root=\"%s\"\n", root);
++					log_event(LOG_INFO, "Set EmailAddress=\"%s\"\n", uad);
+ 				}
+ 			}
+ 			else if(strcasecmp(p, "MinUserId") == 0) {
+@@ -1469,11 +1500,15 @@ int ssmtp(char *argv[])
+ 			die("ssmtp() -- strdup() failed");
+ 		}
+ 	}
+-	revaliases(pw);
+ 
+-	/* revaliases() may have defined this */
+-	if(uad == (char *)NULL) {
+-		uad = append_domain(pw->pw_name);
++	/* this may have been defined on the user's .ssmtprc */
++	if(uad == (char *)NULL){
++		revaliases(pw);
++
++		/* revaliases() may have defined this */
++		if(uad == (char *)NULL) {
++			uad = append_domain(pw->pw_name);
++		}
+ 	}
+ 
+ 	rt = &rcpt_list;
+diff --git a/ssmtp.conf.5 b/ssmtp.conf.5
+index 25f6ceb..a0e1bbf 100644
+--- a/ssmtp.conf.5
++++ b/ssmtp.conf.5
+@@ -12,8 +12,11 @@
+ .Nd ssmtp configuration file
+ .Sh DESCRIPTION
+ .Nm ssmtp
+-reads configuration data from
+-.Pa /etc/ssmtp/ssmtp.conf
++reads configuration data first from
++.Pa ~/.ssmtprc .
++If this file is not found the global configuration is
++read from
++.Pa /etc/ssmtp/ssmtp.conf .
+ The file contains keyword-argument pairs, one per line.
+ Lines starting with
+ .Ql #
+@@ -23,7 +26,16 @@ The possible keywords and their meanings are as follows (both are case-insensiti
+ .Bl -tag -width Ds
+ .It Cm Root
+ The user that gets all mail for userids less than 1000. If blank, address rewriting is disabled.
++This keyword is invalid in the individual configuration file 
++.Pa ~/.ssmtprc
+ .Pp
++.It Cm EmailAddress
++This keyword is only valid in the individual configuration file
++.Pa ~/.ssmtprc .
++It sets the address placed on the From: field on the user's outgoing
++messages. When this keyword is set the reverse alias file
++.Pa /etc/ssmtp/revaliases
++is ignored.
+ .It Cm Mailhub
+ The host to send mail to, in the form
+ .Ar host No | Ar IP_addr No Oo : Ar port Oc .
+@@ -72,6 +84,10 @@ May also be set to
+ .It Pa /etc/ssmtp/ssmtp.conf
+ Contains configuration data for
+ .Nm ssmtp .
++.br
++.It Pa ~/.ssmtprc
++Contains individual configuration data for
++.Nm ssmtp .
+ .El
+ .Sh SEE ALSO
+ .Xr ssmtp 8
+-- 
+2.4.6
+

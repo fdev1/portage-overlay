@@ -1,0 +1,274 @@
+From 6b554136455b423fd47443e528f81aba10066bd5 Mon Sep 17 00:00:00 2001
+From: Fernando Rodriguez <frodriguez.developer@outlook.com>
+Date: Thu, 13 Aug 2015 23:23:03 -0400
+Subject: [PATCH] Fixed compile warnings with recent GCC
+
+This commit fixes the large number of warnings that are
+generated when compiling with a recent verssion of GCC.
+It does not affect behaviour and should generate the
+same binary.
+
+Tested with GCC 4.9.3
+---
+ base64.c |  2 +-
+ ssmtp.c  | 65 ++++++++++++++++++++++++++++++++--------------------------------
+ ssmtp.h  |  2 +-
+ 3 files changed, 34 insertions(+), 35 deletions(-)
+
+diff --git a/base64.c b/base64.c
+index ccdc732..e91ef33 100644
+--- a/base64.c
++++ b/base64.c
+@@ -31,7 +31,7 @@ static const char base64val[] = {
+ };
+ #define DECODE64(c)  (isascii(c) ? base64val[c] : BAD)
+ 
+-void to64frombits(unsigned char *out, const unsigned char *in, int inlen)
++void to64frombits(char *out, const unsigned char *in, int inlen)
+ /* raw bytes in quasi-big-endian order to base 64 string (NUL-terminated) */
+ {
+     for (; inlen >= 3; inlen -= 3)
+diff --git a/ssmtp.c b/ssmtp.c
+index e281f2f..849b6a0 100644
+--- a/ssmtp.c
++++ b/ssmtp.c
+@@ -60,21 +60,21 @@ bool_t use_oldauth = False;		/* use old AUTH LOGIN username style */
+ 
+ #define ARPADATE_LENGTH 32		/* Current date in RFC format */
+ char arpadate[ARPADATE_LENGTH];
+-char *auth_user = (char)NULL;
+-char *auth_pass = (char)NULL;
+-char *auth_method = (char)NULL;		/* Mechanism for SMTP authentication */
+-char *mail_domain = (char)NULL;
+-char *from = (char)NULL;		/* Use this as the From: address */
++char *auth_user = (char*)NULL;
++char *auth_pass = (char*)NULL;
++char *auth_method = (char*)NULL;		/* Mechanism for SMTP authentication */
++char *mail_domain = (char*)NULL;
++char *from = (char*)NULL;		/* Use this as the From: address */
+ char *hostname;
+ char *mailhost = "mailhub";
+-char *minus_f = (char)NULL;
+-char *minus_F = (char)NULL;
++char *minus_f = (char*)NULL;
++char *minus_F = (char*)NULL;
+ char *gecos;
+-char *prog = (char)NULL;
++char *prog = (char*)NULL;
+ char *root = NULL;
+ char *tls_cert = "/etc/ssl/certs/ssmtp.pem";	/* Default Certificate */
+-char *uad = (char)NULL;
+-char *config_file = (char)NULL;		/* alternate configuration file */
++char *uad = (char*)NULL;
++char *config_file = (char*)NULL;		/* alternate configuration file */
+ 
+ headers_t headers, *ht;
+ 
+@@ -265,7 +265,7 @@ char *strip_post_ws(char *str)
+ 
+ 	p = (str + strlen(str));
+ 	while(isspace(*--p)) {
+-		*p = (char)NULL;
++		*p = '\0';
+ 	}
+ 
+ 	return(p);
+@@ -291,7 +291,7 @@ char *addr_parse(char *str)
+ 		q++;
+ 
+ 		if((p = strchr(q, '>'))) {
+-			*p = (char)NULL;
++			*p = '\0';
+ 		}
+ 
+ #if 0
+@@ -314,7 +314,7 @@ char *addr_parse(char *str)
+ 	q = strip_post_ws(p);
+ 	if(*q == ')') {
+ 		while((*--q != '('));
+-		*q = (char)NULL;
++		*q = '\0';
+ 	}
+ 	(void)strip_post_ws(p);
+ 
+@@ -353,7 +353,6 @@ standardise() -- Trim off '\n's and double leading dots
+ */
+ bool_t standardise(char *str, bool_t *linestart)
+ {
+-	size_t sl;
+ 	char *p;
+ 	bool_t leadingdot = False;
+ 
+@@ -367,7 +366,7 @@ bool_t standardise(char *str, bool_t *linestart)
+ 	*linestart = False;
+ 
+ 	if((p = strchr(str, '\n'))) {
+-		*p = (char)NULL;
++		*p = '\0';
+ 		*linestart = True;
+ 	}
+ 	return(leadingdot);
+@@ -388,7 +387,7 @@ void revaliases(struct passwd *pw)
+ 		while(fgets(buf, sizeof(buf), fp)) {
+ 			/* Make comments invisible */
+ 			if((p = strchr(buf, '#'))) {
+-				*p = (char)NULL;
++				*p = '\0';
+ 			}
+ 
+ 			/* Ignore malformed lines and comments */
+@@ -523,7 +522,7 @@ void rcpt_save(char *str)
+ #endif
+ 
+ 	/* Ignore missing usernames */
+-	if(*str == (char)NULL) {
++	if(*str == '\0') {
+ 		return;
+ 	}
+ 
+@@ -580,7 +579,7 @@ void rcpt_parse(char *str)
+ 		}
+ 
+ 		/* End of string? */
+-		if(*(q + 1) == (char)NULL) {
++		if(*(q + 1) == '\0') {
+ 			got_addr = True;
+ 		}
+ 
+@@ -588,7 +587,7 @@ void rcpt_parse(char *str)
+ 		if((*q == ',') && (in_quotes == False)) {
+ 			got_addr = True;
+ 
+-			*q = (char)NULL;
++			*q = '\0';
+ 		}
+ 
+ 		if(got_addr) {
+@@ -680,7 +679,7 @@ void header_save(char *str)
+ 	if(strncasecmp(ht->string, "From:", 5) == 0) {
+ #if 1
+ 		/* Hack check for NULL From: line */
+-		if(*(p + 6) == (char)NULL) {
++		if(*(p + 6) == '\0') {
+ 			return;
+ 		}
+ #endif
+@@ -745,7 +744,7 @@ void header_parse(FILE *stream)
+ 	size_t size = BUF_SZ, len = 0;
+ 	char *p = (char *)NULL, *q;
+ 	bool_t in_header = True;
+-	char l = (char)NULL;
++	char l = '\0';
+ 	int c;
+ 
+ 	while(in_header && ((c = fgetc(stream)) != EOF)) {
+@@ -780,9 +779,9 @@ void header_parse(FILE *stream)
+ 						in_header = False;
+ 
+ 				default:
+-						*q = (char)NULL;
++						*q = '\0';
+ 						if((q = strrchr(p, '\n'))) {
+-							*q = (char)NULL;
++							*q = '\0';
+ 						}
+ 						header_save(p);
+ 
+@@ -813,9 +812,9 @@ void header_parse(FILE *stream)
+ 						in_header = False;
+ 
+ 				default:
+-						*q = (char)NULL;
++						*q = '\0';
+ 						if((q = strrchr(p, '\n'))) {
+-							*q = (char)NULL;
++							*q = '\0';
+ 						}
+ 						header_save(p);
+ 
+@@ -889,7 +888,7 @@ bool_t read_config()
+ 		char *rightside;
+ 		/* Make comments invisible */
+ 		if((p = strchr(buf, '#'))) {
+-			*p = (char)NULL;
++			*p = '\0';
+ 		}
+ 
+ 		/* Ignore malformed lines and comments */
+@@ -1146,7 +1145,7 @@ int smtp_open(char *host, int port)
+ 	/* Init SSL stuff */
+ 	SSL_CTX *ctx;
+ 	SSL_METHOD *meth;
+-	X509 *server_cert;
++	const X509 *server_cert;
+ 
+ 	SSL_load_error_strings();
+ 	SSLeay_add_ssl_algorithms();
+@@ -1341,7 +1340,7 @@ char *fd_gets(char *buf, int size, int fd)
+ 			buf[i++] = c;
+ 		}
+ 	}
+-	buf[i] = (char)NULL;
++	buf[i] = '\0';
+ 
+ 	return(buf);
+ }
+@@ -1540,7 +1539,7 @@ int ssmtp(char *argv[])
+ 		else {
+ #endif
+ 		memset(buf, 0, bufsize);
+-		to64frombits(buf, auth_user, strlen(auth_user));
++		to64frombits(buf, (unsigned char*)auth_user, strlen(auth_user));
+ 		if (use_oldauth) {
+ 			outbytes += smtp_write(sock, "AUTH LOGIN %s", buf);
+ 		}
+@@ -1552,7 +1551,7 @@ int ssmtp(char *argv[])
+ 			}
+ 			/* we assume server asked us for Username */
+ 			memset(buf, 0, bufsize);
+-			to64frombits(buf, auth_user, strlen(auth_user));
++			to64frombits(buf, (unsigned char*)auth_user, strlen(auth_user));
+ 			outbytes += smtp_write(sock, buf);
+ 		}
+ 
+@@ -1562,7 +1561,7 @@ int ssmtp(char *argv[])
+ 		}
+ 		memset(buf, 0, bufsize);
+ 
+-		to64frombits(buf, auth_pass, strlen(auth_pass));
++		to64frombits(buf, (unsigned char*)auth_pass, strlen(auth_pass));
+ #ifdef MD5AUTH
+ 		}
+ #endif
+@@ -1644,7 +1643,7 @@ int ssmtp(char *argv[])
+ 		outbytes += smtp_write(sock, "From: %s", from);
+ 	}
+ 
+-	if(remote_addr=getenv("REMOTE_ADDR")) {
++	if((remote_addr=getenv("REMOTE_ADDR"))) {
+ 		outbytes += smtp_write(sock, "X-Originating-IP: %s", remote_addr);
+ 	}
+ 
+@@ -1773,7 +1772,7 @@ char **parse_options(int argc, char *argv[])
+ 		j = 0;
+ 
+ 		add = 1;
+-		while(argv[i][++j] != (char)NULL) {
++		while(argv[i][++j] != '\0') {
+ 			switch(argv[i][j]) {
+ #ifdef INET6
+ 			case '6':
+diff --git a/ssmtp.h b/ssmtp.h
+index d30ffcb..c5bede1 100644
+--- a/ssmtp.h
++++ b/ssmtp.h
+@@ -41,5 +41,5 @@ typedef struct string_list rcpt_t;
+ void get_arpadate(char *);
+ 
+ /* base64.c */
+-void to64frombits(unsigned char *, const unsigned char *, int);
++void to64frombits(char *, const unsigned char *, int);
+ int from64tobits(char *, const char *);
+-- 
+2.4.6
+
