@@ -55,6 +55,7 @@ src_prepare() {
 		epatch
 	epatch "${FILESDIR}/ssmtp-2.64-gcc49-cleanup.patch"
 	epatch "${FILESDIR}/ssmtp-2.64-ssmtprc.patch"
+	epatch "${FILESDIR}/ssmtp-2.64-sshaskpass.patch"
 	epatch_user
 
 	# let's start by not using configure.in anymore as future autoconf
