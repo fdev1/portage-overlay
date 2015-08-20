@@ -6,7 +6,6 @@ EAPI="4"
 
 WANT_AUTOMAKE=none
 
-
 DESCRIPTION="Extremely simple yet flexible MTA to get mail off the system."
 HOMEPAGE="https://github.com/fernando-rodriguez/ssmtp-reloaded"
 
@@ -16,7 +15,6 @@ if [[ ${PV} == 9999* ]]; then
 		"https://github.com/fernando-rodriguez/ssmtp-reloaded.git"
 		"git://github.com/fernando-rodriguez/ssmtp-reloaded.git" )
 	KEYWORDS=""
-
 else
 	inherit eutils autotools user
 	SRC_URI="https://github.com/fernando-rodriguez/${PN}/archive/${PV}.tar.gz -> ssmtp-reloaded-${PV}.tar.gz"
@@ -57,14 +55,6 @@ pkg_setup() {
 		enewgroup ssmtp
 	fi
 }
-
-#src_unpack() {
-#	if [[ ${PV} == 9999* ]]; then
-#		
-#	else
-#		default
-#	fi
-#}
 
 src_prepare() {
 	epatch_user
