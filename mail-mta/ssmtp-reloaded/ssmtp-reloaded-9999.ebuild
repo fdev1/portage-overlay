@@ -58,10 +58,6 @@ pkg_setup() {
 
 src_prepare() {
 	epatch_user
-	if use prefix; then
-		sed -ie '/\$(GROUPADD)/d' Makefile.in || die
-		sed -ie 's/--group=ssmtp//g' Makefile.in || die
-	fi
 	eautoconf
 }
 
@@ -80,4 +76,12 @@ src_install() {
 	fi
 	dodoc ChangeLog CHANGELOG_OLD INSTALL README TLS
 	newdoc ssmtp.lsm DESC
+	if ! use prefix; then
+        fowners root:ssmtp /etc/ssmtp/ssmtp.conf
+		fowners root:ssmtp /var/lib/ssmtp/queue
+        fperms 640 /etc/ssmtp/ssmtp.conf
+		fperms 770 /var/lib/ssmtp/queue
+        fowners root:ssmtp /usr/sbin/ssmtp
+        fperms 2711 /usr/sbin/ssmtp
+    fi  
 }
