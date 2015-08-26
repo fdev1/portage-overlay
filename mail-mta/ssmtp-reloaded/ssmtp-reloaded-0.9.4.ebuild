@@ -64,8 +64,7 @@ src_prepare() {
 src_configure() {
 	econf \
 		$(use_enable ssl) $(use_with gnutls) \
-		$(use_enable ipv6 inet6) \
-		--enable-md5auth
+		$(use_enable ipv6 inet6)
 }
 
 src_install() {
