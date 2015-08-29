@@ -198,10 +198,10 @@ multilib_src_install() {
 		cd "${BUILD_DIR}-narrowc-tinfo/misc" || die
 		chmod +x gen-pkgconfig || die
 		./gen-pkgconfig || die
-		find "${BUILD_DIR}-narrowc-tinfo/lib/." -name 'libtinfo*' \
-			-exec mv '{}' "${ED}/usr/$(get_libdir)/" \; || die
-		find "${BUILD_DIR}-narrowc-tinfo/misc/." -name 'tinfo*' \
-			-exec mv '{}' "${ED}/usr/$(get_libdir)/pkgconfig/" \; || die
+		find "${BUILD_DIR}-narrowc-tinfo/lib" -name 'libtinfo*' \
+			-maxdepth 1 -mindepth 1 -exec mv '{}' "${ED}/usr/$(get_libdir)/" \; || die
+		find "${BUILD_DIR}-narrowc-tinfo/misc" -name 'tinfo*' \
+			-maxdepth 1 -mindepth 1 -exec mv '{}' "${ED}/usr/$(get_libdir)/pkgconfig/" \; || die
 	fi
 	if use unicode ; then
 		cd "${BUILD_DIR}"-widec || die
@@ -210,10 +210,10 @@ multilib_src_install() {
 			cd "${BUILD_DIR}-widec-tinfo/misc" || die
 			chmod +x gen-pkgconfig || die
 			./gen-pkgconfig || die
-			find "${BUILD_DIR}-widec-tinfo/lib/." -name 'libtinfo*' \
-				-exec mv '{}' "${ED}/usr/$(get_libdir)/" \; || die
-			find "${BUILD_DIR}-widec-tinfo/misc/." -name 'tinfo*' \
-				-exec mv '{}' "${ED}/usr/$(get_libdir)/pkgconfig/" \; || die
+			find "${BUILD_DIR}-widec-tinfo/lib" -name 'libtinfo*' \
+				-maxdepth 1 -mindepth 1 -exec mv '{}' "${ED}/usr/$(get_libdir)/" \; || die
+			find "${BUILD_DIR}-widec-tinfo/misc" -name 'tinfo*' \
+				-maxdepth 1 -mindepth 1 -exec mv '{}' "${ED}/usr/$(get_libdir)/pkgconfig/" \; || die
 		fi
 	fi
 
