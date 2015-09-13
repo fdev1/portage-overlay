@@ -313,6 +313,8 @@ src_prepare() {
 	epatch "${FILESDIR}/ati-drivers-cr4.patch"
 	#epatch "${FILESDIR}/ati-drivers-license.patch"
 	epatch "${FILESDIR}/dont-use-gpl-symbols.patch"
+	epatch "${FILESDIR}/ati-drivers-kcl-str.patch"
+	epatch "${FILESDIR}/ati-drivers-linux4-fpu.patch"
 
 	epatch_user
 
