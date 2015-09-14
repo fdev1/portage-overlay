@@ -1,34 +1,15 @@
 --- a/common/lib/modules/fglrx/build_mod/firegl_public.c	2015-09-14 15:14:36.000000000 -0400
-+++ b/common/lib/modules/fglrx/build_mod/firegl_public.c	2015-09-14 15:25:38.000000000 -0400
-@@ -634,9 +634,9 @@ static int firegl_major_proc_read(char *
- static int firegl_major_proc_read(struct seq_file *m, void* data)
- #endif
- {
--    int len = 0;    // For ProcFS: fill buf from the beginning
- 
- #if LINUX_VERSION_CODE < KERNEL_VERSION(3,10,0)
-+    int len = 0;    // For ProcFS: fill buf from the beginning
-     KCL_DEBUG1(FN_FIREGL_PROC, "offset %d\n", (int)offset);
- 
-     if (offset > 0) 
-@@ -650,12 +650,16 @@ static int firegl_major_proc_read(struct
++++ b/common/lib/modules/fglrx/build_mod/firegl_public.c	2015-09-14 16:01:30.000000000 -0400
+@@ -650,8 +650,12 @@ static int firegl_major_proc_read(struct
  
      len = snprintf(buf, request, "%d\n", major);
  #else
--    len = seq_printf(m, "%d\n", major);
--#endif
--
 +#if LINUX_VERSION_CODE >= KERNEL_VERSION(4,3,0)
 +    seq_printf(m, "%d\n", major);
-+    return 0;
 +#else
-+    int len = seq_printf(m, "%d\n", major);
-     KCL_DEBUG1(FN_FIREGL_PROC, "return len=%i\n",len);
--
-     return len;
+     len = seq_printf(m, "%d\n", major);
+ #endif
 +#endif
-+#endif
-+
- }
  
- #if LINUX_VERSION_CODE >= KERNEL_VERSION(3,10,0)
+     KCL_DEBUG1(FN_FIREGL_PROC, "return len=%i\n",len);
+ 
