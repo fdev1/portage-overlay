@@ -315,6 +315,7 @@ src_prepare() {
 	epatch "${FILESDIR}/dont-use-gpl-symbols.patch"
 	epatch "${FILESDIR}/ati-drivers-kcl-str.patch"
 	epatch "${FILESDIR}/ati-drivers-linux4-fpu.patch"
+	epatch "${FILESDIR}/ati-drivers-linux43-seq_printf.patch"
 
 	epatch_user
 
