@@ -27,13 +27,19 @@ src_install()
 {
 	addpredict /var/cache/samba/gencache.tdb
 
+	# update shebangs to use Python 2.7 (bootstrapping)
+	einfo "Fixing python shebangs for bootstrapping..."
+	find "${S}/bin/bootstrapping" -name '*.py' -type f -exec sed -i \
+		-e '1,/RE/s:^#!/usr/bin/env python$:#!/usr/bin/env python2.7:g' '{}' \;
+
+	# run install script script
 	einfo "Running install script..."
 	bin/bootstrapping/install.py || die
 
 	# update shebangs to use Python 2.7
 	einfo "Fixing python shebangs..."
-	find "${S}" -name '*.py' -type f -exec \
-		sed -i -e 's:#!/usr/bin/env python:#!/usr/bin/env python2.7:g' '{}' \;
+	find "${S}" -name '*.py' -type f -exec sed -i \
+		-e '1,/RE/s:^#!/usr/bin/env python$:#!/usr/bin/env python2.7:' '{}' \;
 
 	# install documents
 	dodoc "${S}/LICENSE"
@@ -46,6 +52,8 @@ src_install()
 	rm "${S}/LICENSE" || die
 	rm "${S}/README" || die
 	rm "${S}/RELEASE_NOTES" || die
+	rm -r "${S}/.install" || die
+	rm -r "${S}/bin/bootstrapping" || die
 
 	# disable usage reporting by default
 	sed -i -e 's/disable_usage_reporting = False/disable_usage_reporting = True/g' \
@@ -76,7 +84,11 @@ src_install()
 
 pkg_postinst()
 {
-	ewarn "Before you can use Google Cloud SDK you must run: "
+	echo
+	ewarn "Before you can use Google Cloud SDK you must run:"
 	ewarn "source /etc/profile"
+	echo
+	ewarn "To update Google Cloud SDK just run:"
+	ewarn "emerge --oneshot dev-util/google-cloud-sdk"
 	echo
 }
