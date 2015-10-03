@@ -23,6 +23,16 @@ MERGEDIR="opt/${PN}-php/"
 src_install()
 {
 	dodir "${MERGEDIR}"
+	insinto "${MERGEDIR}"
+	insopts --mode=755
+	doins "${FILESDIR}/google-app-engine-php"
+	dosym /opt/google-app-engine-php/google-app-engine-php /usr/bin/google-app-engine-php
 	find "${S}" -maxdepth 1 -mindepth 1 \
 		-exec mv '{}' "${ED}/${MERGEDIR}" \;
+}
+
+pkg_postinst()
+{
+	einfo "To start a shell with the google app engine enabled run:"
+	einfo "google-app-engine-php"
 }

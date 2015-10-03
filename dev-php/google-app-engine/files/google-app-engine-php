@@ -1,0 +1,5 @@
+#!/bin/bash
+
+PATH=$PATH:/opt/google-app-engine-php
+PSX="\[\033]0;\u@\h:\w\007\]\[\033[01;33m\]google-app-engine-php\[\033[01;34m\] \w \$\[\033[00m\] "
+exec /bin/bash --rcfile <(cat ~/.bashrc; echo "PS1=\"${PSX}\"";)
