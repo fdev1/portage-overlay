@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "http://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<longdescription>Google Cloud SDK</longdescription>
+	<use>
+		<flag name="zsh">Add support for the zsh shell</flag>
+		<flag name="bashcomp">Add bash completion support</flag>
+	</use>
+</pkgmetadata>
