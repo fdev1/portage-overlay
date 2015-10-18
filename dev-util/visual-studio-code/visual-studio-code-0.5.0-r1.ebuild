@@ -1,6 +1,6 @@
-# Copyright 2015 Fernando Rodriguez
+# Copyright 1999-2015 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: $
+# $Id$
 
 EAPI=5
 
@@ -45,7 +45,6 @@ RDEPEND="${DEPEND}
 	>=net-print/cups-2.0.3
 	>=sys-apps/dbus-1.8.16
 	>=sys-apps/keyutils-1.5.9
-	>=sys-devel/gcc-5.1.0
 	>=sys-libs/e2fsprogs-libs-1.42.13
 	>=sys-libs/glibc-2.20
 	>=sys-libs/zlib-1.2.8
@@ -77,8 +76,8 @@ QA_PREBUILT="opt/${P}/*"
 src_unpack()
 {
 	mkdir -p "${S}" || die
-	unzip -q "${DISTDIR}"/"${A}" -d "${S}" || die
-	mv "${S}"/"${A%%-$PV.zip}" "${S}"/files || die
+	unzip -q "${DISTDIR}"/${A} -d "${S}" || die
+	mv "${S}"/${A%%-$PV.zip} "${S}"/files || die
 }
 
 src_install()
@@ -92,7 +91,7 @@ src_install()
 	# unbundle libs
 	rm "${S}"/files/libnotify.so.4 || die
 	rm "${S}"/files/libgcrypt.so.11 || die
-	ln -s ../../usr/$(get_libdir)/libgcrypt.so.11 "${S}"/files/libgcrypt.so.11 || die
+	ln -s ../../usr/$(get_libdir)/libgcrypt.so "${S}"/files/libgcrypt.so.11 || die
 
 	# unbundle chromium files
 	if use chromium-libs; then
