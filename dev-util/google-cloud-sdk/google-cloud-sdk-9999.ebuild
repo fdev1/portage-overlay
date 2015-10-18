@@ -12,7 +12,7 @@ SRC_URI="https://dl.google.com/dl/cloudsdk/channels/rapid/google-cloud-sdk.tar.g
 
 LICENSE="Apache-2.0"
 SLOT="0"
-KEYWORDS=""
+KEYWORDS="~*"
 IUSE="zsh +bashcomp"
 
 DEPEND="dev-lang/python:2.7
