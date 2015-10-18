@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "http://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<longdescription>Open source software for numerical computation</longdescription>
+	<use>
+		<flag name="system-jre">Use system JRE or JDK (unbundle)</flag>
+	</use>
+</pkgmetadata>

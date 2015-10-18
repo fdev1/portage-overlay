@@ -1,6 +1,6 @@
-# Copyright 2015 Fernando Rodriguez 
+# Copyright 1999-2015 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: $
+# $Id$
 
 EAPI=5
 
@@ -10,12 +10,42 @@ SRC_URI="
 	x86? ( http://www.scilab.org/download/5.5.2/scilab-5.5.2.bin.linux-i686.tar.gz )
 	amd64? ( http://www.scilab.org/download/5.5.2/scilab-5.5.2.bin.linux-x86_64.tar.gz )"
 
-LICENSE="CeCILL"
+LICENSE="CeCILL-2"
 SLOT="0"
-KEYWORDS="x86 amd64"
+KEYWORDS="~x86 ~amd64"
 IUSE="+system-jre"
 
-DEPEND=""
+DEPEND="
+	dev-libs/openssl:0.9.8
+	dev-libs/openssl:0
+	app-arch/bzip2
+	app-crypt/mit-krb5
+	dev-lang/tcl:0
+	dev-lang/tk:0
+	dev-libs/expat
+	dev-libs/icu
+	dev-libs/libpcre
+	dev-libs/libxml2
+	media-libs/fontconfig
+	media-libs/freetype
+	media-libs/libpng:0
+	net-misc/curl
+	net-nds/openldap
+	sci-libs/fftw:3.0
+	sys-apps/keyutils
+	>=sys-devel/llvm-3.5.0
+	>=sys-libs/e2fsprogs-libs-1.42.13
+	sys-libs/ncurses:5/5
+	sys-libs/zlib
+	x11-libs/libX11
+	x11-libs/libXau
+	x11-libs/libxcb
+	x11-libs/libXdmcp
+	x11-libs/libXext
+	x11-libs/libXft
+	x11-libs/libXrender
+	x11-libs/libXScrnSaver
+"
 RDEPEND="${DEPEND}
 	system-jre? ( || ( >=dev-java/oracle-jre-bin-1.6.0.41 >=dev-java/oracle-jdk-bin-1.6.0.41 ) )"
 QA_PREBUILT="opt/${P}/*"
@@ -65,26 +95,26 @@ src_install()
 
 	if use system-jre; then
 		cat >> find-jre << "EOF"
-        for f in $(ls /opt); do 
-                n=${f%-*}
-                if [ "$n" == "oracle-jdk-bin" ]; then 
-                        JAVA_HOME=/opt/$f
-                        JRE_HOME=/opt/$f/jre
-                elif [ "$n" == "oracle-jre-bin" ]; then 
-                        JAVA_HOME=/opt/$f
-                        JRE_HOME=/opt/$f
-                fi   
-        done 
+for f in $(ls /opt); do
+		n=${f%-*}
+		if [ "$n" == "oracle-jdk-bin" ]; then
+				JAVA_HOME=/opt/$f
+				JRE_HOME=/opt/$f/jre
+		elif [ "$n" == "oracle-jre-bin" ]; then
+				JAVA_HOME=/opt/$f
+				JRE_HOME=/opt/$f
+		fi
+done
 EOF
 		rm -r "${ED}"/opt/"${P}"/thirdparty/java || die
-		
+
 		mv "${ED}"/opt/"${P}"/bin/scilab scilab.orig || die
 		sed '/# Check if the lib exists or not/,$d' scilab.orig > scilab || die
 		cat find-jre >> scilab || die
 		sed -n '/^# Check if the lib exists or not/,$p' scilab.orig >> scilab || die
 		chmod 0755 scilab || die
 		mv scilab "${ED}"/opt/"${P}"/bin || die
-		
+
 		mv "${ED}"/opt/"${P}"/bin/scinotes scinotes.orig || die
 		sed '/# Check if the lib exists or not/,$d' scinotes.orig > scinotes || die
 		cat find-jre >> scinotes || die
