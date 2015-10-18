@@ -1,7 +1,6 @@
 # Copyright 1999-2015 Gentoo Foundation
-# Copyright 2015 Fernando Rodriguez
 # Distributed under the terms of the GNU General Public License v2
-# $Header: $
+# $Id$
 
 EAPI=5
 
@@ -96,7 +95,7 @@ src_install()
 	insopts --owner=root --group=root --mode=644
 	insinto "/usr/share/icons"
 	doins "${S}/popcorntime.png"
-	
+
 	# install menu item
 	echo "[Desktop Entry]" > Popcorn-Time.desktop || die
 	echo "Name=Popcorn Time" >> Popcorn-Time.desktop || die
