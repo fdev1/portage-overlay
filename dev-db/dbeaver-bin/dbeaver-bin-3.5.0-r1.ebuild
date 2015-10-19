@@ -65,7 +65,7 @@ src_install()
 	dosym "/opt/${P}/dbeaver" /usr/bin/dbeaver
 
 	# copy icon
-	mv "${FILESDIR}/icon.xpm" "${ED}/opt/${P}/icon.xpm"
+	cp "${FILESDIR}/icon.xpm" "${ED}/opt/${P}/icon.xpm"
 
 	# install desktop entry
 	echo "[Desktop Entry]" > "${T}/dbeaver.desktop" || die
