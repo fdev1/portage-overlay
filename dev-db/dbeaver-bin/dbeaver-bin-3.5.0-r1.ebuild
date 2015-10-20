@@ -72,8 +72,8 @@ src_install()
 	echo "Name=DBeaver" >> "${T}/dbeaver.desktop" || die
 	echo "GenericName=Free Universal Database Manager" >> "${T}/dbeaver.desktop" || die
 	echo "Comment=Free Universal Database Manager" >> "${T}/dbeaver.desktop" || die
-	echo "Icon=${EROOT}/opt/${P}/icon.xpm" >> "${T}/dbeaver.desktop" || die
-	echo "Exec=${EROOT}/opt/${P}/dbeaver" >> "${T}/dbeaver.desktop" || die
+	echo "Icon=${EROOT}opt/${P}/icon.xpm" >> "${T}/dbeaver.desktop" || die
+	echo "Exec=${EROOT}opt/${P}/dbeaver" >> "${T}/dbeaver.desktop" || die
 	echo "StartupNotify=true" >> "${T}/dbeaver.desktop" || die
 	echo "Terminal=false" >> "${T}/dbeaver.desktop" || die
 	echo "Type=Application" >> "${T}/dbeaver.desktop" || die
