@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "http://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<longdescription>MPLAB X Integrated Development Environment (IDE)</longdescription>
+	<use>
+		<flag name="system-jre">Use system-wide JRE instead of bundled one</flag>
+	</use>
+</pkgmetadata>
