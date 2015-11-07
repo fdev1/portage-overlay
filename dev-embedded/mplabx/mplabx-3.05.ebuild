@@ -1,7 +1,6 @@
 # Copyright 1999-2015 Gentoo Foundation
-# Copyright 2015 Fernando Rodriguez
 # Distributed under the terms of the GNU General Public License v2
-# $Header: $
+# $Id$
 
 EAPI=5
 
@@ -12,7 +11,7 @@ HOMEPAGE="http://www.microchip.com/pagehandler/en-us/family/mplabx/"
 SRC_URI="http://ww1.microchip.com/downloads/en/DeviceDoc/MPLABX-v3.05-linux-installer.tar"
 RESTRICT="mirror userpriv strip"
 
-LICENSE="MICROCHIP"
+LICENSE="MPLABX"
 SLOT="0"
 KEYWORDS="x86 amd64"
 IUSE="+system-jre"
@@ -82,7 +81,7 @@ src_install()
 	chroot_add_libs libc.so.6 libdl.so.2 libm.so.6 libnsl.so.1 libreadline.so.6 \
 		libncurses.so.5 libacl.so.1 libattr.so.1 libpthread.so.0 libnss_compat.so.2
 	chroot_mv MPLABX-v3.05-linux-installer.run /tmp
-		
+
 	if [ $VERBOSE == 1 ]; then
 		echo -e "\n\n\n\n\n\n\n\n\n\nY\n\nY\nY\n\nY\nN\nN\nN\nN\nN\n" > answers || die
 		chroot_mv answers /tmp
@@ -109,7 +108,7 @@ src_install()
 	rm -f chroot/etc/mplabx/mchplinusbdevice || die
 	ln -s ../../"${MPLABCOMMDIR}"/lib/mchplinusbdevice chroot/etc/mplabx/mchplinusbdevice || die
 	ln -s mplabx chroot/etc/.mplab_ide || die
-	
+
 	sed -i \
 		-e "s/.png//g" \
 		-e "s/Application;Development;Programming;/Electronics;Development;IDE;/g" \
