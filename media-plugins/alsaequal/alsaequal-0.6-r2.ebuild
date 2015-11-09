@@ -44,4 +44,4 @@ SND_CTL_LIBS="-lasound" || die
 multilib_src_install() {
 exeinto /usr/$(get_libdir)/alsa-lib
 doexe *.so || die
-} 
+}
