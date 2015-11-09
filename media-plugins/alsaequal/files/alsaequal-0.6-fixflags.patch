@@ -1,0 +1,29 @@
+--- /root/ctl_equal.c	2015-11-08 14:58:27.000000000 -0500
++++ ctl_equal.c	2015-11-08 15:01:32.000000000 -0500
+@@ -263,7 +263,8 @@ SND_CTL_PLUGIN_DEFINE_FUNC(equal)
+ 	for(i = 0; i < equal->num_input_controls; i++) {
+ 		if(equal->control_data->control[i].type == LADSPA_CNTRL_INPUT) {
+ 			index = equal->control_data->control[i].index;
+-			if(equal->klass->PortDescriptors[index] !=
++			if((equal->klass->PortDescriptors[index] &
++					(LADSPA_PORT_INPUT | LADSPA_PORT_CONTROL)) !=
+ 					(LADSPA_PORT_INPUT | LADSPA_PORT_CONTROL)) {
+ 				SNDERR("Problem with control file %s, %d.", controls, index);
+ 				return -1;
+@@ -284,12 +285,14 @@ SND_CTL_PLUGIN_DEFINE_FUNC(equal)
+ 	}
+ 
+ 	/* Make sure that the control file makes sense */
+-	if(equal->klass->PortDescriptors[equal->control_data->input_index] !=
++	if((equal->klass->PortDescriptors[equal->control_data->input_index] &
++			(LADSPA_PORT_INPUT | LADSPA_PORT_AUDIO)) !=
+ 			(LADSPA_PORT_INPUT | LADSPA_PORT_AUDIO)) {
+ 		SNDERR("Problem with control file %s.", controls);
+ 		return -1;
+ 	}
+-	if(equal->klass->PortDescriptors[equal->control_data->output_index] !=
++	if((equal->klass->PortDescriptors[equal->control_data->output_index] &
++			(LADSPA_PORT_OUTPUT | LADSPA_PORT_AUDIO)) !=
+ 			(LADSPA_PORT_OUTPUT | LADSPA_PORT_AUDIO)) {
+ 		SNDERR("Problem with control file %s.", controls);
+ 		return -1;
