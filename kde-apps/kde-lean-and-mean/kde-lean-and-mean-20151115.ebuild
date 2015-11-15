@@ -9,7 +9,7 @@ HOMEPAGE="https://google.com"
 
 LICENSE="MIT"
 SLOT="0"
-KEYWORDS="~x86 ~amd64"
+KEYWORDS="-* ~x86 ~amd64"
 IUSE="+kdm +multimedia"
 
 DEPEND="
@@ -31,7 +31,7 @@ DEPEND="
 	kde-apps/kdenetwork-filesharing
 	kde-apps/kgamma
 	kde-apps/kget
-	kde-apps/kmix:*
+	kde-apps/kmix:*[alsa]
 	kde-apps/kmplot
 	kde-apps/kppp
 	kde-apps/krdc
@@ -55,9 +55,17 @@ DEPEND="
 	kde-apps/zeroconf-ioslave
 
 	multimedia? (
+		media-sound/clementine[skydrive,googledrive,dropbox,ipod,lastfm,moodbar,ubuntu-one]
+		media-sound/clementine[mtp,system-sqlite,wiimote,box,mms]
 		media-video/cheese
-		media-video/ffmpeg
-		media-video/vlc
+		>=media-video/ffmpeg-2.8[theora,jpeg2k,vaapi,vdpau,amr,vpx,threads,openssl]
+		>=media-video/ffmpeg-2.8[celt,schroedinger,bs2b,amrenc,fontconfig,gme,libass,libv4l,lzma]
+		>=media-video/ffmpeg-2.8[wavpack,zvbi,x265,speex,quvi,opus,ladspa,gsm,aacplus]
+		>=media-video/ffmpeg-2.8[modplug,webp,snappy,fribidi,frei0r]
+		media-video/vlc[alsa,faad,mtp,ncurses,rtsp,samba,schroedinger,taglib]
+		media-video/vlc[theora,vdpau,vaapi,libsamplerate,postproc,qt5]
+		media-video/vlc[upnp,musepack,vlm,vpx,zvbi,vcdx,speex,shout,opus,omxil]
+		media-video/vlc[libass,aalib,libsamplerate,directfb,x265,sid,fontconfig]
 		kde-apps/kdenlive:*
 	)
 "
