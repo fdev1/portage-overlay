@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "http://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<longdescription>Like kde-meta but without the crap</longdescription>
+	<use>
+		<flag name="kdm">Install kdm</flag>
+		<flag name="multimedia">Install multimedia extras (non-KDE)</flag>
+	</use>
+</pkgmetadata>
