@@ -64,7 +64,7 @@ DEPEND="
 		>=media-video/ffmpeg-2.8[modplug,webp,snappy,fribidi,frei0r]
 		media-video/vlc[alsa,faad,mtp,ncurses,rtsp,samba,schroedinger,taglib]
 		media-video/vlc[theora,vdpau,vaapi,libsamplerate,postproc,qt5]
-		media-video/vlc[upnp,musepack,vlm,vpx,zvbi,vcdx,speex,shout,opus,omxil]
+		media-video/vlc[upnp,musepack,vlm,vpx,zvbi,vcdx,speex,shout,omxil]
 		media-video/vlc[libass,aalib,libsamplerate,directfb,x265,sid,fontconfig]
 		kde-apps/kdenlive:*
 	)
