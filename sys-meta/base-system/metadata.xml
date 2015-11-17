@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "http://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<longdescription>Base system meta-package</longdescription>
+	<use>
+		<flag name="alsa">Install ALSA support</flag>
+		<flag name="multimedia">Install multimedia extras</flag>
+	</use>
+</pkgmetadata>
