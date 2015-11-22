@@ -1,15 +1,16 @@
-# Copyright 2015 Fernando Rodriguez 
+# Copyright 1999-2015 Gentoo Foundation 
 # Distributed under the terms of the GNU General Public License v2
-# $Header: $
+# $Id$
 
 EAPI=5
 
 DESCRIPTION="Fernan's Theme Collection"
 HOMEPAGE="https://github.com/fernando-rodriguez/themes"
-SRC_URI="https://github.com/fernando-rodriguez/themes/archive/${PV}.tar.gz -> fernan-themes-${PV}.tar.gz"
+#SRC_URI="https://github.com/fernando-rodriguez/themes/archive/${PV}.tar.gz -> fernan-themes-${PV}.tar.gz"
+SRC_URI="https://codeload.github.com/fernando-rodriguez/themes/tar.gz/${PV} -> fernan-themes-${PV}.tar.gz"
 RESTRICT="primaryuri"
 
-LICENSE="WTFPL"
+LICENSE="WTFPL-2"
 SLOT="0"
 KEYWORDS="x86 amd64"
 IUSE="grub2 kde kdm plymouth"
@@ -52,9 +53,12 @@ src_install()
 			-exec mv '{}' "${ED}"/usr/share/apps/ksplash/Themes \; || die
 
 		# install kde4 themes
-		mkdir -p "${ED}"/usr/share/apps/desktoptheme || die
-		find "${S}"/kde4 -maxdepth 1 -mindepth 1 \
-			-exec mv '{}' "${ED}"/usr/share/apps/desktoptheme \; || die
+		mkdir -p "${ED}/usr/share/apps/desktoptheme" || die
+		mkdir -p "${ED}/usr/share/apps/aurorae/themes" || die
+		find "${S}/kde4" -maxdepth 1 -mindepth 1 \
+			-exec mv '{}' "${ED}/usr/share/apps/desktoptheme" \; || die
+		find "${S}/kde" -maxdepth 1 -mindepth 1 \
+			-exec mv '{}' "${ED}/usr/share/apps/aurorae/themes" \; || die
 	fi
 
 	if use plymouth; then
