@@ -1,6 +1,6 @@
 # Copyright 1999-2015 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Header: $
+# $Id$
 
 EAPI=5
 
@@ -55,11 +55,15 @@ src_install()
 	find "${S}"/eclipse/features -type f -exec chmod 0664 '{}' \; || die
 	find "${S}"/eclipse/features -exec chown root:eclipse '{}' \; || die
 
+	# install icon
+	mkdir -p "${ED}/usr/share/icons" || die
+	cp "${S}/eclipse/icon.xpm" "${ED}/usr/share/icons/eclipse.xpm" || die
+
 	# docs
 	#mkdir -p "${ED}"/usr/share/doc/"${P}"
 	#mv "${S}"/eclipse/readme/readme_eclipse.html "${S}"/usr/share/doc/"${P}" || die
 	#rm "${S}"/eclipse/readme || die
-	
+
 	# install it
 	mv "${S}"/eclipse "${ED}"/opt/"${P}" || die
 	ln -s "${EROOT}"/opt/"${P}"/eclipse "${ED}"/usr/bin/eclipse || die
@@ -69,7 +73,7 @@ src_install()
 	echo "Name=Eclipse Mars" >> eclipse.desktop || die
 	echo "GenericName=Eclipse IDE for Java Developers" >> eclipse.desktop || die
 	echo "Comment=Eclipse IDE for Java Developers" >> eclipse.desktop || die
-	echo "Icon=${EROOT}/opt/${P}/icon.xpm" >> eclipse.desktop || die
+	echo "Icon=eclipse" >> eclipse.desktop || die
 	echo "Exec=/usr/bin/eclipse" >> eclipse.desktop || die
 	echo "StartupNotify=true" >> eclipse.desktop || die
 	echo "Terminal=false" >> eclipse.desktop || die
