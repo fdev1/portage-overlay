@@ -13,7 +13,7 @@ RESTRICT="primaryuri"
 LICENSE="WTFPL-2"
 SLOT="0"
 KEYWORDS="x86 amd64"
-IUSE="grub2 kde kdm plymouth"
+IUSE="grub2 kde kdm plymouth +icons"
 
 DEPEND="
 	grub2? ( sys-boot/grub:2 )
@@ -57,8 +57,14 @@ src_install()
 		mkdir -p "${ED}/usr/share/apps/aurorae/themes" || die
 		find "${S}/kde4" -maxdepth 1 -mindepth 1 \
 			-exec mv '{}' "${ED}/usr/share/apps/desktoptheme" \; || die
-		find "${S}/kde" -maxdepth 1 -mindepth 1 \
+		find "${S}/kwin" -maxdepth 1 -mindepth 1 \
 			-exec mv '{}' "${ED}/usr/share/apps/aurorae/themes" \; || die
+	fi
+
+	if use icons; then
+		mkdir -p "${ED}/usr/share/icons"
+		find "${S}/icons" -maxdepth 1 -mindepth 1 \
+			-exec mv '{}' "${ED}/usr/share/icons" \; || die
 	fi
 
 	if use plymouth; then
