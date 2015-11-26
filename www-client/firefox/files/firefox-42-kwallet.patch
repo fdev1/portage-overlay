@@ -1,0 +1,94 @@
+--- a/security/manager/ssl/nsNSSCallbacks.cpp	2015-11-23 15:13:22.000000000 -0500
++++ b/security/manager/ssl/nsNSSCallbacks.cpp	2015-11-25 19:55:22.000000000 -0500
+@@ -783,6 +783,78 @@ private:
+   nsIInterfaceRequestor* const mIR; // in
+ };
+ 
++#include <unistd.h>
++#include <sys/types.h>
++#include <sys/wait.h>
++#include <string.h>
++#include <errno.h>
++
++static int SshAskPassword(char **password)
++{
++  int fd_pipe[2];
++  pid_t pid;
++  if (pipe(fd_pipe) == -1)
++  {
++    fprintf(stderr, "SshAskPassword() -- pipe() failed!\n");
++    return -1;
++  }
++  if((pid = fork()) == -1)
++  {
++    fprintf(stderr, "SshAskPassword() -- fork() failed!\n");
++    return -1;
++  }
++  else if(pid == 0)
++  {
++    char *pw_cmd = (char*) strdup("/usr/bin/ksshaskpass");
++    char *pw_conv = (char*) strdup("Firefox/Software Security Device");
++    char *const args[] = { pw_cmd, pw_conv, NULL };
++    if (dup2(fd_pipe[1], STDOUT_FILENO) == -1)
++    {
++      fprintf(stderr, "SshAskPassword() -- dup2() failed!\n");
++      exit(-1);
++    }
++    close(fd_pipe[0]);
++    execv(pw_cmd, args);
++    fprintf(stderr, "SshAskPassword() -- execv() failed!\n");
++    exit(237);
++  }
++  else
++  {
++    int exit_code, buf_len = 0, pw_len = 0, r;
++    char *pw_buf = NULL;
++    close(fd_pipe[1]);
++    while (waitpid(pid, &exit_code, 0) != pid);
++    if(WEXITSTATUS(exit_code))
++    {
++      fprintf(stderr, "[%i]: SshAskPassword() -- ksshaskpass returned %i\n", 
++        getpid(), WEXITSTATUS(exit_code));
++      if(WEXITSTATUS(exit_code) != 237)
++      {
++        *password = nullptr;
++        return 0;
++      }
++      return exit_code;
++    }
++    while(1)
++    {
++      buf_len += 16;
++      pw_buf = (char*) realloc(pw_buf, (buf_len * sizeof(char))+1);
++      if(pw_buf == (char *)NULL)
++      {
++        fprintf(stderr, "[%i]: SshAskPassword() -- realloc() failed!\n", getpid());
++        return -1;
++      }
++      r = read(fd_pipe[0], pw_buf + pw_len, 16);
++      if (r <= 0)
++        break;
++      pw_len += r;
++      pw_buf[pw_len] = '\0';
++    }
++    *password = (r != 0 && !pw_len) ? NULL : pw_buf;
++    return 0;
++  }
++}
++
+ void PK11PasswordPromptRunnable::RunOnTargetThread()
+ {
+   static NS_DEFINE_CID(kNSSComponentCID, NS_NSSCOMPONENT_CID);
+@@ -793,6 +865,12 @@ void PK11PasswordPromptRunnable::RunOnTa
+   bool value = false;
+   nsCOMPtr<nsIPrompt> prompt;
+ 
++  fprintf(stderr, "mIR: %x\n", mIR);
++  fprintf(stderr, "mSlot: %x\n", mSlot);
++
++  if (!SshAskPassword(&mResult))
++    return;
++
+   /* TODO: Retry should generate a different dialog message */
+ /*
+   if (retry)
