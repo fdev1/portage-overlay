@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE pkgmetadata SYSTEM "http://www.gentoo.org/dtd/metadata.dtd">
+<pkgmetadata>
+	<longdescription>Fernan's theme collection</longdescription>
+	<use>
+		<flag name="grub2">Install GRUB2 themes</flag>
+		<flag name="kdm">Install KDM themes</flag>
+		<flag name="kde">Install KDE themes</flag>
+		<flag name="plymouth">Install Plymouth themes</flag>
+	</use>
+</pkgmetadata>
