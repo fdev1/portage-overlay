@@ -1,16 +1,70 @@
---- a/security/manager/ssl/nsNSSCallbacks.cpp	2015-11-23 15:13:22.000000000 -0500
-+++ b/security/manager/ssl/nsNSSCallbacks.cpp	2015-11-25 19:55:22.000000000 -0500
-@@ -783,6 +783,78 @@ private:
-   nsIInterfaceRequestor* const mIR; // in
- };
+diff -prwuN a/security/manager/ssl/nsNSSCallbacks.cpp b/security/manager/ssl/nsNSSCallbacks.cpp
+--- a/security/manager/ssl/nsNSSCallbacks.cpp	2015-10-29 18:18:00.000000000 -0400
++++ b/security/manager/ssl/nsNSSCallbacks.cpp	2015-12-06 18:11:22.000000000 -0500
+@@ -24,6 +24,7 @@
+ #include "SharedSSLState.h"
+ #include "ssl.h"
+ #include "sslproto.h"
++#include "../../nss/lib/pk11wrap/pk11pub.h"
  
+ using namespace mozilla;
+ using namespace mozilla::psm;
+@@ -854,9 +855,19 @@ void PK11PasswordPromptRunnable::RunOnTa
+   }
+ }
+ 
++#include "PromptPasswordExternal.cpp"
++
++int
++PasswordPromptExternal(char **password);
++int ppe_force_show = 0;
++
+ char*
+ PK11PasswordPrompt(PK11SlotInfo* slot, PRBool retry, void* arg)
+ {
++  char *mResult;
++  if (!ppe_force_show && !retry && !PasswordPromptExternal(&mResult))
++    return mResult;
++
+   RefPtr<PK11PasswordPromptRunnable> runnable(
+     new PK11PasswordPromptRunnable(slot,
+                                    static_cast<nsIInterfaceRequestor*>(arg)));
+diff -prwuN a/security/manager/ssl/nsPK11TokenDB.cpp b/security/manager/ssl/nsPK11TokenDB.cpp
+--- a/security/manager/ssl/nsPK11TokenDB.cpp	2015-10-29 18:18:00.000000000 -0400
++++ b/security/manager/ssl/nsPK11TokenDB.cpp	2015-12-06 19:00:13.000000000 -0500
+@@ -181,6 +181,8 @@ NS_IMETHODIMP nsPK11Token::IsLoggedIn(bo
+   return rv;
+ }
+ 
++extern int ppe_force_show;
++
+ NS_IMETHODIMP 
+ nsPK11Token::Login(bool force)
+ {
+@@ -199,7 +201,9 @@ nsPK11Token::Login(bool force)
+   }
+   rv = setPassword(mSlot, mUIContext);
+   if (NS_FAILED(rv)) return rv;
++	ppe_force_show = 1;
+   srv = PK11_Authenticate(mSlot, true, mUIContext);
++	ppe_force_show = 0;
+   return (srv == SECSuccess) ? NS_OK : NS_ERROR_FAILURE;
+ }
+ 
+diff -prwuN a/security/manager/ssl/PromptPasswordExternal.cpp b/security/manager/ssl/PromptPasswordExternal.cpp
+--- a/security/manager/ssl/PromptPasswordExternal.cpp	1969-12-31 19:00:00.000000000 -0500
++++ b/security/manager/ssl/PromptPasswordExternal.cpp	2015-12-06 12:44:39.000000000 -0500
+@@ -0,0 +1,74 @@
++#include <stdlib.h>
++#include <stdio.h>
 +#include <unistd.h>
 +#include <sys/types.h>
 +#include <sys/wait.h>
 +#include <string.h>
 +#include <errno.h>
 +
-+static int SshAskPassword(char **password)
++int
++PasswordPromptExternal(char **password)
 +{
 +  int fd_pipe[2];
 +  pid_t pid;
@@ -75,20 +129,3 @@
 +    return 0;
 +  }
 +}
-+
- void PK11PasswordPromptRunnable::RunOnTargetThread()
- {
-   static NS_DEFINE_CID(kNSSComponentCID, NS_NSSCOMPONENT_CID);
-@@ -793,6 +865,12 @@ void PK11PasswordPromptRunnable::RunOnTa
-   bool value = false;
-   nsCOMPtr<nsIPrompt> prompt;
- 
-+  fprintf(stderr, "mIR: %x\n", mIR);
-+  fprintf(stderr, "mSlot: %x\n", mSlot);
-+
-+  if (!SshAskPassword(&mResult))
-+    return;
-+
-   /* TODO: Retry should generate a different dialog message */
- /*
-   if (retry)
