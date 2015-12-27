@@ -24,24 +24,25 @@ S=${WORKDIR}/${PN}
 DOCS=( README )
 
 src_prepare() {
-epatch "${FILESDIR}"/${P}-asneeded.patch
-epatch "${FILESDIR}"/${P}-eq-name.patch
-epatch "${FILESDIR}"/${P}-fixflags.patch
-multilib_copy_sources
+	epatch "${FILESDIR}"/${P}-asneeded.patch
+	epatch "${FILESDIR}"/${P}-eq-name.patch
+	epatch "${FILESDIR}"/${P}-fixflags.patch
+	epatch "${FILESDIR}"/${P}-multilib-caps.patch
+	multilib_copy_sources
 }
 
 multilib_src_compile() {
-emake \
-CC="$(tc-getCC)" \
-CFLAGS="${CFLAGS} -Wall -fPIC -DPIC" \
-LD="$(tc-getCC)" \
-LDFLAGS="${LDFLAGS} -shared" \
-Q= \
-SND_PCM_LIBS="-lasound" \
-SND_CTL_LIBS="-lasound" || die
+	emake \
+		CC="$(tc-getCC)" \
+		CFLAGS="${CFLAGS} -Wall -fPIC -DPIC -DCAPS_SO=/usr/$(get_libdir)/ladspa/caps.so" \
+		LD="$(tc-getCC)" \
+		LDFLAGS="${LDFLAGS} -shared" \
+		Q= \
+		SND_PCM_LIBS="-lasound" \
+		SND_CTL_LIBS="-lasound" || die
 }
 
 multilib_src_install() {
-exeinto /usr/$(get_libdir)/alsa-lib
-doexe *.so || die
+	exeinto /usr/$(get_libdir)/alsa-lib
+	doexe *.so || die
 }
