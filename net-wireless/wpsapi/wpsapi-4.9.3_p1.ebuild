@@ -42,7 +42,9 @@ src_install()
 	find "${S}/documentation/" -maxdepth 1 -mindepth 1 \
 		-exec mv '{}' "${ED}/usr/share/doc/${PN}" \;
 
-	dodir "/usr/share/${PN}/examples"
-	find "${S}/example" -maxdepth 1 -mindepth 1 \
-		-exec mv '{}' "${ED}/usr/share/${PN}/examples" \;
+	if use examples; then
+		dodir "/usr/share/${PN}/examples"
+		find "${S}/example" -maxdepth 1 -mindepth 1 \
+			-exec mv '{}' "${ED}/usr/share/${PN}/examples" \;
+	fi
 }
