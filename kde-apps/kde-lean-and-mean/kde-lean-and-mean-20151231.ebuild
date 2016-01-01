@@ -13,7 +13,7 @@ KEYWORDS="-* ~x86 ~amd64"
 IUSE="+kdm +multimedia"
 
 DEPEND="
-	kde-base/kdepim-meta
+	kde-apps/kdepim-meta
 	kde-base/kdeplasma-addons
 	kdm? ( kde-base/kdm )
 	kde-base/plasma-workspace
