@@ -1,0 +1,58 @@
+#!/bin/sh
+
+if [ "$1" == "--clean-profile" ]; then
+	rm -rf ~/.TorBrowser/bookmarkbackups
+	rm -rf ~/.TorBrowser/cache2
+	rm -rf ~/.TorBrowser/datareporting
+	rm -rf ~/.TorBrowser/healthreport
+	rm -rf ~/.TorBrowser/saved-telemetry-pings
+	rm -rf ~/.TorBrowser/storage
+	rm -rf ~/.TorBrowser/startupCache
+	rm -rf ~/.TorBrowser/pluginreg.dat
+	rm -rf ~/.TorBrowser/cookies.sqlite
+	rm -rf ~/.TorBrowser/permissions.sqlite
+	rm -rf ~/.TorBrowser/formhistory.sqlite
+	rm -rf ~/.TorBrowser/healthreport.sqlite
+	rm -rf ~/.TorBrowser/.parentlock
+	rm -rf ~/.TorBrowser/SiteSecurityServiceState.txt
+	rm -rf ~/.TorBrowser/adblockplus/patterns-backup*
+	rm -rf ~/.TorBrowser/content-prefs.sqlite
+	rm -rf ~/.TorBrowser/gmp
+	rm -rf ~/.TorBrowser/webappsstore.sqlite
+	rm -rf ~/.TorBrowser/sessionCheckpoints.json
+	rm -rf ~/.TorBrowser/revocations.txt
+	rm -rf ~/.TorBrowser/cert8.db
+	rm -rf ~/.TorBrowser/key3.db
+	rm -rf ~/.TorBrowser/webapps
+	rm -rf ~/.TorBrowser/times.json
+	rm -rf ~/.TorBrowser/search.json
+	rm -rf ~/.TorBrowser/search-metadata.json
+	rm -rf ~/.TorBrowser/secmod.db
+	rm -rf ~/.TorBrowser/xulstore.json
+	rm -rf ~/.TorBrowser/safebrowsing
+	rm -rf ~/.TorBrowser/directoryLinks.json
+	rm -rf ~/.TorBrowser/HTTPSEverywhereUserRules
+	rm -rf ~/.TorBrowser/lightweighttheme-header
+	rm -rf ~/.TorBrowser/lightweighttheme-footer
+	rm -rf ~/.TorBrowser/frequencyCap.json
+	rm -rf ~/.TorBrowser/mimeTypes.rdf
+	rm -rf ~/.TorBrowser/compatibility.ini
+	rm -rf ~/.TorBrowser/blocklist.xml
+	exit 0
+fi
+
+# if the user does not have a TorBrowser profile
+# create one
+if [ ! -x ~/.TorBrowser ]; then
+	mkdir -p ~/.TorBrowser;
+	cp -R /usr/share/not-tor-browser/* ~/.TorBrowser
+	chmod -R o-rwx ~/.TorBrowser
+fi
+
+# make sure the Tor daemon is running
+/usr/bin/sudo /usr/bin/systemctl start tor;
+
+# start firefox with the Tor profile
+TOR_CONTROL_PASSWD='"secret"' /usr/bin/firefox \
+	--no-remote \
+	--profile ~/.TorBrowser
