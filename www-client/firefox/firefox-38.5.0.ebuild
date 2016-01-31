@@ -5,7 +5,7 @@
 EAPI="5"
 VIRTUALX_REQUIRED="pgo"
 WANT_AUTOCONF="2.1"
-MOZ_ESR=""
+MOZ_ESR=1
 
 # This list can be updated with scripts/get_langs.sh from the mozilla overlay
 # No official support as of fetch time
@@ -27,23 +27,22 @@ if [[ ${MOZ_ESR} == 1 ]]; then
 fi
 
 # Patch version
-PATCH="${PN}-42.0-patches-02"
+PATCH="${PN}-38.0-patches-04"
 MOZ_HTTP_URI="http://archive.mozilla.org/pub/${PN}/releases"
 
-MOZCONFIG_OPTIONAL_GTK3=1
 MOZCONFIG_OPTIONAL_WIFI=1
 MOZCONFIG_OPTIONAL_JIT="enabled"
 
-inherit check-reqs flag-o-matic toolchain-funcs eutils gnome2-utils mozconfig-v6.42 multilib pax-utils fdo-mime autotools virtualx mozlinguas
+inherit check-reqs flag-o-matic toolchain-funcs eutils gnome2-utils mozconfig-v6.38 multilib pax-utils fdo-mime autotools virtualx mozlinguas
 
 DESCRIPTION="Firefox Web Browser"
 HOMEPAGE="http://www.mozilla.com/firefox"
 
-KEYWORDS="~alpha ~amd64 ~arm ~hppa ~ia64 ~ppc ~ppc64 ~x86 ~amd64-linux ~x86-linux"
+KEYWORDS="~alpha amd64 ~arm hppa ~ia64 ppc ppc64 x86 ~amd64-linux ~x86-linux"
 
 SLOT="0"
 LICENSE="MPL-2.0 GPL-2 LGPL-2.1"
-IUSE="bindist egl hardened +minimal neon pgo selinux +gmp-autoupdate test"
+IUSE="bindist egl hardened +minimal pgo selinux +gmp-autoupdate test"
 RESTRICT="!bindist? ( bindist )"
 
 # More URIs appended below...
@@ -68,16 +67,24 @@ DEPEND="${RDEPEND}
 	x86? ( ${ASM_DEPEND}
 		virtual/opengl )"
 
-# No source releases for alpha
+# No source releases for alpha|beta
 if [[ ${PV} =~ alpha ]]; then
 	CHANGESET="8a3042764de7"
 	SRC_URI="${SRC_URI}
-		https://dev.gentoo.org/~nirbheek/mozilla/firefox/firefox-${MOZ_PV}_${CHANGESET}.source.tar.xz"
+		https://dev.gentoo.org/~nirbheek/mozilla/firefox/firefox-${MOZ_PV}_${CHANGESET}.source.tar.bz2"
 	S="${WORKDIR}/mozilla-aurora-${CHANGESET}"
-else
-	S="${WORKDIR}/firefox-${MOZ_PV}"
+elif [[ ${PV} =~ beta ]]; then
+	S="${WORKDIR}/mozilla-release"
 	SRC_URI="${SRC_URI}
-		${MOZ_HTTP_URI}/${MOZ_PV}/source/firefox-${MOZ_PV}.source.tar.xz"
+		${MOZ_HTTP_URI}/${MOZ_PV}/source/firefox-${MOZ_PV}.source.tar.bz2"
+else
+	SRC_URI="${SRC_URI}
+		${MOZ_HTTP_URI}/${MOZ_PV}/source/firefox-${MOZ_PV}.source.tar.bz2"
+	if [[ ${MOZ_ESR} == 1 ]]; then
+		S="${WORKDIR}/mozilla-esr${PV%%.*}"
+	else
+		S="${WORKDIR}/mozilla-release"
+	fi
 fi
 
 QA_PRESTRIPPED="usr/$(get_libdir)/${PN}/firefox"
@@ -132,7 +139,8 @@ src_prepare() {
 	# Apply our patches
 	EPATCH_SUFFIX="patch" \
 	EPATCH_FORCE="yes" \
-	epatch "${FILESDIR}/firefox-42-kwallet.patch"
+	EPATCH_EXCLUDE="8011_bug1194520-freetype261_until_moz43.patch
+			8010_bug114311-freetype26.patch" \
 	epatch "${WORKDIR}/firefox"
 
 	# Allow user to apply any additional patches without modifing ebuild
@@ -164,10 +172,6 @@ src_prepare() {
 	# Don't error out when there's no files to be removed:
 	sed 's@\(xargs rm\)$@\1 -f@' \
 		-i "${S}"/toolkit/mozapps/installer/packager.mk || die
-
-	# Keep codebase the same even if not using official branding
-	sed '/^MOZ_DEV_EDITION=1/d' \
-		-i "${S}"/browser/branding/aurora/configure.sh || die
 
 	eautoreconf
 
@@ -202,22 +206,6 @@ src_configure() {
 
 	# Add full relro support for hardened
 	use hardened && append-ldflags "-Wl,-z,relro,-z,now"
-
-	if use neon ; then
-		mozconfig_annotate '' --with-fpu=neon
-		mozconfig_annotate '' --with-thumb=yes
-		mozconfig_annotate '' --with-thumb-interwork=no
-	fi
-
-	if [[ ${CHOST} == armv* ]] ; then
-		mozconfig_annotate '' --with-float-abi=hard
-		mozconfig_annotate '' --enable-skia
-
-		if ! use system-libvpx ; then
-			sed -i -e "s|softfp|hard|" \
-				"${S}"/media/libvpx/moz.build
-		fi
-	fi
 
 	use egl && mozconfig_annotate 'Enable EGL as GL provider' --with-gl-provider=EGL
 
@@ -327,17 +315,6 @@ src_install() {
 		# Let's just stick with this one...
 		icon="aurora"
 		name="Aurora"
-
-		# Override preferences to set the MOZ_DEV_EDITION defaults, since we
-		# don't define MOZ_DEV_EDITION to avoid profile debaucles.
-		# (source: browser/app/profile/firefox.js)
-		cat >>"${BUILD_OBJ_DIR}/dist/bin/browser/defaults/preferences/all-gentoo.js" <<PROFILE_EOF
-pref("app.feedback.baseURL", "https://input.mozilla.org/%LOCALE%/feedback/firefoxdev/%VERSION%/");
-sticky_pref("lightweightThemes.selectedThemeID", "firefox-devedition@mozilla.org");
-sticky_pref("browser.devedition.theme.enabled", true);
-sticky_pref("devtools.theme", "dark");
-PROFILE_EOF
-
 	else
 		sizes="16 22 24 32 256"
 		icon_path="${S}/browser/branding/official"

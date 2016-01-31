@@ -1,4 +1,4 @@
-# Copyright 1999-2015 Gentoo Foundation
+# Copyright 1999-2016 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Id$
 
@@ -27,14 +27,14 @@ if [[ ${MOZ_ESR} == 1 ]]; then
 fi
 
 # Patch version
-PATCH="${PN}-42.0-patches-0.3"
+PATCH="${PN}-44.0-patches-0.4"
 MOZ_HTTP_URI="http://archive.mozilla.org/pub/${PN}/releases"
 
 MOZCONFIG_OPTIONAL_GTK3=1
 MOZCONFIG_OPTIONAL_WIFI=1
 MOZCONFIG_OPTIONAL_JIT="enabled"
 
-inherit check-reqs flag-o-matic toolchain-funcs eutils gnome2-utils mozconfig-v6.42 multilib pax-utils fdo-mime autotools virtualx mozlinguas
+inherit check-reqs flag-o-matic toolchain-funcs eutils gnome2-utils mozconfig-v6.44 multilib pax-utils fdo-mime autotools virtualx mozlinguas
 
 DESCRIPTION="Firefox Web Browser"
 HOMEPAGE="http://www.mozilla.com/firefox"
@@ -43,7 +43,7 @@ KEYWORDS="~alpha ~amd64 ~arm ~hppa ~ia64 ~ppc ~ppc64 ~x86 ~amd64-linux ~x86-linu
 
 SLOT="0"
 LICENSE="MPL-2.0 GPL-2 LGPL-2.1"
-IUSE="bindist egl hardened +minimal neon pgo selinux +gmp-autoupdate test"
+IUSE="bindist hardened +hwaccel pgo selinux +gmp-autoupdate test"
 RESTRICT="!bindist? ( bindist )"
 
 # More URIs appended below...
@@ -79,19 +79,6 @@ else
 	SRC_URI="${SRC_URI}
 		${MOZ_HTTP_URI}/${MOZ_PV}/source/firefox-${MOZ_PV}.source.tar.xz"
 fi
-#elif [[ ${PV} =~ beta ]]; then
-#	S="${WORKDIR}/mozilla-beta"
-#	SRC_URI="${SRC_URI}
-#		${MOZ_HTTP_URI}/${MOZ_PV}/source/firefox-${MOZ_PV}.source.tar.xz"
-#else
-#	SRC_URI="${SRC_URI}
-#		${MOZ_HTTP_URI}/${MOZ_PV}/source/firefox-${MOZ_PV}.source.tar.xz"
-#	if [[ ${MOZ_ESR} == 1 ]]; then
-#		S="${WORKDIR}/mozilla-esr${PV%%.*}"
-#	else
-#		S="${WORKDIR}/mozilla-release"
-#	fi
-#fi
 
 QA_PRESTRIPPED="usr/$(get_libdir)/${PN}/firefox"
 
@@ -145,8 +132,8 @@ src_prepare() {
 	# Apply our patches
 	EPATCH_SUFFIX="patch" \
 	EPATCH_FORCE="yes" \
-	epatch "${FILESDIR}/firefox-42-external-password-prompt.patch"
 	epatch "${WORKDIR}/firefox"
+	epatch "${FILESDIR}/firefox-42-external-password-prompt.patch"
 
 	# Allow user to apply any additional patches without modifing ebuild
 	epatch_user
@@ -219,23 +206,8 @@ src_configure() {
 	# Add full relro support for hardened
 	use hardened && append-ldflags "-Wl,-z,relro,-z,now"
 
-	if use neon ; then
-		mozconfig_annotate '' --with-fpu=neon
-		mozconfig_annotate '' --with-thumb=yes
-		mozconfig_annotate '' --with-thumb-interwork=no
-	fi
-
-	if [[ ${CHOST} == armv* ]] ; then
-		mozconfig_annotate '' --with-float-abi=hard
-		mozconfig_annotate '' --enable-skia
-
-		if ! use system-libvpx ; then
-			sed -i -e "s|softfp|hard|" \
-				"${S}"/media/libvpx/moz.build
-		fi
-	fi
-
-	use egl && mozconfig_annotate 'Enable EGL as GL provider' --with-gl-provider=EGL
+	# EGL use flag removed for now, as build failures ensue with firefox-44
+	#use egl && mozconfig_annotate 'Enable EGL as GL provider' --with-gl-provider=EGL
 
 	# Setup api key for location services
 	echo -n "${_google_api_key}" > "${S}"/google-api-key
@@ -304,13 +276,17 @@ src_install() {
 
 	cd "${BUILD_OBJ_DIR}" || die
 
-	# Pax mark xpcshell for hardened support, only used for startupcache creation.
-	pax-mark m "${BUILD_OBJ_DIR}"/dist/bin/xpcshell
-
 	# Add our default prefs for firefox
-	cp "${FILESDIR}"/gentoo-default-prefs.js-2 \
+	cp "${FILESDIR}"/gentoo-default-prefs.js-1 \
 		"${BUILD_OBJ_DIR}/dist/bin/browser/defaults/preferences/all-gentoo.js" \
 		|| die
+
+	# Augment this with hwaccel prefs
+	if use hwaccel ; then
+		cat "${FILESDIR}"/gentoo-hwaccel-prefs.js-1 >> \
+		"${BUILD_OBJ_DIR}/dist/bin/browser/defaults/preferences/all-gentoo.js" \
+		|| die
+	fi
 
 	# Set default path to search for dictionaries.
 	echo "pref(\"spellchecker.dictionary_path\", ${DICTPATH});" \
@@ -382,16 +358,11 @@ PROFILE_EOF
 			|| die
 	fi
 
-	# Required in order to use plugins and even run firefox on hardened.
+	# Required in order to use plugins and even run firefox on hardened, with jit useflag.
 	if use jit; then
 		pax-mark m "${ED}"${MOZILLA_FIVE_HOME}/{firefox,firefox-bin,plugin-container}
 	else
 		pax-mark m "${ED}"${MOZILLA_FIVE_HOME}/plugin-container
-	fi
-
-	if use minimal; then
-		rm -r "${ED}"/usr/include "${ED}${MOZILLA_FIVE_HOME}"/{idl,include,lib,sdk} \
-			|| die "Failed to remove sdk and headers"
 	fi
 
 	# very ugly hack to make firefox not sigbus on sparc
