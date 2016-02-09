@@ -16,6 +16,7 @@ DEPEND="
 	kdepim? ( kde-apps/kdepim-meta )
 	kde-base/kdeplasma-addons
 	kdm? ( kde-base/kdm )
+	!kdm? ( !kde-apps/kdebase-meta[display-manager] )
 	kde-base/plasma-workspace
 	kde-base/powerdevil
 	kde-apps/ark
