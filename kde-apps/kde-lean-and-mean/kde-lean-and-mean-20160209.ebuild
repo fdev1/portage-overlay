@@ -13,7 +13,7 @@ KEYWORDS="-* ~x86 ~amd64"
 IUSE="+kdm +multimedia +kdepim screensaver"
 
 DEPEND="
-	kde-pim? ( kde-apps/kdepim-meta )
+	kdepim? ( kde-apps/kdepim-meta )
 	kde-base/kdeplasma-addons
 	kdm? ( kde-base/kdm )
 	kde-base/plasma-workspace
