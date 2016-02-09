@@ -37,7 +37,6 @@ DEPEND="
 	kde-apps/krdc
 	kde-apps/krfb
 	kde-apps/ksnapshot
-	kde-apps/kturtle
 	kde-apps/kuser
 	kde-apps/kwalletmanager
 	kde-apps/libkcddb
