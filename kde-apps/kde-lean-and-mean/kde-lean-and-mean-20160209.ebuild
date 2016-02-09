@@ -13,7 +13,7 @@ KEYWORDS="-* ~x86 ~amd64"
 IUSE="+kdm +multimedia +kdepim screensaver"
 
 DEPEND="
-	kde-pim? kde-apps/kdepim-meta
+	kde-pim? ( kde-apps/kdepim-meta )
 	kde-base/kdeplasma-addons
 	kdm? ( kde-base/kdm )
 	kde-base/plasma-workspace
@@ -60,7 +60,7 @@ DEPEND="
 	kde-apps/kdeartwork-wallpapers
 	kde-apps/kdeartwork-weatherwallpapers
 	kde-apps/kdeartwork-styles
-	screensaver? kde-apps/kdeartwork-kscreensaver
+	screensaver? ( kde-apps/kdeartwork-kscreensaver )
 
 	multimedia? (
 		media-sound/clementine[skydrive,googledrive,dropbox,ipod,lastfm,moodbar,ubuntu-one]
