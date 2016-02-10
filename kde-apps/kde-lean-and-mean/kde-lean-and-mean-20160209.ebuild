@@ -56,8 +56,8 @@ DEPEND="
 	kde-apps/keditbookmarks
 	kde-apps/kfind
 	kde-apps/kfmclient
-	kde-apps/konsolepart:4
-	kde-apps/konsole:4
+	kde-apps/konsolepart
+	kde-apps/konsole
 	kde-apps/kwrite:4
 	kde-apps/phonon-kde
 	kde-base/krunner

@@ -5,5 +5,11 @@
 	<use>
 		<flag name="kdm">Install kdm</flag>
 		<flag name="multimedia">Install multimedia extras (non-KDE)</flag>
+		<flag name="kdepim">Install kde pim</flag>
+		<flag name="konqueror">Install Konqueror web browser</flag>
+		<flag name="screensaver">Install screensaver programs</flag>
+		<flag name="wallpapers">Install wallpapers</flag>
+		<flag name="admintools">Install administration GUI tools</flag>
+		<flag name="bogus">DO NOT ENABLE THIS FLAG</flag>
 	</use>
 </pkgmetadata>
