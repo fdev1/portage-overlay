@@ -65,7 +65,7 @@ DEPEND="
 	kde-base/kdebase-startkde
 	kde-base/kdebase-cursors
 	kde-base/kcheckpass
-	kde-base/kdepasswd
+	kde-apps/kdepasswd
 	kde-base/khotkeys
 	kde-base/klipper
 	kde-base/kmenuedit
@@ -89,12 +89,12 @@ DEPEND="
 	kde-base/solid-actions-kcm
 	kde-base/systemsettings
 	bogus? (
-		kde-apps/kephal
-		kde-apps/freespacenotifier
+		kde-base/kephal
+		kde-base/freespacenotifier
 	)
 
 	admintools? (
-		kde-apps/kinfocenter
+		kde-base/kinfocenter
 		kde-apps/kuser
 	)
 	wallpapers? ( kde-apps/kde-wallpapers:4 )
@@ -114,7 +114,7 @@ DEPEND="
 	kde-apps/kdeartwork-styles
 	screensaver? (
 		kde-apps/kdeartwork-kscreensaver
-		kde-apps/kscreensaver
+		kde-base/kscreensaver
 	)
 
 	multimedia? (
