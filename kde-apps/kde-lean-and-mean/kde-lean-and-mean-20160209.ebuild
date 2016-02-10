@@ -1,4 +1,4 @@
-# Copyright 1999-2015 Gentoo Foundation
+# Copyright 1999-2016 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Id$
 
@@ -10,23 +10,21 @@ HOMEPAGE="https://google.com"
 LICENSE="MIT"
 SLOT="0"
 KEYWORDS="-* ~x86 ~amd64"
-IUSE="+kdm +multimedia +kdepim screensaver"
+IUSE="+kdm +multimedia +kdepim +bluetooth screensaver konqueror +wallpapers admintools bogus"
 
 DEPEND="
 	kdepim? ( kde-apps/kdepim-meta )
 	kde-base/kdeplasma-addons
 	kdm? ( kde-base/kdm )
-	!kdm? ( !kde-apps/kdebase-meta[display-manager] )
 	kde-base/plasma-workspace
 	kde-base/powerdevil
-	kde-apps/ark
+	kde-apps/ark:4
 	kde-apps/audiocd-kio
-	kde-apps/ffmpegthumbs
-	kde-apps/gwenview
-	kde-apps/kamera
-	kde-apps/kcharselect
+	kde-apps/ffmpegthumbs:4
+	kde-apps/gwenview:4
+	kde-apps/kamera:4
+	kde-apps/kcharselect:4
 	kde-apps/kdebase-kioslaves
-	kde-apps/kdebase-meta
 	kde-apps/kdegraphics-mobipocket
 	kde-apps/kdenetwork-filesharing
 	kde-apps/kgamma
@@ -37,30 +35,87 @@ DEPEND="
 	kde-apps/krdc
 	kde-apps/krfb
 	kde-apps/ksnapshot
-	kde-apps/kuser
-	kde-apps/kwalletmanager
+	kde-apps/kwalletmanager:4
 	kde-apps/libkcddb
 	kde-apps/libkcompactdisc
-	kde-apps/libkdcraw
-	kde-apps/libkexiv2
-	kde-apps/libkipi
+	kde-apps/libkdcraw:4
+	kde-apps/libkexiv2:4
+	kde-apps/libkipi:4
 	kde-apps/okular
 	kde-apps/phonon-kde
 	kde-apps/plasma-runtime
-	kde-apps/print-manager
+	kde-apps/print-manager:4
 	kde-apps/svgpart
 	kde-apps/sweeper
-	kde-apps/thumbnailers
+	kde-apps/thumbnailers:4
 	kde-apps/zeroconf-ioslave
+
+	kde-apps/dolphin:4
+	kde-apps/kdebase-runtime-meta:4
+	kde-apps/kdialog
+	kde-apps/keditbookmarks
+	kde-apps/kfind
+	kde-apps/kfmclient
+	kde-apps/konsolepart
+	kde-apps/konsole:4
+	kde-apps/kwrite:4
+	kde-apps/phonon-kde
+	kde-base/krunner
+	kde-base/kcminit
+	kde-base/kdebase-startkde
+	kde-base/kdebase-cursors
+	kde-base/kcheckpass
+	kde-base/kdepasswd
+	kde-base/khotkeys
+	kde-base/klipper
+	kde-base/kmenuedit
+	kde-base/ksmserver
+	kde-base/ksplash
+	kde-base/kstartupconfig
+	kde-base/kstyles
+	kde-base/ksysguard
+	kde-base/ksystraycmd
+	kde-base/kwin
+	kde-base/kwrited
+	kde-base/libkworkspace
+	kde-base/liboxygenstyle
+	kde-base/libplasmaclock
+	kde-base/libplasmagenericshell
+	kde-base/libtaskmanager
+	kde-apps/plasma-apps
+	kde-base/plasma-workspace
+	kde-base/powerdevil
+	kde-base/qguiplatformplugin_kde
+	kde-base/solid-actions-kcm
+	kde-base/systemsettings
+	bogus? (
+		kde-apps/kephal
+		kde-apps/freespacenotifier
+	)
+
+	admintools? (
+		kde-apps/kinfocenter
+		kde-apps/kuser
+	)
+	wallpapers? ( kde-apps/kde-wallpapers:4 )
+	konqueror? (
+		kde-apps/konq-plugins
+		kde-apps/konqueror
+		kde-apps/libkonq
+		kde-apps/nsplugins
+	)
 
 	kde-apps/kdeartwork-colorschemes
 	kde-apps/kdeartwork-desktopthemes
 	kde-apps/kdeartwork-emoticons
 	kde-apps/kdeartwork-iconthemes
-	kde-apps/kdeartwork-wallpapers
-	kde-apps/kdeartwork-weatherwallpapers
+	kde-apps/kdeartwork-wallpapers:4
+	kde-apps/kdeartwork-weatherwallpapers:4
 	kde-apps/kdeartwork-styles
-	screensaver? ( kde-apps/kdeartwork-kscreensaver )
+	screensaver? (
+		kde-apps/kdeartwork-kscreensaver
+		kde-apps/kscreensaver
+	)
 
 	multimedia? (
 		media-sound/clementine[skydrive,googledrive,dropbox,ipod,lastfm,moodbar,ubuntu-one]
