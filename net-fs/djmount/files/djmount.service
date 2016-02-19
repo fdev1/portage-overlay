@@ -5,8 +5,9 @@ After=network.target
 [Service]
 Type=forking
 ExecStartPre=-/sbin/modprobe fuse
-ExecStart=/usr/bin/djmount -o allow_other /media/upnp
-ExecStop=/usr/bin/fusermount -u /media/upnp
+ExecStart=/usr/bin/djmount -o allow_other /upnp
+ExecStartPost=-/bin/sh -c '/usr/bin/sleep 2; /bin/ls /upnp'
+ExecStop=/usr/bin/fusermount -u /upnp
 
 [Install]
 WantedBy=multi-user.target

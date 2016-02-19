@@ -19,6 +19,12 @@ DEPEND="
 	"
 RDEPEND="${DEPEND}"
 
+pkg_setup()
+{
+	mkdir -p /upnp
+	chattr +i /upnp
+}
+
 src_prepare()
 {
 	if use system-libupnp; then
