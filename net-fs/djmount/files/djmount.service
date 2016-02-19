@@ -1,12 +1,12 @@
 [Unit]
 Description=Mount AV devices as filesystem
+After=network.target
 
 [Service]
-Type=oneshot
-ExecStartPre=/bin/mkdir -p /media/upnp
+Type=forking
+ExecStartPre=-/sbin/modprobe fuse
 ExecStart=/usr/bin/djmount -o allow_other /media/upnp
 ExecStop=/usr/bin/fusermount -u /media/upnp
-RemainAfterExit=yes
 
 [Install]
 WantedBy=multi-user.target

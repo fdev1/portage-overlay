@@ -11,10 +11,25 @@ SRC_URI="http://downloads.sourceforge.net/project/djmount/djmount/0.71/djmount-0
 LICENSE="GPL-2"
 SLOT="0"
 KEYWORDS="~amd64"
-IUSE=""
+IUSE="+networkmanager -system-libupnp"
 
-DEPEND="sys-fs/fuse"
+DEPEND="
+	sys-fs/fuse
+	system-libupnp? ( net-libs/libupnp )
+	"
 RDEPEND="${DEPEND}"
+
+src_prepare()
+{
+	if use system-libupnp; then
+		rm -rf libupnp/*/{src,inc} libupnp/configure
+	fi
+}
+
+src_configure()
+{
+	econf $(with_use system-libupnp --with-external-libupnp)
+}
 
 src_install()
 {
@@ -23,4 +38,11 @@ src_install()
 	insinto /usr/lib/systemd/system
 	insopts --mode=644
 	doins "${FILESDIR}/djmount.service"
+
+	if use networkmanager; then
+		dodir /etc/NetworkManager/dispatcher.d
+		insinto /etc/NetworkManager/dispatcher.d
+		insopts --mode=644
+		doins "${FILESDIR}/40-djmount"
+	fi
 }

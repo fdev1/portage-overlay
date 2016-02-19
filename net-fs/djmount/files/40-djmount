@@ -1,0 +1,11 @@
+#!/bin/sh
+case $2 in
+	up)
+		logger -t "nm-dispatch-script[$$]" "Starting djmount"
+		systemctl start djmount.service
+		;;
+	down)
+		logger -t "nm-dispatch-script[$$]" "Stopping djmount"
+		systemctl stop djmount.service
+		;;
+esac
