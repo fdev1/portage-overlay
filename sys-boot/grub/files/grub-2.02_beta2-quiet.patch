@@ -1,0 +1,16 @@
+diff --git a/grub-core/kern/main.c b/grub-core/kern/main.c
+index 9cad0c4..15d17d9 100644
+--- a/grub-core/kern/main.c
++++ b/grub-core/kern/main.c
+@@ -269,11 +269,6 @@ grub_main (void)
+ 
+   grub_boot_time ("After machine init.");
+ 
+-  /* Hello.  */
+-  grub_setcolorstate (GRUB_TERM_COLOR_HIGHLIGHT);
+-  grub_printf ("Welcome to GRUB!\n\n");
+-  grub_setcolorstate (GRUB_TERM_COLOR_STANDARD);
+-
+   grub_load_config ();
+ 
+   grub_boot_time ("Before loading embedded modules.");
