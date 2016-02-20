@@ -1,5 +1,8 @@
 [Unit]
 Description=djmount keep-alive timer
+BindsTo=djmount.service
+RefuseManualStart=yes
+RefuseManualStop=yes
 
 [Timer]
 OnActiveSec=1min
