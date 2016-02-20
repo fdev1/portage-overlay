@@ -1,0 +1,13 @@
+diff --git a/djmount/djfs.c b/djmount/djfs.c
+index c6b4947..956aadc 100644
+--- a/djmount/djfs.c
++++ b/djmount/djfs.c
+@@ -356,7 +356,7 @@ BrowseRoot (VFS* const vfs, const char* const sub_path,
+     
+     const PtrArray* const names = DeviceList_GetDevicesNames (tmp_ctx);
+     
+-    FILE_BEGIN("devices") {
++    FILE_BEGIN(".devices") {
+       if (names) {
+ 	char* str = talloc_strdup(tmp_ctx, "");
+ 	const char* devName;

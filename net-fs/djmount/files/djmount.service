@@ -1,6 +1,7 @@
 [Unit]
 Description=Mount AV devices as filesystem
 After=network.target
+Wants=djmount-keep-alive.timer
 
 [Service]
 Type=forking

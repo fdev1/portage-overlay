@@ -1,0 +1,10 @@
+[Unit]
+Description=djmount keep-alive timer
+
+[Timer]
+OnActiveSec=1min
+OnUnitActiveSec=1min
+Unit=djmount-keep-alive.service
+
+[Install]
+WantedBy=timers.target
