@@ -6,7 +6,7 @@ RefuseManualStop=yes
 
 [Timer]
 OnActiveSec=1min
-OnUnitActiveSec=1min
+OnUnitActiveSec=2min
 Unit=djmount-keep-alive.service
 
 [Install]

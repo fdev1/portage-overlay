@@ -3,6 +3,6 @@
 <pkgmetadata>
 	<longdescription>Mount uPnP AV devices as FUSE filesystem</longdescription>
 	<use>
-		<flag name="system-libupnp">Use the system-wide libupnp instead of bundled one</flag>
+		<flag name="charset">Support charset mount option</flag>
 	</use>
 </pkgmetadata>

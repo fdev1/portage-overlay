@@ -1,0 +1,119 @@
+diff --git a/djmount/charset.h b/djmount/charset.h
+index 77ff8de..fcf6f23 100644
+--- a/djmount/charset.h
++++ b/djmount/charset.h
+@@ -160,7 +160,7 @@ Charset_PrintString (Charset_Direction, const char* str, FILE* stream);
+ int
+ Charset_Finish();
+ #else
+-#	define Charset_Finish()	   0
++#	define Charset_Finish()	   (void) 0
+ #endif
+ 
+ 
+diff --git a/djmount/device_list.c b/djmount/device_list.c
+index b3cb08f..c84f245 100644
+--- a/djmount/device_list.c
++++ b/djmount/device_list.c
+@@ -936,6 +936,7 @@ CheckSubscriptionsLoop (void* arg)
+ 		isleep (CHECK_SUBSCRIPTIONS_TIMEOUT);
+ 		VerifyTimeouts (CHECK_SUBSCRIPTIONS_TIMEOUT);
+ 	}
++	return NULL;
+ }
+ 
+ 
+diff --git a/djmount/didl_object.c b/djmount/didl_object.c
+index 3355076..0b0e6e5 100644
+--- a/djmount/didl_object.c
++++ b/djmount/didl_object.c
+@@ -114,7 +114,7 @@ DIDLObject_Create (void* talloc_context,
+ 		if (o->cds_class == NULL)
+ 			o->cds_class = "";
+ 
+-		char* s = ixmlElement_getAttribute (o->element, "searchable");
++		const char* s = ixmlElement_getAttribute (o->element, "searchable");
+ 		o->searchable = String_ToBoolean (s, false);
+ 
+ 		Log_Printf (LOG_DEBUG,
+diff --git a/djmount/fuse_main.c b/djmount/fuse_main.c
+index c2efbd2..21957bf 100644
+--- a/djmount/fuse_main.c
++++ b/djmount/fuse_main.c
+@@ -536,7 +536,7 @@ usage (FILE* stream, const char* progname)
+      "    iocharset=<charset>    filenames encoding (default: environment)\n"
+ #endif
+      "    playlists              use playlists for AV files, instead of plain files\n"
+-     "    search_history=<size>  number of remembered searches (default: %d)\n"
++     "    search_history=<size>  number of remembered searches (default: %zd)\n"
+      "                           (set to 0 to disable search)\n"
+      "\n", DEFAULT_SEARCH_HISTORY_SIZE);
+   fprintf 
+diff --git a/djmount/object_p.h b/djmount/object_p.h
+index 4d4fea2..5f1251e 100644
+--- a/djmount/object_p.h
++++ b/djmount/object_p.h
+@@ -28,6 +28,7 @@
+ #include "object.h"
+ #include <stdlib.h>
+ #include <inttypes.h>
++#include <assert.h>
+ 
+ 
+ /******************************************************************************
+@@ -162,7 +163,7 @@ const OBJTYPE ## _Class* OBJECT_CLASS_PTR(OBJTYPE)			\
+ 			the_class._.base.size	= sizeof (OBJTYPE);	\
+ 			the_class._.base.initializer = &the_default_object; \
+ 			the_class._.base.finalize = NULL;		\
+-                        if (INITFUNCTION != NULL)			\
++			assert(INITFUNCTION); \
+ 				INITFUNCTION(&the_class);		\
+                 }							\
+ 		_ObjectClass_Unlock();					\
+diff --git a/djmount/test_upnp.c b/djmount/test_upnp.c
+index 9091fdf..24338af 100644
+--- a/djmount/test_upnp.c
++++ b/djmount/test_upnp.c
+@@ -485,6 +485,7 @@ CommandLoop (void* arg)
+ 			process_command (cmdline);
+ 	}
+ #endif
++	return NULL;
+ }
+ 
+ 
+diff --git a/djmount/xml_util.c b/djmount/xml_util.c
+index 67f37ea..8134150 100644
+--- a/djmount/xml_util.c
++++ b/djmount/xml_util.c
+@@ -43,7 +43,7 @@
+ const char*
+ XMLUtil_GetElementValue (IN const IXML_Element* element)
+ {
+-	char* res = NULL;
++	const char* res = NULL;
+ 	IXML_Node* child = ixmlNode_getFirstChild 
+ 		(discard_const_p (IXML_Node, XML_E2N (element)));
+ 	while (child && !res) {
+@@ -133,7 +133,7 @@ XMLUtil_FindFirstElementValue (const IXML_Node* const node,
+  * XMLUtil_GetDocumentString
+  *****************************************************************************/
+ char*
+-XMLUtil_GetDocumentString (void* context, const IXML_Document* doc)
++XMLUtil_GetDocumentString (void* context, IXML_Document* doc)
+ {
+ 	// TBD XXX
+ 	// TBD prepend <?xml version="1.0"?> if not already done ???
+diff --git a/djmount/xml_util.h b/djmount/xml_util.h
+index c599e0e..a12efdb 100644
+--- a/djmount/xml_util.h
++++ b/djmount/xml_util.h
+@@ -138,7 +138,7 @@ XMLUtil_FindFirstElementValue (const IXML_Node* const node,
+  * 	  The returned string should be freed using "talloc_free".
+  *****************************************************************************/
+ char*
+-XMLUtil_GetDocumentString (void* talloc_context, IN const IXML_Document* doc);
++XMLUtil_GetDocumentString (void* talloc_context, IN IXML_Document* doc);
+ 
+ 
+ /*****************************************************************************
