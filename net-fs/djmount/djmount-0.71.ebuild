@@ -34,6 +34,8 @@ src_prepare()
 	epatch "${FILESDIR}/djmount-0.71-hide-devices-file.patch"
 	epatch "${FILESDIR}/djmount-0.71-unbundle-libs.patch"
 	epatch "${FILESDIR}/djmount-0.71-fix-warnings.patch"
+	epatch "${FILESDIR}/djmount-0.71-optimize-stream.patch"
+	epatch "${FILESDIR}/djmount-0.71-disable-playlists.patch"
 	eautoreconf
 }
 

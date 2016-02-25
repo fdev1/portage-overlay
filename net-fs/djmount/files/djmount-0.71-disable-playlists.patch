@@ -1,0 +1,12 @@
+diff --git a/djmount/media_file.c b/djmount/media_file.c
+index c7b46ea..d2a200f 100644
+--- a/djmount/media_file.c
++++ b/djmount/media_file.c
+@@ -92,6 +92,7 @@ static const MimeType MIMES[] = {
+ 	{ "video/x-matroska",			"m3u",	"mkv"	},
+ 	{ "video/mpeg",				"m3u",	"mpg"	},
+ 	{ "video/mp2p",				"m3u",	"vob"	},
++	{ "video/mp4",       "m3u", "mp4" },
+ 	// Default for all other video files : asf, mpeg2, x-ms-wmv, ...
+ 	{ "video/",				"m3u",	NULL	},
+ 
