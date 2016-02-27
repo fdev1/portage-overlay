@@ -4,9 +4,9 @@ After=network.target
 Wants=djmount-keep-alive.timer
 
 [Service]
-Type=forking
+Type=simple
 ExecStartPre=-/sbin/modprobe fuse
-ExecStart=/usr/bin/djmount -o allow_other /upnp
+ExecStart=/usr/bin/djmount -f -o allow_other /upnp
 ExecStartPost=-/bin/sh -c '/usr/bin/sleep 2; /bin/ls /upnp'
 ExecStop=/usr/bin/fusermount -u /upnp
 

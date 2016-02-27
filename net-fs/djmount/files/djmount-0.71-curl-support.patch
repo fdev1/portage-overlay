@@ -1,0 +1,586 @@
+diff --git a/configure.ac b/configure.ac
+index a9bd91a..729c7b5 100644
+--- a/configure.ac
++++ b/configure.ac
+@@ -23,7 +23,6 @@ AC_CONFIG_HEADERS(config.h)
+ AC_COPYRIGHT([Copyright (C) 2005 Rémi Turboult])
+ AC_REVISION([$Revision: 266 $])
+ 
+-
+ #
+ # --enable-FEATURE flags
+ # ----------------------
+@@ -253,6 +252,17 @@ FUSE_CFLAGS="$FUSE_CFLAGS -DFUSE_USE_VERSION=22"
+ 
+ AM_CONDITIONAL(INTERNAL_LIBUPNP, false)
+ 
++AC_ARG_WITH([curl],
++	[Use libcurl for streaming])
++AM_CONDITIONAL(WITH_CURL, test x"$with_curl" = xyes)
++if test x"$with_curl" = xyes; then
++	AX_LIB_CURL([7.45.0],,
++		[AC_MSG_ERROR([Your system lacks libcurl >= 7.45.0])])
++	LDFLAGS="$LDFLAGS -lcurl"
++	AC_DEFINE([USE_CURL], 1, [Define to 1 to use libcurl])
++else
++	AC_DEFINE([USE_CURL], 0, [Define to 1 to use libcurl])
++fi
+ 
+ #
+ # Output Makefiles
+diff --git a/djmount/Makefile.am b/djmount/Makefile.am
+index 35417b9..305bc6c 100644
+--- a/djmount/Makefile.am
++++ b/djmount/Makefile.am
+@@ -61,6 +61,9 @@ if !WANT_ICONV
+     COMMON_SRCS 	+= charset_internal.c
+ endif
+ endif
++if WITH_CURL
++    COMMON_SRCS   += curl_util.c
++endif
+ 
+ noinst_HEADERS		= \
+ 			log.h object.h object_p.h service.h service_p.h \
+diff --git a/djmount/curl_util.c b/djmount/curl_util.c
+new file mode 100644
+index 0000000..4f1ad0b
+--- /dev/null
++++ b/djmount/curl_util.c
+@@ -0,0 +1,282 @@
++/*
++ * curl_util.c : access to the content of a remote file.
++ * This file is part of djmount.
++ *
++ * (C) Copyright 2016 Fernando Rodriguez
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++ */
++
++#include <stdio.h>
++#include <string.h>
++#include <sys/time.h>
++#include <stdlib.h>
++#include <errno.h>
++#include <assert.h>
++#include <curl/curl.h>
++#include "log.h"
++#include "minmax.h"
++
++struct _Curl_File
++{
++	CURL*  handle;
++	CURLM* multi_handle;
++	int    connected;
++	int    still_running;
++
++	char*  reservoir;
++	size_t reservoir_len;
++	size_t reservoir_pos;
++
++	char*  user_buf;
++	size_t user_buf_wants;
++	size_t user_buf_has;
++};
++
++typedef struct _Curl_File Curl_File;
++
++/**
++ * Curl_WriteCallback() -- cURL callback routine
++ */
++static size_t
++Curl_WriteCallback(char *buffer, size_t size, size_t nitems, void *userp)
++{
++	Curl_File *file = (Curl_File*) userp;
++	size_t bytes_to_copy;
++	size_t sz = (size = (size * nitems));
++
++	assert(file->reservoir_pos == 0);
++
++	/* get what we need */
++	if (file->user_buf_wants > 0) {
++		bytes_to_copy = MIN(sz, file->user_buf_wants);
++		memcpy(file->user_buf + file->user_buf_has, buffer, bytes_to_copy);
++		file->user_buf_has += bytes_to_copy;
++		file->user_buf_wants -= bytes_to_copy;
++		sz -= bytes_to_copy;
++		buffer += bytes_to_copy;
++	}
++
++	/* if there's any leftovers save them in buffer */
++	if (sz > 0) {
++		size_t avail_buf = (file->reservoir_len - file->reservoir_pos);
++		if (sz > avail_buf) {
++			unsigned char *newbuf;
++			size_t needed_buf = (sz - avail_buf);
++			newbuf = realloc(file->reservoir, file->reservoir_len + needed_buf);
++			if (newbuf == NULL) {
++				Log_Printf(LOG_ERROR, "Failed to grow buffer");
++				size -= (sz - avail_buf);
++				sz = avail_buf;
++				/* TODO: We lost data here!! */
++			} else {
++				file->reservoir = newbuf;
++				file->reservoir_len += needed_buf;
++			}
++		}
++		memcpy(file->reservoir + file->reservoir_pos, buffer, sz);
++		file->reservoir_pos += sz;
++	}
++	return size;
++}
++
++/**
++ * Curl_FillBuffer() -- Attempt to fill buffer with streamed data
++ */
++static int
++Curl_FillBuffer(Curl_File *file)
++{
++	CURLMcode mc;
++	fd_set fdread, fdwrite, fdexcep;
++	struct timeval timeout;
++	int rc;
++
++	/* if we got data in the reservoir use it first */
++	if (file->reservoir_pos && file->user_buf_wants) {
++		size_t bytes_to_copy = MIN(file->reservoir_pos, file->user_buf_wants);
++		memcpy(file->user_buf + file->user_buf_has, file->reservoir, bytes_to_copy);
++		file->user_buf_has += bytes_to_copy;
++		file->user_buf_wants -= bytes_to_copy;
++		file->reservoir_pos -= bytes_to_copy;
++		if (file->user_buf_wants == 0) {
++			return 0;
++		}
++	}
++
++	/*
++	 * if the connection has not been establish
++	 * then establish it now
++	 */
++	if (!file->connected) {
++		curl_multi_perform(file->multi_handle, &file->still_running);
++		file->connected = file->still_running;
++		if ((file->reservoir_pos == 0) && (!file->still_running)) {
++			Log_Printf(LOG_ERROR, "Http Connection Failed!");
++			curl_multi_remove_handle(file->multi_handle, file->handle);
++			curl_easy_cleanup(file->handle);
++			file->handle = NULL;
++			return -1;
++		}
++	}
++
++	if (!file->still_running) {
++		return 0;
++	}
++
++	do {
++		int maxfd = -1;
++		long curl_timeo = -1;
++
++		FD_ZERO(&fdread);
++		FD_ZERO(&fdwrite);
++		FD_ZERO(&fdexcep);
++
++		/* set a suitable timeout to fail on */
++		timeout.tv_sec = 60;
++		timeout.tv_usec = 0;
++
++		curl_multi_timeout(file->multi_handle, &curl_timeo);
++		if(curl_timeo >= 0) {
++			timeout.tv_sec = curl_timeo / 1000;
++			if(timeout.tv_sec > 1) {
++				timeout.tv_sec = 1;
++			} else {
++				timeout.tv_usec = (curl_timeo % 1000) * 1000;
++			}
++		}
++
++		/* get file descriptors from the transfers */
++		mc = curl_multi_fdset(file->multi_handle, &fdread, &fdwrite, &fdexcep, &maxfd);
++		if (mc != CURLM_OK) {
++			Log_Printf(LOG_ERROR, "curl_multi_fdset() failed, code %d.\n", mc);
++			break;
++		}
++
++		/* On success the value of maxfd is guaranteed to be >= -1. We call
++		   select(maxfd + 1, ...); specially in case of (maxfd == -1) there are
++		   no fds ready yet so we call select(0, ...) --or Sleep() on Windows--
++		   to sleep 100ms, which is the minimum suggested value in the
++		   curl_multi_fdset() doc. */
++		if (maxfd == -1) {
++			/* Portable sleep for platforms other than Windows. */
++			struct timeval wait = { 0, 100 * 1000 }; /* 100ms */
++			rc = select(0, NULL, NULL, NULL, &wait);
++		} else {
++			/* Note that on some platforms 'timeout' may be modified by select().
++			   If you need access to the original value save a copy beforehand. */
++			rc = select(maxfd+1, &fdread, &fdwrite, &fdexcep, &timeout);
++		}
++
++		if (rc != -1) {
++			/* timeout or readable/writable sockets */
++			curl_multi_perform(file->multi_handle, &file->still_running);
++		}
++	}
++	while (file->still_running && (file->user_buf_wants > 0));
++	return 1;
++}
++
++/**
++ * Curl_Open()
++ */
++Curl_File*
++Curl_Open(const char *url)
++{
++	Curl_File *file;
++
++	if ((file = malloc(sizeof(Curl_File))) == NULL) {
++		Log_Printf(LOG_ERROR, "malloc() failed");
++		return NULL;
++	}
++
++	file->handle = curl_easy_init ();
++	file->multi_handle = curl_multi_init ();
++	file->reservoir = NULL;
++	file->reservoir_pos = 0;
++	file->reservoir_len = 0;
++	file->still_running = 0;
++	file->connected = 0;
++
++	if (file->handle == NULL || file->multi_handle == NULL) {
++		Log_Printf(LOG_ERROR, "curl_easy_init() or curl_multi_init() failed");
++		return NULL;
++	}
++
++	curl_easy_setopt (file->handle, CURLOPT_URL, url);
++	curl_easy_setopt (file->handle, CURLOPT_WRITEDATA, file);
++	curl_easy_setopt (file->handle, CURLOPT_VERBOSE, 0L);
++	curl_easy_setopt (file->handle, CURLOPT_NOSIGNAL, 1L);
++	curl_easy_setopt (file->handle, CURLOPT_WRITEFUNCTION, Curl_WriteCallback);
++	curl_easy_setopt (file->handle, CURLOPT_USERAGENT, "djmount/0.71");
++	curl_multi_add_handle(file->multi_handle, file->handle);
++	return file;
++}
++
++/**
++ * Curl_Close()
++ */
++void
++Curl_Close(Curl_File *file)
++{
++#if (1 || DEBUG)
++	Log_Printf(LOG_DEBUG, "Curl reservoir length: %zd", file->reservoir_len);
++#endif
++	curl_multi_remove_handle (file->multi_handle, file->handle);
++	curl_easy_cleanup (file->handle);
++	curl_multi_cleanup (file->multi_handle);
++	free (file->reservoir);
++	free (file);
++}
++
++/**
++ * Curl_Read()
++ */
++size_t
++Curl_Read(Curl_File *file, void *ptr, size_t size)
++{
++	file->user_buf = ptr;
++	file->user_buf_wants = size;
++	file->user_buf_has = 0;
++	if (Curl_FillBuffer(file) == -1) {
++		return -1;
++	}
++	if (file->user_buf_wants > 0) {
++		Log_Printf(LOG_ERROR, "Requested %zd but got %zd", size, file->user_buf_has);
++	}
++	return file->user_buf_has;
++}
++
++/**
++ * Curl_Seek()
++ */
++void
++Curl_Seek(Curl_File *file, off_t offset)
++{
++	curl_multi_remove_handle(file->multi_handle, file->handle);
++	curl_easy_setopt(file->handle, CURLOPT_RESUME_FROM, (long) offset);
++	curl_multi_add_handle(file->multi_handle, file->handle);
++	file->reservoir_pos = 0;
++	file->still_running = 0;
++	file->connected = 0;
++}
++
++/**
++ * Curl_Init()
++ */
++void
++Curl_Init()
++{
++	curl_global_init(CURL_GLOBAL_DEFAULT);
++}
+diff --git a/djmount/curl_util.h b/djmount/curl_util.h
+new file mode 100644
+index 0000000..6b57ba9
+--- /dev/null
++++ b/djmount/curl_util.h
+@@ -0,0 +1,60 @@
++/*
++ * curl_util.h : access to the content of a remote file.
++ * This file is part of djmount.
++ *
++ * (C) Copyright 2016 Fernando Rodriguez
++ *
++ * This program is free software; you can redistribute it and/or modify
++ * it under the terms of the GNU General Public License as published by
++ * the Free Software Foundation; either version 2 of the License, or
++ * (at your option) any later version.
++ *
++ * This program is distributed in the hope that it will be useful,
++ * but WITHOUT ANY WARRANTY; without even the implied warranty of
++ * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
++ * GNU General Public License for more details.
++ *
++ * You should have received a copy of the GNU General Public License
++ * along with this program; if not, write to the Free Software
++ * Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
++ */
++
++#ifndef __CURL_UTIL__
++#define __CURL_UTIL__
++
++/**
++ * File handle structure
++ */
++typedef struct _Curl_File Curl_File;
++
++/**
++ * Initialize the cURL library.
++ */
++void
++Curl_Init();
++
++/**
++ * Opens a URL for streaming
++ */
++Curl_File*
++Curl_Open(const char *url);
++
++/**
++ * Closes a URL
++ */
++void
++Curl_Close(Curl_File *file);
++
++/**
++ * Reads data from a network stream
++ */
++size_t
++Curl_Read(Curl_File *file, void *ptr, size_t size);
++
++/**
++ * Seek the network stream
++ */
++void
++Curl_Seek(Curl_File *file, off_t offset);
++
++#endif
+diff --git a/djmount/djfs.c b/djmount/djfs.c
+index 956aadc..ee5be4b 100644
+--- a/djmount/djfs.c
++++ b/djmount/djfs.c
+@@ -276,7 +276,7 @@ BrowseChildren (DJFS* const self, const char* const sub_path,
+ 	    if ( file.playlist &&
+ 		 ( (self->flags & DJFS_USE_PLAYLISTS) ||
+ 		   res_size < 0 ||
+-		   res_size > FILE_BUFFER_MAX_CONTENT_LENGTH) ) {
++		   (USE_CURL == 0 && res_size > FILE_BUFFER_MAX_CONTENT_LENGTH)) ) {
+ 	      char* name = MediaFile_GetName (tmp_ctx, o, file.playlist);
+ 	      FILE_BEGIN (name) {
+ 		const char* const str = MediaFile_GetPlaylistContent 
+diff --git a/djmount/file_buffer.c b/djmount/file_buffer.c
+index 601c45f..4f8b7c7 100644
+--- a/djmount/file_buffer.c
++++ b/djmount/file_buffer.c
+@@ -43,17 +43,23 @@
+ #	define HTTP_DEFAULT_TIMEOUT	30
+ #endif
+ 
++#if USE_CURL
++#include "curl_util.h"
++#endif
+ 
+ struct _FileBuffer {
+ 	bool		exact_read;
+ 	off_t		file_size; 
+ 	const char*	url;
+ 	const char*	content;
+-	void*		handle;
+-	off_t		offset;
++	off_t	     	offset;
++#if USE_CURL
++	Curl_File*  handle;
++#else
++	void*		    handle;
++#endif
+ };
+ 
+-
+ /******************************************************************************
+  * FileBuffer_CreateFromString
+  *****************************************************************************/
+@@ -166,7 +172,50 @@ FileBuffer_Read (FileBuffer* file, char* buffer,
+ 			    " offset %" PRIdMAX " (file_size %" PRIdMAX ")",
+ 			    file->url, (intmax_t) size, (intmax_t) offset,
+ 			    (intmax_t) file->file_size);
+-		
++
++		// Adjust request to file size, if known
++		if (file->file_size >= 0) {
++			if (offset > file->file_size) {
++				Log_Printf (LOG_ERROR,
++					"GetHttp url '%s' overflowed "
++					"size %" PRIdMAX " offset %" PRIdMAX,
++					file->url, (intmax_t) file->file_size,
++					(intmax_t) offset);
++				return -EOVERFLOW;
++			} else if (offset > file->file_size - size) {
++				size = MAX (0, file->file_size - offset);
++				Log_Printf (LOG_DEBUG,
++					    "GetHttp truncate to size %"
++					    PRIdMAX, (intmax_t) size);
++			}
++		}
++
++#if USE_CURL
++		if (file->handle == NULL) {
++			Log_Printf(LOG_DEBUG, "Opening %s", file->url);
++			file->handle = Curl_Open(file->url);
++			file->offset = 0;
++			if (file->handle == NULL) {
++				Log_Printf(LOG_ERROR, "curl_open() failed");
++				return -EIO;
++			}
++		}
++		if (file->offset != offset) {
++			Log_Printf(LOG_DEBUG, "Adjusting offset to %zd from %zd",
++				offset, file->offset);
++			Curl_Seek(file->handle, offset);
++			file->offset = offset;
++		}
++		do {
++			size_t read_size = size - n;
++			if ((read_size = Curl_Read(file->handle, buffer, read_size)) < 0) {
++				Log_Printf(LOG_ERROR, "Curl_Read() returned %zd", n);
++				return -EIO;
++			}
++			n += read_size;
++			file->offset += read_size;
++		} while (file->exact_read && n < size);
++#else
+ 		/*
+ 		 * Warning : the libupnp API (UpnpOpenHttpGetEx, 
+ 		 * UpnpReadHttpGet ...) has strange prototypes for length 
+@@ -182,16 +231,6 @@ FileBuffer_Read (FileBuffer* file, char* buffer,
+ 			return -EOVERFLOW; // ---------->
+ 		}
+ 
+-		// Adjust request to file size, if known
+-		if (file->file_size >= 0) {
+-			if (offset > file->file_size - size) {
+-				size = MAX (0, file->file_size - offset);
+-				Log_Printf (LOG_DEBUG, 
+-					    "GetHttp truncate to size %" 
+-					    PRIdMAX, (intmax_t) size);
+-			}
+-		}
+-
+ 		int rc;
+ 		int contentLength = 0;
+ 		int httpStatus    = 0;
+@@ -208,14 +247,14 @@ FileBuffer_Read (FileBuffer* file, char* buffer,
+ 			rc = UpnpOpenHttpGetEx (file->url, &file->handle,
+ 						    &contentType, &contentLength,
+ 						    &httpStatus,
+-						    offset, file->file_size,
++						    offset, INT_MAX,
+ 						    HTTP_DEFAULT_TIMEOUT
+ 						    );
+ 			if (rc != UPNP_E_SUCCESS)
+ 				goto HTTP_CHECK; // ---------->
+ 			file->offset = offset;
+ 			freshStream = true;
+-			Log_Printf(LOG_DEBUG, "Opened stream: %s", file->url);
++			Log_Printf(LOG_DEBUG, "Opened stream (offset=%i): %s", offset, file->url);
+ 		}
+ 
+ 		/*
+@@ -267,6 +306,7 @@ FileBuffer_Read (FileBuffer* file, char* buffer,
+ 			default:			n = -EIO;    break;
+ 			}
+ 		}
++#endif
+ 	}
+ 	return n;
+ }
+@@ -279,7 +319,12 @@ void
+ FileBuffer_Close(FileBuffer *file)
+ {
+ 	if (file->url && file->handle) {
++#if USE_CURL
++		Log_Printf (LOG_DEBUG, "Closed %s", file->url);
++		Curl_Close (file->handle);
++#else
+ 		(void) UpnpCloseHttpGet (file->handle);
++#endif
+ 	}
+ }
+ 
+diff --git a/djmount/fuse_main.c b/djmount/fuse_main.c
+index b79c81e..a035a9a 100644
+--- a/djmount/fuse_main.c
++++ b/djmount/fuse_main.c
+@@ -51,7 +51,9 @@
+ #include "charset.h"
+ #include "minmax.h"
+ 
+-
++#if USE_CURL
++#include "curl_util.h"
++#endif
+ 
+ /*****************************************************************************
+  * Configuration related to specific FUSE versions
+@@ -495,6 +497,7 @@ stdout_print (Log_Level level, const char* msg)
+ 	Charset_PrintString (CHARSET_FROM_UTF8, msg, stdout);
+ 	Log_EndColor (level, stdout);
+ 	printf ("\n");
++	fflush(stdout);
+ }
+ 
+ 
+@@ -787,6 +790,13 @@ main (int argc, char *argv[])
+ 		}
+ 	}
+ 	
++#if USE_CURL
++	/*
++	 * Initialie cURL
++	 */
++	Curl_Init();
++#endif
++
+ 	/*
+ 	 * Initialise UPnP Control point and starts FUSE file system
+ 	 */

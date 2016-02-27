@@ -4,5 +4,8 @@
 	<longdescription>Mount uPnP AV devices as FUSE filesystem</longdescription>
 	<use>
 		<flag name="charset">Support charset mount option</flag>
+		<flag name="curl">
+			Use curl instead of libupnp for streaming (supports files >2GB)
+		</flag>
 	</use>
 </pkgmetadata>

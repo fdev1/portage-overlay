@@ -13,12 +13,13 @@ SRC_URI="http://downloads.sourceforge.net/project/djmount/djmount/0.71/djmount-0
 LICENSE="GPL-2"
 SLOT="0"
 KEYWORDS="~x86 ~amd64"
-IUSE="charset debug +networkmanager systemd"
+IUSE="charset +curl debug +networkmanager systemd"
 
 DEPEND="
 	sys-fs/fuse
 	sys-libs/talloc
-	net-libs/libupnp"
+	net-libs/libupnp
+	curl? ( >=net-misc/curl-7.45.0 )"
 RDEPEND="${DEPEND}"
 
 pkg_setup()
@@ -35,13 +36,14 @@ src_prepare()
 	epatch "${FILESDIR}/djmount-0.71-unbundle-libs.patch"
 	epatch "${FILESDIR}/djmount-0.71-fix-warnings.patch"
 	epatch "${FILESDIR}/djmount-0.71-optimize-stream.patch"
-	epatch "${FILESDIR}/djmount-0.71-disable-playlists.patch"
+	epatch "${FILESDIR}/djmount-0.71-curl-support.patch"
 	eautoreconf
 }
 
 src_configure()
 {
 	econf \
+		$(use_with curl) \
 		$(use_enable charset) \
 		$(use_enable debug)
 }
