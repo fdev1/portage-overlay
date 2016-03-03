@@ -1,9 +1,0 @@
-[Unit]
-Description=djmount keep-alive service
-RefuseManualStart=yes
-RefuseManualStop=yes
-
-[Service]
-Type=oneshot
-StandardOutput=null
-ExecStart=/bin/ls /upnp
