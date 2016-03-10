@@ -21,7 +21,7 @@ HOMEPAGE="https://sourceforge.net/projects/djmount/"
 
 LICENSE="GPL-2"
 SLOT="0"
-IUSE="charset +curl debug +networkmanager systemd"
+IUSE="charset +curl debug systemd"
 
 DEPEND="
 	sys-fs/fuse
@@ -32,9 +32,9 @@ RDEPEND="${DEPEND}"
 
 pkg_setup()
 {
-	if [ ! -d /upnp ]; then
-		mkdir -p /upnp
-		chattr +i /upnp
+	if [ ! -d /media/upnp ]; then
+		mkdir -p /media/upnp
+		chattr +i /media/upnp
 	fi
 }
 
@@ -67,13 +67,6 @@ src_install()
 		else
 			sed -i -e "s:@ARGS@::g" \
 				"${ED}/usr/lib/systemd/system/avmount.service" || die
-		fi
-
-		if use networkmanager; then
-			dodir /etc/NetworkManager/dispatcher.d
-			insinto /etc/NetworkManager/dispatcher.d
-			insopts --mode=755
-			doins "${FILESDIR}/40-avmount"
 		fi
 	fi
 }

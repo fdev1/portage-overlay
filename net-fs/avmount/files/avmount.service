@@ -1,12 +1,11 @@
 [Unit]
 Description=Mount AV devices as filesystem
 After=network.target
-#Wants=avmount-keepalive.timer
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/avmount @ARGS@ -f -o allow_other /upnp
-ExecStopPost=/usr/bin/fusermount -u /upnp
+ExecStart=/usr/bin/avmount @ARGS@ -f -o allow_other /media/upnp
+ExecStopPost=-/usr/bin/fusermount -u /media/upnp
 
 [Install]
 WantedBy=multi-user.target
