@@ -21,13 +21,13 @@ HOMEPAGE="https://sourceforge.net/projects/djmount/"
 
 LICENSE="GPL-2"
 SLOT="0"
-IUSE="charset +curl debug systemd"
+IUSE="charset debug systemd"
 
 DEPEND="
 	sys-fs/fuse
 	sys-libs/talloc
 	net-libs/libupnp
-	curl? ( >=net-misc/curl-7.45.0 )"
+	>=net-misc/curl-7.45.0"
 RDEPEND="${DEPEND}"
 
 pkg_setup()
@@ -46,7 +46,6 @@ src_prepare()
 src_configure()
 {
 	econf \
-		$(use_with curl) \
 		$(use_enable charset) \
 		$(use_enable debug)
 }
