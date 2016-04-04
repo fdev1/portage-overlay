@@ -146,7 +146,31 @@ chroot_exec()
 {
 	einfo "Entering chroot jail..."
 	echo ${1}
-	env -i chroot ./chroot /bin/sh -c "export PATH=/bin && ldconfig && $1" || die
+
+	# We need to create a dummy sandbox.
+	# In the past this wasn't necessary but the latest
+	# sandbox will abort if procfs is missing. This will
+	# cause the library loader to throw an error if the
+	# program executed is 32-bits on a multilib system but
+	# the error is ignored.
+	#
+	# TODO: Possible workarounds are a) detecting the file
+	# type and creating a propper dummy sandbox, or b) use
+	# the $LIB DSO on LD_PRELOAD. Their drawbacks respectively:
+	# a) what if a 64bit process execs a 32bit one?, and
+	# b) only works on Linux.
+	mkdir -p ./chroot/usr/lib || die
+	(echo "" | gcc -x c -shared -o ./chroot/usr/lib/libsandbox.so -) || die
+
+	# Exec command inside chroot
+	LD_PRELOAD=./chroot/usr/lib/libsandbox.so \
+		env -i chroot ./chroot /bin/sh -c "
+			export LD_PRELOAD=/usr/lib/libsandbox.so &&
+			export PATH=/bin && 
+			ldconfig && $1" || die
+
+	# Remove dummy sandbox
+	rm ./chroot/usr/lib/libsandbox.so || die
 }
 
 chroot_cleanup()
