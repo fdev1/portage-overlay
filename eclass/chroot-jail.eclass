@@ -166,7 +166,7 @@ chroot_exec()
 	LD_PRELOAD=./chroot/usr/lib/libsandbox.so \
 		env -i chroot ./chroot /bin/sh -c "
 			export LD_PRELOAD=/usr/lib/libsandbox.so &&
-			export PATH=/bin && 
+			export PATH=/bin &&
 			ldconfig && $1" || die
 
 	# Remove dummy sandbox
