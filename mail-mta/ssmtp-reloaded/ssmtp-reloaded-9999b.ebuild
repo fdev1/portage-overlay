@@ -15,6 +15,9 @@ if [[ ${PV} == 9999* ]]; then
 		"https://github.com/fernando-rodriguez/ssmtp-reloaded.git"
 		"git://github.com/fernando-rodriguez/ssmtp-reloaded.git" )
 	KEYWORDS=""
+	if [[ ${PV} == 9999 ]]; then
+		EGIT_BRANCH="staging"
+	fi
 else
 	inherit eutils autotools user
 	SRC_URI="https://github.com/fernando-rodriguez/${PN}/archive/${PV}.tar.gz -> ssmtp-reloaded-${PV}.tar.gz"
