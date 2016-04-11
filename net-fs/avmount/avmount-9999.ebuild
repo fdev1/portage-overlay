@@ -5,13 +5,13 @@
 EAPI=5
 
 if [[ ${PV} == 9999* ]]; then
-	inherit eutils autotools git-r3
+	inherit eutils autotools git-r3 linux-info
 	EGIT_REPO_URI=(
 		"https://github.com/fernando-rodriguez/avmount.git"
 		"git://github.com/fernando-rodriguez/avmount.git" )
 	KEYWORDS=""
 else
-	inherit eutils autotools
+	inherit eutils autotools check-reqs linux-info
 	SRC_URI="https://github.com/fernando-rodriguez/${PN}/archive/${PV}.tar.gz -> avmount-${PV}.tar.gz"
 	KEYWORDS="~x86 ~amd64"
 fi
@@ -23,12 +23,20 @@ LICENSE="GPL-2"
 SLOT="0"
 IUSE="charset debug systemd"
 
-DEPEND="
+RDEPEND="
 	sys-fs/fuse
 	sys-libs/talloc
 	net-libs/libupnp
 	>=net-misc/curl-7.45.0"
-RDEPEND="${DEPEND}"
+DEPEND="${RDEPEND}
+	dev-lang/perl"
+
+pkg_pretend()
+{
+	CONFIG_CHECK="~FUSE_FS"
+	ERROR_FUSE="You must enable CONFIG_FUSE_FS in your kernel to use avmount"
+	check_extra_config
+}
 
 pkg_setup()
 {
