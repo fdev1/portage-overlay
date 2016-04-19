@@ -21,12 +21,13 @@ HOMEPAGE="https://sourceforge.net/projects/djmount/"
 
 LICENSE="GPL-2"
 SLOT="0"
-IUSE="charset debug systemd"
+IUSE="charset debug ipv6 systemd"
 
 RDEPEND="
 	sys-fs/fuse
 	sys-libs/talloc
 	net-libs/libupnp
+	ipv6? ( net-libs/libupnp[ipv6] )
 	>=net-misc/curl-7.45.0"
 DEPEND="${RDEPEND}
 	dev-lang/perl"
@@ -55,6 +56,7 @@ src_configure()
 {
 	econf \
 		$(use_enable charset) \
+		$(use_enable ipv6) \
 		$(use_enable debug)
 }
 
