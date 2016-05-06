@@ -4,8 +4,7 @@ After=network.target
 
 [Service]
 Type=simple
-ExecStart=/usr/bin/avmount @ARGS@ -f -o allow_other /media/upnp
-#KillMode=process
+ExecStart=/usr/bin/avmount @ARGS@ -f --port 49153 -o allow_other /media/upnp
 
 [Install]
 WantedBy=multi-user.target
