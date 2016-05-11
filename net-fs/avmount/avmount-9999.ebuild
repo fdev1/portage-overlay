@@ -39,14 +39,6 @@ pkg_pretend()
 	check_extra_config
 }
 
-pkg_setup()
-{
-	if [ ! -d /media/upnp ]; then
-		mkdir -p /media/upnp
-		chattr +i /media/upnp
-	fi
-}
-
 src_prepare()
 {
 	eautoreconf
@@ -55,27 +47,8 @@ src_prepare()
 src_configure()
 {
 	econf \
+		$(use_with systemd) \
 		$(use_enable charset) \
 		$(use_enable ipv6) \
 		$(use_enable debug)
-}
-
-src_install()
-{
-	default
-
-	if use systemd; then
-		dodir /usr/lib/systemd/system
-		insinto /usr/lib/systemd/system
-		insopts --mode=644
-		doins "${FILESDIR}/avmount.service"
-
-		if use debug; then
-			sed -i -e "s:@ARGS@:-d -l /var/log/avmount.log:g" \
-				"${ED}/usr/lib/systemd/system/avmount.service" || die
-		else
-			sed -i -e "s:@ARGS@::g" \
-				"${ED}/usr/lib/systemd/system/avmount.service" || die
-		fi
-	fi
 }
