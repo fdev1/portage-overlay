@@ -9,6 +9,9 @@ if [[ ${PV} == 9999* ]]; then
 	EGIT_REPO_URI=(
 		"https://github.com/fernando-rodriguez/avmount.git"
 		"git://github.com/fernando-rodriguez/avmount.git" )
+	if [[ ${PV} == 9999 ]]; then
+		EGIT_BRANCH="staging"
+	fi
 	KEYWORDS=""
 else
 	inherit eutils autotools check-reqs linux-info
