@@ -25,7 +25,7 @@ IUSE="charset debug ipv6 systemd"
 
 RDEPEND="
 	sys-fs/fuse
-	sys-libs/talloc
+	>=sys-libs/talloc-2.1.5
 	net-libs/libupnp
 	ipv6? ( net-libs/libupnp[ipv6] )
 	>=net-misc/curl-7.45.0"
