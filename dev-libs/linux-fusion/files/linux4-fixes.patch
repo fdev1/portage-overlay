@@ -1,0 +1,81 @@
+diff --git a/Makefile b/Makefile
+index 0115a44..23f6cde 100644
+--- a/Makefile
++++ b/Makefile
+@@ -62,11 +62,15 @@ ifeq ($(shell test -e $(KERNEL_BUILD)/include/linux/config.h && echo yes),yes)
+   CPPFLAGS += -DHAVE_LINUX_CONFIG_H
+ endif
+ 
++ifeq ($(K_VERSION),4)
++  KMAKEFILE = Makefile-2.6
++else
+ ifeq ($(K_VERSION),3)
+   KMAKEFILE = Makefile-2.6
+ else
+   KMAKEFILE = Makefile-2.$(K_PATCHLEVEL)
+ endif
++endif
+ 
+ check-version = $(shell expr \( $(K_VERSION) \* 65536 + $(K_PATCHLEVEL) \* 256 + $(K_SUBLEVEL) \) \>= \( $(1) \* 65536 + $(2) \* 256 + $(3) \))
+ 
+diff --git a/linux/drivers/char/fusion/fusionee.c b/linux/drivers/char/fusion/fusionee.c
+index ef067f5..b03c489 100644
+--- a/linux/drivers/char/fusion/fusionee.c
++++ b/linux/drivers/char/fusion/fusionee.c
+@@ -925,7 +925,7 @@ fusionee_kill(FusionDev * dev,
+                if (f != fusionee && (!target || target == f->id)) {
+                     struct task_struct *p;
+ 
+-#if defined(CONFIG_TREE_RCU) || defined(CONFIG_TREE_PREEMPT_RCU) || defined(CONFIG_TINY_RCU) || defined(rcu_read_lock)
++#if 1 || defined(CONFIG_TREE_RCU) || defined(CONFIG_TREE_PREEMPT_RCU) || defined(CONFIG_TINY_RCU) || defined(rcu_read_lock)
+                     rcu_read_lock();
+ #else
+                     read_lock(&tasklist_lock);
+@@ -946,7 +946,7 @@ fusionee_kill(FusionDev * dev,
+                          }
+                     }
+ 
+-#if defined(CONFIG_TREE_RCU) || defined(CONFIG_TREE_PREEMPT_RCU) || defined(CONFIG_TINY_RCU) || defined(rcu_read_unlock)
++#if 1 || defined(CONFIG_TREE_RCU) || defined(CONFIG_TREE_PREEMPT_RCU) || defined(CONFIG_TINY_RCU) || defined(rcu_read_unlock)
+                     rcu_read_unlock();
+ #else
+                     read_unlock(&tasklist_lock);
+diff --git a/one/one_udp.c b/one/one_udp.c
+index 26b9e6a..f1243ea 100644
+--- a/one/one_udp.c
++++ b/one/one_udp.c
+@@ -183,13 +183,21 @@ ksocket_send_iov( struct socket      *sock,
+      msg.msg_namelen  = sizeof(struct sockaddr_in);
+      msg.msg_control = NULL;
+      msg.msg_controllen = 0;
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 19, 0)
++     iov_iter_init(&msg.msg_iter, WRITE, (struct iovec *)iov, iov_count, len);
++#else
+      msg.msg_iov = (struct iovec*) iov;
+      msg.msg_iovlen = iov_count;
++#endif
+      msg.msg_control = NULL;
+ 
+      oldfs = get_fs();
+      set_fs(KERNEL_DS);
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 19, 0)
++     size = sock_sendmsg(sock,&msg);
++#else
+      size = sock_sendmsg(sock,&msg,len);
++#endif
+      set_fs(oldfs);
+ 
+      return size;
+@@ -218,8 +226,12 @@ ksocket_receive(struct socket* sock, struct sockaddr_in* addr, void *buf, int le
+      msg.msg_namelen  = sizeof(struct sockaddr_in);
+      msg.msg_control = NULL;
+      msg.msg_controllen = 0;
++#if LINUX_VERSION_CODE >= KERNEL_VERSION(3, 19, 0)
++     iov_iter_init(&msg.msg_iter, WRITE, &iov, 1, len);
++#else
+      msg.msg_iov = &iov;
+      msg.msg_iovlen = 1;
++#endif
+      msg.msg_control = NULL;
+ 
+      oldfs = get_fs();
