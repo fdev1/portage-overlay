@@ -32,7 +32,7 @@ SRC_URI="http://directfb.org/downloads/Core/${PN}-${PV:0:3}/${P}.tar.gz
 LICENSE="LGPL-2.1"
 SLOT="0"
 KEYWORDS="~alpha ~amd64 ~arm ~hppa ~ia64 -mips ~ppc ~ppc64 ~sh -sparc ~x86"
-IUSE="alsa bmp cddb debug divine drmkms +dynload doc egl fbcon fusiondale fusionsound gif gles2 gstreamer imlib2 input_hub jpeg jpeg2k mad cpu_flags_x86_mmx mng mpeg2 mpeg3 multicore opengl oss png pnm sawman sdl cpu_flags_x86_sse static-libs swfdec tiff timidity tremor truetype v4l vdpau vorbis webp X xine zlib ${IUV} ${IUD}"
+IUSE="alsa bmp cddb debug divine drmkms +dynload doc egl fbcon fusiondale fusionsound gif gles2 gstreamer imlib2 input_hub jpeg jpeg2k mad cpu_flags_x86_mmx mng mpeg2 mpeg3 multi multicore opengl oss png pnm sawman sdl cpu_flags_x86_sse static-libs swfdec tiff timidity tremor truetype v4l vdpau vorbis webp X xine zlib ${IUV} ${IUD}"
 REQUIRED_USE="gles2? ( opengl )"
 
 # ffmpeg useflag broken
@@ -50,6 +50,7 @@ RDEPEND="
 	mad? ( media-libs/libmad )
 	mng? ( media-libs/libmng )
 	mpeg3? ( media-libs/libmpeg3 )
+	multi? ( dev-libs/linux-fusion )
 	opengl? ( media-libs/mesa[gbm,egl?,gles2?] x11-libs/libdrm )
 	png? ( media-libs/libpng:0 )
 	sdl? ( media-libs/libsdl )
@@ -183,8 +184,7 @@ src_configure() {
 		${sdlconf} \
 		--with-gfxdrivers="${gfxdrivers}" \
 		--with-inputdrivers="${inputdrivers}" \
-		--enable-multi \
-		--disable-multi-kernel \
+		$(use_enable multi) \
 		--disable-vnc
 }
 

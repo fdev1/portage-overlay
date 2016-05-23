@@ -31,6 +31,7 @@
 			added/removed</flag>
 		<flag name="mpeg2">build MPEG2 image provider</flag>
 		<flag name="mpeg3">build Libmpeg3 video provider</flag>
+		<flag name="multi">Enable multi application core</flag>
 		<flag name="multicore">enable multicore support</flag>
 		<flag name="pnm">build PNM (PBM/PGM/PPM) image provider</flag>
 		<flag name="sawman">enable SaWMan (window manager and
