@@ -183,6 +183,7 @@ src_configure() {
 		${sdlconf} \
 		--with-gfxdrivers="${gfxdrivers}" \
 		--with-inputdrivers="${inputdrivers}" \
+		--enable-multi
 		--disable-vnc
 }
 
