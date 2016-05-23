@@ -25,7 +25,6 @@ MODULE_NAMES="linux/drivers/char/fusion/fusion(misc:${S}) one/linux-one(misc:${S
 
 pkg_setup() {
 	linux-mod_pkg_setup
-
 	BUILD_PARAMS="KERN_DIR=${KV_DIR} KERNOUT=${KV_OUT_DIR} V=1 KBUILD_VERBOSE=1"
 }
 
@@ -36,6 +35,8 @@ src_prepare() {
 
 src_install() {
 	linux-mod_src_install
+	insinto /usr/include/linux
+	doins "${S}/linux/include/linux/fusion.h"
 }
 
 pkg_postinst() {
