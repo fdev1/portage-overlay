@@ -7,5 +7,7 @@
 		<flag name="kdm">Install KDM themes</flag>
 		<flag name="kde">Install KDE themes</flag>
 		<flag name="plymouth">Install Plymouth themes</flag>
+		<flag name="sddm">Install SDDM themes</flag>
+		<flag name="icons">Install icon themes</flag>
 	</use>
 </pkgmetadata>
