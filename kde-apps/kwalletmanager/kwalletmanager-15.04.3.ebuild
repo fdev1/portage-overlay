@@ -1,4 +1,4 @@
-# Copyright 1999-2015 Gentoo Foundation
+# Copyright 1999-2016 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Id$
 
@@ -10,13 +10,21 @@ inherit kde4-base
 DESCRIPTION="KDE Wallet Management Tool"
 HOMEAGE="https://www.kde.org/applications/system/kwalletmanager
 https://utils.kde.org/projects/kwalletmanager"
-KEYWORDS="amd64 ~arm ~ppc ~ppc64 x86 ~amd64-linux ~x86-linux"
-IUSE="debug"
+SRC_URI="mirror://kde/Attic/applications/${PV}/src/${P}.tar.xz"
 
-RDEPEND="!kde-base/kwallet:4"
+KEYWORDS="amd64 x86"
+IUSE="debug minimal"
 
 src_prepare()
 {
-	epatch "${FILESDIR}/kwalletmanager-kauth.patch"
+	epatch "${FILESDIR}/kwalletmanager-15.04.3-kauth.patch"
 	kde4-base_src_prepare
+}
+
+src_install() {
+	kde4-base_src_install
+
+	if use minimal ; then
+		rm -r "${D}"/usr/share/icons
+	fi
 }
