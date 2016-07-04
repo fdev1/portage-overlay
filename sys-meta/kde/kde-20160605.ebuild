@@ -4,8 +4,8 @@
 
 EAPI=5
 
-DESCRIPTION="A Lean and Mean install of KDE"
-HOMEPAGE="https://google.com"
+DESCRIPTION="A lightweight install of KDE"
+HOMEPAGE="https://nourl.com"
 
 LICENSE="MIT"
 SLOT="0"
