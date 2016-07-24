@@ -11,5 +11,6 @@
 		<flag name="wallpapers">Install wallpapers</flag>
 		<flag name="admintools">Install administration GUI tools</flag>
 		<flag name="bogus">DO NOT ENABLE THIS FLAG</flag>
+		<flag name="plasma5">Install the plasma5 desktop</flag>
 	</use>
 </pkgmetadata>
