@@ -65,13 +65,9 @@ DEPEND="
 		kde-plasma/systemsettings
 		kde-plasma/plasma-nm
 		kde-plasma/powerdevil
+		kde-plasma/khotkeys
+		kde-plasma/kmenuedit
 		bluetooth? ( kde-plasma/bluedevil )
-		kde-apps/kdeartwork-colorschemes
-		kde-apps/kdeartwork-desktopthemes
-		kde-apps/kdeartwork-emoticons
-		kde-apps/kdeartwork-iconthemes
-		kde-apps/kdeartwork-wallpapers:5
-		kde-apps/kdeartwork-weatherwallpapers:5
 	)
 	!plasma5? (
 		kde-base/plasma-workspace
@@ -124,7 +120,7 @@ DEPEND="
 		)
 		kde-apps/kuser
 	)
-	wallpapers? ( kde-apps/kde-wallpapers:4 )
+	wallpapers? ( kde-plasma/plasma-workspace-wallpapers )
 	konqueror? (
 		kde-apps/konq-plugins
 		kde-apps/konqueror

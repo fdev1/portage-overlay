@@ -10,17 +10,14 @@ HOMEPAGE="https://nourl.com"
 LICENSE="MIT"
 SLOT="0"
 KEYWORDS="-* ~x86 ~amd64"
-IUSE="+kdm +multimedia +kdepim +bluetooth screensaver konqueror +wallpapers admintools bogus"
+IUSE="+kdm +multimedia +kdepim +bluetooth screensaver konqueror +wallpapers admintools bogus plasma5"
 
 DEPEND="
 	kdepim? ( kde-apps/kdepim-meta )
-	kde-base/kdeplasma-addons
 	kdm? (
 		x11-misc/sddm
 		kde-plasma/sddm-kcm
 	)
-	kde-base/plasma-workspace
-	kde-base/powerdevil
 	kde-apps/ark:5
 	kde-apps/audiocd-kio
 	kde-apps/ffmpegthumbs:5
@@ -62,44 +59,74 @@ DEPEND="
 	kde-apps/konsole:5
 	kde-apps/kwrite:5
 	kde-apps/phonon-kde
-	kde-base/krunner
-	kde-base/kcminit
-	kde-base/kdebase-startkde
-	kde-base/kdebase-cursors
-	kde-base/kcheckpass
-	kde-apps/kdepasswd
-	kde-base/khotkeys
-	kde-base/klipper
-	kde-base/kmenuedit
-	kde-base/ksmserver
-	kde-base/ksplash
-	kde-base/kstartupconfig
-	kde-base/kstyles
-	kde-base/ksystraycmd
-	kde-base/kwin
-	kde-base/kwrited
-	kde-base/libkworkspace
-	kde-base/liboxygenstyle
-	kde-base/libplasmaclock
-	kde-base/libplasmagenericshell
-	kde-base/libtaskmanager
 	kde-apps/plasma-apps
-	kde-base/plasma-workspace
-	kde-base/powerdevil
+	plasma5? (
+		kde-plasma/plasma-desktop
+		kde-plasma/systemsettings
+		kde-plasma/plasma-nm
+		kde-plasma/powerdevil
+		kde-plasma/khotkeys
+		kde-plasma/kmenuedit
+		bluetooth? ( kde-plasma/bluedevil )
+		kde-apps/kdeartwork-colorschemes
+		kde-apps/kdeartwork-desktopthemes
+		kde-apps/kdeartwork-emoticons
+		kde-apps/kdeartwork-iconthemes
+		kde-apps/kdeartwork-wallpapers:5
+		kde-apps/kdeartwork-weatherwallpapers:5
+	)
+	!plasma5? (
+		kde-base/plasma-workspace
+		kde-base/ksplash
+		kde-base/khotkeys
+		kde-base/kdeplasma-addons
+		kde-base/systemsettings
+		kde-base/solid-actions-kcm
+		kde-base/plasma-workspace
+		kde-base/krunner
+		kde-base/kdebase-startkde
+		kde-base/kcminit
+		kde-base/kwin
+		kde-base/ksmserver
+		kde-base/kmenuedit
+		kde-base/libplasmaclock
+		kde-base/libkworkspace
+		kde-base/kstyles
+		kde-base/libplasmagenericshell
+		kde-base/klipper
+		kde-base/ksystraycmd
+		kde-base/kstartupconfig
+		kde-base/libtaskmanager
+		kde-base/kdebase-cursors
+		kde-base/kcheckpass
+		kde-base/liboxygenstyle
+		kde-base/kwrited
+		kde-apps/kdeartwork-colorschemes
+		kde-apps/kdeartwork-desktopthemes
+		kde-apps/kdeartwork-emoticons
+		kde-apps/kdeartwork-iconthemes
+		kde-apps/kdeartwork-wallpapers:4
+		kde-apps/kdeartwork-weatherwallpapers:4
+		kde-apps/kdeartwork-styles
+		kde-apps/kdepasswd
+		net-wireless/bluedevil
+		kde-misc/plasma-nm
+		kde-base/powerdevil
+	)
 	kde-base/qguiplatformplugin_kde
-	kde-base/solid-actions-kcm
-	kde-base/systemsettings
 	bogus? (
 		kde-base/kephal
 		kde-base/freespacenotifier
 	)
 
 	admintools? (
-		kde-base/ksysguard
-		kde-base/kinfocenter
+		!plasma5? (
+			kde-base/ksysguard
+			kde-base/kinfocenter
+		)
 		kde-apps/kuser
 	)
-	wallpapers? ( kde-apps/kde-wallpapers:4 )
+	wallpapers? ( kde-plasma/plasma-workspace-wallpapers )
 	konqueror? (
 		kde-apps/konq-plugins
 		kde-apps/konqueror
@@ -107,13 +134,6 @@ DEPEND="
 		kde-apps/nsplugins
 	)
 
-	kde-apps/kdeartwork-colorschemes
-	kde-apps/kdeartwork-desktopthemes
-	kde-apps/kdeartwork-emoticons
-	kde-apps/kdeartwork-iconthemes
-	kde-apps/kdeartwork-wallpapers:4
-	kde-apps/kdeartwork-weatherwallpapers:4
-	kde-apps/kdeartwork-styles
 	screensaver? (
 		kde-apps/kdeartwork-kscreensaver
 		kde-base/kscreensaver
