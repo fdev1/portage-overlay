@@ -39,7 +39,7 @@ inherit check-reqs flag-o-matic toolchain-funcs eutils gnome2-utils mozconfig-v6
 DESCRIPTION="Firefox Web Browser"
 HOMEPAGE="http://www.mozilla.com/firefox"
 
-KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~hppa ~ia64 ~ppc ~ppc64 ~x86 ~amd64-linux ~x86-linux"
+KEYWORDS="~alpha ~amd64 ~arm ~arm64 ~ia64 ~ppc ~ppc64 ~x86 ~amd64-linux ~x86-linux"
 
 SLOT="0"
 LICENSE="MPL-2.0 GPL-2 LGPL-2.1"
@@ -54,7 +54,7 @@ SRC_URI="${SRC_URI}
 ASM_DEPEND=">=dev-lang/yasm-1.1"
 
 RDEPEND="
-	>=dev-libs/nss-3.23
+	>=dev-libs/nss-3.24
 	>=dev-libs/nspr-4.12
 	selinux? ( sec-policy/selinux-mozilla )"
 
@@ -115,8 +115,8 @@ src_unpack() {
 
 src_prepare() {
 	# Apply our patches
-	eapply "${WORKDIR}/firefox" \
-		${FILESDIR}"/${PN}-42-external-password-prompt.patch
+	eapply 	"${WORKDIR}/firefox" \
+		"${FILESDIR}"/${PN}-48-external-password-prompt.patch 
 #		"${FILESDIR}"/${PN}-45-qt-widget-fix.patch
 
 	if ! tc-ld-is-gold && has_version ">=sys-devel/binutils-2.26" ; then
