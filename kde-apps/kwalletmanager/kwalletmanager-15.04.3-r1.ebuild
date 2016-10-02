@@ -2,7 +2,7 @@
 # Distributed under the terms of the GNU General Public License v2
 # $Id$
 
-EAPI=5
+EAPI=6
 
 KDE_HANDBOOK="optional"
 inherit kde4-base
@@ -12,19 +12,18 @@ HOMEAGE="https://www.kde.org/applications/system/kwalletmanager
 https://utils.kde.org/projects/kwalletmanager"
 SRC_URI="mirror://kde/Attic/applications/${PV}/src/${P}.tar.xz"
 
-KEYWORDS="amd64 x86"
-IUSE="debug minimal"
+KEYWORDS="amd64 ~arm x86"
+IUSE="debug"
 
-src_prepare()
-{
+DEPEND=""
+RDEPEND="|| ( >=kde-base/legacy-icons-4.11.22-r1 kde-apps/kwalletmanager:5 )"
+
+src_prepare() {
 	epatch "${FILESDIR}/kwalletmanager-15.04.3-kauth.patch"
 	kde4-base_src_prepare
 }
 
 src_install() {
 	kde4-base_src_install
-
-	if use minimal ; then
-		rm -r "${D}"/usr/share/icons
-	fi
+	rm -r "${ED}"usr/share/icons  || die
 }
