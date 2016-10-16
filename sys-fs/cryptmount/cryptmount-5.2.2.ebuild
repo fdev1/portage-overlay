@@ -6,8 +6,7 @@ EAPI=5
 
 DESCRIPTION="Allows management and user-mode mounting of encrypted filesystems."
 HOMEPAGE="http://sourceforge.net/projects/cryptmount/"
-#SRC_URI="http://downloads.sourceforge.net/project/${PN}/${PN}/${P}/${P}.tar.gz -> ${P}.tar.gz"
-SRC_URI="http://downloads.sourceforge.net/project/${PN}/${PN}/${PN}-5.2/${P}.tar.gz -> ${P}.tar.gz"
+SRC_URI="http://downloads.sourceforge.net/project/${PN}/${PN}/${P%.*}/${P}.tar.gz -> ${P}.tar.gz"
 
 LICENSE="GPL-2"
 SLOT="0"
