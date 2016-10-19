@@ -44,6 +44,6 @@ RDEPEND="${DEPEND}
 "
 
 src_prepare() {
-	epatch "${FILESDIR}/kwalletmanager-15.04.3-kauth.patch"
+	epatch "${FILESDIR}/kwalletmanager-16.04.3-kauth.patch"
 	kde5_src_prepare
 }
