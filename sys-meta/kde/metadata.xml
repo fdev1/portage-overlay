@@ -3,7 +3,8 @@
 <pkgmetadata>
 	<longdescription>Like kde-meta but without the crap</longdescription>
 	<use>
-		<flag name="kdm">Install kdm</flag>
+		<flag name="kdm">Install a display manager</flag>
+		<flag name="gtk">Install Breeze theme for GTK+</flag>
 		<flag name="multimedia">Install multimedia extras (non-KDE)</flag>
 		<flag name="kdepim">Install kde pim</flag>
 		<flag name="konqueror">Install Konqueror web browser</flag>
