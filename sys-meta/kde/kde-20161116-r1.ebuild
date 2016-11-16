@@ -142,7 +142,7 @@ DEPEND="
 	)
 
 	multimedia? (
-		sys-meta/base-system multimedia
+		sys-meta/base-system[multimedia]
 		media-sound/clementine[skydrive,googledrive,dropbox,ipod,lastfm,moodbar,ubuntu-one]
 		media-sound/clementine[mtp,wiimote,box,mms]
 		media-video/cheese
