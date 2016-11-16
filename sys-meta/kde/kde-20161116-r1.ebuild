@@ -38,7 +38,7 @@ DEPEND="
 	kde-apps/krdc:5
 	kde-apps/krfb:5
 	kde-apps/spectacle
-	kde-apps/kwalletmanager:4
+	kde-apps/kwalletmanager:5
 	kde-apps/libkcddb
 	kde-apps/libkcompactdisc
 	kde-apps/libkdcraw:5
