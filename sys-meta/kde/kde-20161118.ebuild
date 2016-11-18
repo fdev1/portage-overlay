@@ -10,10 +10,10 @@ HOMEPAGE="https://nourl.com"
 LICENSE="MIT"
 SLOT="0"
 KEYWORDS="-* ~x86 ~amd64"
-IUSE="+kdm +multimedia +kdepim +bluetooth +gtk screensaver konqueror +wallpapers admintools bogus +plasma5 x11-apps"
+IUSE="+kdm +multimedia kdepim +bluetooth +gtk screensaver konqueror +wallpapers admintools bogus x11-apps"
 
 DEPEND="
-	kdepim? ( kde-apps/kdepim-meta )
+	kdepim? ( kde-apps/kdepim-meta:5 )
 	kdm? (
 		x11-misc/sddm
 		kde-plasma/sddm-kcm
@@ -63,57 +63,19 @@ DEPEND="
 	kde-apps/kwrite:5
 	kde-apps/phonon-kde
 	kde-apps/plasma-apps
-	plasma5? (
-		kde-plasma/plasma-desktop
-		kde-plasma/systemsettings
-		kde-plasma/plasma-nm
-		kde-plasma/powerdevil
-		kde-plasma/khotkeys
-		kde-plasma/kmenuedit
-		kde-plasma/user-manager
-		kde-plasma/kinfocenter
-		bluetooth? ( kde-plasma/bluedevil )
-		gtk? (
-			kde-plasma/breeze-gtk
-		)
-	)
-	!plasma5? (
-		kde-base/plasma-workspace
-		kde-base/ksplash
-		kde-base/khotkeys
-		kde-base/kdeplasma-addons
-		kde-base/systemsettings
-		kde-base/solid-actions-kcm
-		kde-base/plasma-workspace
-		kde-base/krunner
-		kde-base/kdebase-startkde
-		kde-base/kcminit
-		kde-base/kwin
-		kde-base/ksmserver
-		kde-base/kmenuedit
-		kde-base/libplasmaclock
-		kde-base/libkworkspace
-		kde-base/kstyles
-		kde-base/libplasmagenericshell
-		kde-base/klipper
-		kde-base/ksystraycmd
-		kde-base/kstartupconfig
-		kde-base/libtaskmanager
-		kde-base/kdebase-cursors
-		kde-base/kcheckpass
-		kde-base/liboxygenstyle
-		kde-base/kwrited
-		kde-base/kinfocenter
-		kde-apps/kdeartwork-colorschemes
-		kde-apps/kdeartwork-desktopthemes
-		kde-apps/kdeartwork-emoticons
-		kde-apps/kdeartwork-wallpapers:4
-		kde-apps/kdeartwork-weatherwallpapers:4
-		kde-apps/kdeartwork-styles
-		kde-apps/kdepasswd
-		net-wireless/bluedevil
-		kde-misc/plasma-nm
-		kde-base/powerdevil
+
+	kde-plasma/plasma-desktop
+	kde-plasma/systemsettings:5
+	kde-plasma/plasma-nm:5
+	kde-plasma/powerdevil:5
+	kde-plasma/khotkeys:5
+	kde-plasma/kmenuedit:5
+	kde-plasma/user-manager
+	kde-plasma/kinfocenter:5
+	bluetooth? ( kde-plasma/bluedevil:5 )
+	gtk? (
+		kde-plasma/breeze-gtk
+		kde-plasma/kde-gtk-config:5
 	)
 	kde-base/qguiplatformplugin_kde
 	bogus? (
@@ -122,10 +84,6 @@ DEPEND="
 	)
 
 	admintools? (
-		!plasma5? (
-			kde-base/ksysguard
-			kde-base/kinfocenter
-		)
 		kde-apps/kuser
 	)
 	wallpapers? ( kde-plasma/plasma-workspace-wallpapers )
