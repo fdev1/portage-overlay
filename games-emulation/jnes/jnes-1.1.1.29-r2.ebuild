@@ -35,8 +35,7 @@ src_install()
 	MERGEDIR="/opt/jnes"
 
 	# install Jnes
-	#
-	diropts --owner=root --group=root
+	diropts --owner=root --group=games --mode=775
 	dodir "${MERGEDIR}"
 	insinto "${MERGEDIR}"
 	insopts --owner=root --group=root --mode=755
@@ -79,38 +78,44 @@ src_install()
 	fi
 
 	# create config file
-	#
 	echo "[Jnes]" > jnes.ini || die "Install failed!"
 	echo "options=7052114013" >> jnes.ini || die "Install failed!"
+	#touch jnes-browser.cache || die
+	diropts --owner=root --group=games --mode=774
+	dodir /var/lib/win32/jnes
 	insopts --owner=root --group=games --mode=664
-	insinto /etc
+	insinto /var/lib/win32/jnes
 	doins jnes.ini
-	dosym /etc/jnes.ini "${MERGEDIR}/Jnes.ini"
+	dosym /var/lib/win32/jnes/jnes.ini "${MERGEDIR}/Jnes.ini"
+	dosym /var/lib/win32/jnes/browser.cache "${MERGEDIR}/browser.cache"
+	#dosym /var/cache/jnes/browser.cache "${MERGEDIR}/browser.cache"
+
+	#diropts --owner=root --group=games --mode=0775
+	#dodir /var/cache/jnes
 
 	# extract windows ico from executable
-	#
 	wrestool -x -t 14 "${S}/Jnes.exe" > Jnes.ico || die "Install failed!"
 	insopts --owner=root --group=root --mode=644
 	insinto "${MERGEDIR}"
 	doins Jnes.ico
 
 	# create executable script in /usr/bin
-	#
-	echo "#!/bin/sh" > jnes || die "Install failed!"
-	echo "wine \"${MERGEDIR}/Jnes.exe\"" >> jnes || die "Install failed!"
+	echo "#!/bin/sh" > jnes || die
+	echo 'cd $HOME' >> jnes || die
+	echo "wine \"${MERGEDIR}/Jnes.exe\"" >> jnes || die
 	insopts --owner=root --group=root --mode=755
 	doins jnes
 	dosym "${MERGEDIR}/jnes" /usr/bin/jnes
 
 	# create desktop menu entry
-	#
-	echo "[Desktop Entry]" > jnes.desktop || die "Install failed!"
-	echo "Name=Jnes" >> jnes.desktop || die "Install failed!"
-	echo "Comment=NES Emulator for Windows" >> jnes.desktop || die "Install failed!"
-	echo "Exec=wine ${MERGEDIR}/Jnes.exe" >> jnes.desktop || die "Install failed!"
-	echo "Icon=${MERGEDIR}/Jnes.ico" >> jnes.desktop || die "Install failed!"
-	echo "Terminal=false" >> jnes.desktop || die "Install failed!"
-	echo "Type=Application" >> jnes.desktop || die "Install failed!"
-	echo "Categories=Game;Emulator;" >> jnes.desktop || die "Install failed!"
-	domenu jnes.desktop || die "Install failed!"
+	echo "[Desktop Entry]" > jnes.desktop || die
+	echo "Name=Jnes" >> jnes.desktop || die
+	echo "Comment=NES Emulator for Windows" >> jnes.desktop || die
+	echo "Exec=${EROOT}/usr/bin/jnes" >> jnes.desktop || die
+	echo "Icon=${MERGEDIR}/Jnes.ico" >> jnes.desktop || die
+	echo "Terminal=false" >> jnes.desktop || die
+	echo "Type=Application" >> jnes.desktop || die
+	echo "Categories=Game;Emulator;" >> jnes.desktop || die
+	sed -ie "s://:/:g" jnes.desktop || die
+	domenu jnes.desktop
 }
