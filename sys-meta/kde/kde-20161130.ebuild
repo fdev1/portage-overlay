@@ -28,7 +28,6 @@ DEPEND="
 	kde-apps/gwenview:5
 	kde-apps/kamera:5
 	kde-apps/kcharselect:5
-	kde-apps/kdebase-kioslaves
 	kde-apps/kdegraphics-mobipocket
 	kde-apps/kdenetwork-filesharing:5
 	kde-apps/kget
@@ -54,7 +53,6 @@ DEPEND="
 	kde-apps/zeroconf-ioslave
 
 	kde-apps/dolphin:5
-	kde-apps/kdebase-runtime-meta:5
 	kde-apps/kdialog
 	kde-apps/keditbookmarks
 	kde-apps/kfind
