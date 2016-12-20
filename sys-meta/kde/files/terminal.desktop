@@ -1,0 +1,6 @@
+[Desktop Entry]
+Name=Virtual Terminal
+Comment=An X based virtual terminal
+Exec=/etc/X11/Sessions/terminal
+Icon=xterm
+Type=Application

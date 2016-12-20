@@ -1,0 +1,110 @@
+#!/bin/sh
+# $XConsortium: Xsession /main/10 1995/12/18 18:21:28 gildea $
+
+# redirect errors to a file in user's home directory if we can
+for errfile in "$HOME/.xsession-errors" "${TMPDIR-/tmp}/xses-$USER" "/tmp/xses-$USER"
+do
+	if ( cp /dev/null "$errfile" 2> /dev/null )
+	then
+		chmod 600 "$errfile"
+		exec > "$errfile" 2>&1
+		break
+	fi
+done
+
+# clean up after xbanner
+if which freetemp 2> /dev/null ; then
+	freetemp
+fi
+
+# create a resource for xterm fonts
+XVT_TMP="/tmp/xvt-$(id -u)"
+mkdir -p $XVT_TMP
+if [ -f $XVT_TMP/Xresources ]; then
+	rm -f $XVT_TMP/Xresources
+fi
+if [ -f $HOME/.Xresources ]; then
+	cp $HOME/.Xresources $XVT_TMP/Xresources
+else
+	touch $XVT_TMP/Xresources
+fi
+cat >> $XVT_TMP/Xresources << "EOF"
+xterm*font:     *-fixed-*-*-*-18-*
+EOF
+
+
+startup=$HOME/.xsession
+userresources=$XVT_TMP/Xresources
+usermodmap=$HOME/.Xmodmap 
+userxkbmap=$HOME/.Xkbmap
+
+sysresources=/etc/X11/Xresources 
+sysmodmap=/etc/X11/Xmodmap 
+sysxkbmap=/etc/X11/Xkbmap
+
+rh6sysresources=/etc/X11/xinit/Xresources 
+rh6sysmodmap=/etc/X11/xinit/Xmodmap 
+
+
+# merge in defaults
+if [ -f "$rh6sysresources" ]; then
+    xrdb -merge "$rh6sysresources"
+fi
+
+if [ -f "$sysresources" ]; then
+    xrdb -merge "$sysresources"
+fi
+
+if [ -f "$userresources" ]; then
+    xrdb -merge "$userresources"
+fi
+
+# merge in keymaps
+if [ -f "$sysxkbmap" ]; then
+    setxkbmap `cat "$sysxkbmap"`
+    XKB_IN_USE=yes
+fi
+
+if [ -f "$userxkbmap" ]; then
+    setxkbmap `cat "$userxkbmap"`
+    XKB_IN_USE=yes
+fi
+
+#
+# Eeek, this seems like too much magic here
+#
+if [ -z "$XKB_IN_USE" -a ! -L /etc/X11/X ]; then
+    if grep '^exec.*/Xsun' /etc/X11/X > /dev/null 2>&1 && [ -f /etc/X11/XF86Config ]; then
+       xkbsymbols=`sed -n -e 's/^[     ]*XkbSymbols[   ]*"\(.*\)".*$/\1/p' /etc/X11/XF86Config`
+       if [ -n "$xkbsymbols" ]; then
+           setxkbmap -symbols "$xkbsymbols"
+           XKB_IN_USE=yes
+       fi
+    fi
+fi
+
+# xkb and xmodmap don't play nice together
+if [ -z "$XKB_IN_USE" ]; then
+    if [ -f "$rh6sysmodmap" ]; then
+       xmodmap "$rh6sysmodmap"
+    fi
+
+    if [ -f "$sysmodmap" ]; then
+       xmodmap "$sysmodmap"
+    fi
+
+    if [ -f "$usermodmap" ]; then
+       xmodmap "$usermodmap"
+    fi
+fi
+
+unset XKB_IN_USE
+
+# disable mouse
+xinput disable $(xinput | grep 'ETPS/2 Elantech' | cut -f2 | cut -d'=' -f2)
+
+# start screen locker
+xscreensaver -no-splash &
+
+# start xterm fullscreen with reversed colors
+exec xterm -rv -bw 0 -maximized -bc -bcf 500 -bcn 500
