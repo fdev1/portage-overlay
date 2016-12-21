@@ -10,7 +10,7 @@ HOMEPAGE="https://nourl.com"
 LICENSE="MIT"
 SLOT="0"
 KEYWORDS="-* ~x86 ~amd64"
-IUSE="+kdm +multimedia kdepim +bluetooth +gtk screensaver konqueror +wallpapers admintools bogus x11-apps"
+IUSE="+kdm +multimedia kdepim +bluetooth +gtk screensaver konqueror +wallpapers admintools x11-apps"
 
 DEPEND="
 	kdepim? ( kde-apps/kdepim-meta:5 )
@@ -21,7 +21,10 @@ DEPEND="
 	x11-apps? (
 		x11-apps/xmodmap
 		x11-apps/xinput
+		x11-apps/xrandr
+		x11-apps/xdpyinfo
 	)
+	x11-terms/xterm
 	kde-apps/ark:5
 	kde-apps/audiocd-kio
 	kde-apps/ffmpegthumbs:5
@@ -75,11 +78,6 @@ DEPEND="
 		kde-plasma/breeze-gtk
 		kde-plasma/kde-gtk-config:5
 	)
-	bogus? (
-		kde-base/kephal
-		kde-base/freespacenotifier
-	)
-
 	admintools? (
 		kde-apps/kuser
 	)
@@ -90,17 +88,29 @@ DEPEND="
 		kde-apps/libkonq
 		kde-apps/nsplugins
 	)
-
 	screensaver? (
 		kde-apps/kdeartwork-kscreensaver
-		kde-base/kscreensaver
+		kde-plasma/kscreensaver
 	)
-
 	multimedia? (
 		sys-meta/base-system[multimedia]
-		media-sound/clementine[skydrive,googledrive,dropbox,ipod,lastfm,moodbar,ubuntu-one]
-		media-sound/clementine[mtp,wiimote,box,mms]
-		media-video/vlc
+		media-sound/clementine
+		media-video/smplayer
 	)
 "
 RDEPEND="${DEPEND}"
+
+src_unpack()
+{
+	mkdir -p "${S}"
+}
+
+src_install()
+{
+	dodir /usr/share/xsessions/
+	insinto /usr/share/xsessions
+	doins "${FILESDIR}/terminal.desktop"
+	dodir /etc/X11/Sessions
+	insinto /etc/X11/Sessions
+	doins "${FILESDIR}/terminal"
+}
