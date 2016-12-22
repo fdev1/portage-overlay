@@ -54,7 +54,6 @@ src_install()
 	find "${S}"/plugins -type f -exec chmod 0664 '{}' \; || die
 
 	# install docs
-	dodoc "${S}/licenses/commons_license.txt"
 	dodoc "${S}/licenses/dbeaver_license.txt"
 	dodoc "${S}/licenses/eclipse_license.html"
 	dodoc "${S}/licenses/jsch-license.txt"
