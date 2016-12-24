@@ -1,0 +1,63 @@
+diff --git a/pam_kwallet.c b/pam_kwallet.c
+index 809ab9a..418345c 100644
+--- a/pam_kwallet.c
++++ b/pam_kwallet.c
+@@ -245,16 +245,8 @@ PAM_EXTERN int pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, cons
+         return PAM_IGNORE;//Since we are not an essential module, just make pam ignore us
+     }
+ 
+-    struct passwd *userInfo;
+-    userInfo = getpwnam(username);
+-    if (!userInfo) {
+-        pam_syslog(pamh, LOG_ERR, "%s: Couldn't get user info (passwd) info", logPrefix);
+-        return PAM_IGNORE;
+-    }
+-
+     const char *password;
+     result = pam_get_item(pamh, PAM_AUTHTOK, (const void**)&password);
+-
+     if (result != PAM_SUCCESS) {
+         pam_syslog(pamh, LOG_ERR, "%s: Couldn't get password %s", logPrefix,
+                    pam_strerror(pamh, result));
+@@ -281,13 +273,14 @@ PAM_EXTERN int pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, cons
+         return PAM_IGNORE;
+     }
+ 
+-    char *key = malloc(sizeof(char) * KWALLET_PAM_KEYSIZE);
+-    if (kwallet_hash(password, userInfo, key) != 0) {
+-        pam_syslog(pamh, LOG_ERR, "%s: Fail into creating the hash", logPrefix);
++    char *kwallet_password;
++    kwallet_password = strdup(password);
++    if (kwallet_password == NULL) {
++        pam_syslog(pamh, LOG_ERR, "%s: Impossible to copy the password: out of memory", logPrefix);
+         return PAM_IGNORE;
+     }
+ 
+-    result = pam_set_data(pamh, kwalletPamDataKey, key, NULL);
++    result = pam_set_data(pamh, kwalletPamDataKey, kwallet_password, NULL);
+     if (result != PAM_SUCCESS) {
+         pam_syslog(pamh, LOG_ERR, "%s: Impossible to store the hashed password: %s", logPrefix
+             , pam_strerror(pamh, result));
+@@ -516,14 +509,20 @@ PAM_EXTERN int pam_sm_open_session(pam_handle_t *pamh, int flags, int argc, cons
+         return PAM_IGNORE;
+     }
+ 
+-    const char *kwalletKey;
+-    result = pam_get_data(pamh, kwalletPamDataKey, (const void **)&kwalletKey);
++    const char *password;
++    result = pam_get_data(pamh, kwalletPamDataKey, (const void **)&password);
+ 
+     if (result != PAM_SUCCESS) {
+         pam_syslog(pamh, LOG_INFO, "%s: open_session called without %s", logPrefix, kwalletPamDataKey);
+         return PAM_SUCCESS;//We will wait for pam_sm_authenticate
+     }
+ 
++    char *kwalletKey = malloc(sizeof(char) * KWALLET_PAM_KEYSIZE);
++    if (kwallet_hash(password, userInfo, kwalletKey) != 0) {
++        pam_syslog(pamh, LOG_ERR, "%s: Fail into creating the hash", logPrefix);
++        return PAM_IGNORE;
++    }
++
+     start_kwallet(pamh, userInfo, kwalletKey);
+ 
+     return PAM_SUCCESS;
