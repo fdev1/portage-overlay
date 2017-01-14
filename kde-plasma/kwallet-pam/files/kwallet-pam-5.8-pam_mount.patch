@@ -1,5 +1,5 @@
 diff --git a/pam_kwallet.c b/pam_kwallet.c
-index 809ab9a..418345c 100644
+index 809ab9a..8be3552 100644
 --- a/pam_kwallet.c
 +++ b/pam_kwallet.c
 @@ -245,16 +245,8 @@ PAM_EXTERN int pam_sm_authenticate(pam_handle_t *pamh, int flags, int argc, cons
@@ -38,13 +38,13 @@ index 809ab9a..418345c 100644
      if (result != PAM_SUCCESS) {
          pam_syslog(pamh, LOG_ERR, "%s: Impossible to store the hashed password: %s", logPrefix
              , pam_strerror(pamh, result));
-@@ -516,14 +509,20 @@ PAM_EXTERN int pam_sm_open_session(pam_handle_t *pamh, int flags, int argc, cons
+@@ -516,14 +509,21 @@ PAM_EXTERN int pam_sm_open_session(pam_handle_t *pamh, int flags, int argc, cons
          return PAM_IGNORE;
      }
  
 -    const char *kwalletKey;
 -    result = pam_get_data(pamh, kwalletPamDataKey, (const void **)&kwalletKey);
-+    const char *password;
++    char *password;
 +    result = pam_get_data(pamh, kwalletPamDataKey, (const void **)&password);
  
      if (result != PAM_SUCCESS) {
@@ -58,6 +58,7 @@ index 809ab9a..418345c 100644
 +        return PAM_IGNORE;
 +    }
 +
++    wipeString(password);
      start_kwallet(pamh, userInfo, kwalletKey);
  
      return PAM_SUCCESS;
