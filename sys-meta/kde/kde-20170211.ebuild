@@ -54,6 +54,7 @@ DEPEND="
 	kde-apps/sweeper
 	kde-apps/thumbnailers:5
 	kde-apps/zeroconf-ioslave
+	kde-apps/kaccounts-integration
 
 	kde-apps/dolphin:5
 	kde-apps/kdialog
