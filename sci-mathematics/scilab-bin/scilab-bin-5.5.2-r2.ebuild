@@ -1,4 +1,4 @@
-# Copyright 1999-2015 Gentoo Foundation
+# Copyright 1999-2017 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 # $Id$
 
@@ -20,8 +20,8 @@ DEPEND="
 	dev-libs/openssl:0
 	app-arch/bzip2
 	app-crypt/mit-krb5
-	dev-lang/tcl:0
-	dev-lang/tk:0
+	dev-lang/tcl:0/8.5
+	dev-lang/tk:0/8.5
 	dev-libs/expat
 	dev-libs/icu
 	dev-libs/libpcre
