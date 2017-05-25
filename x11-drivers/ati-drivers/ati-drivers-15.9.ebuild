@@ -19,7 +19,7 @@ SDK_VER="xvba-sdk-0.74-404001.tar.gz"
 XVBA_SDK_URI="http://developer.amd.com/wordpress/media/2012/10/${SDK_VER}"
 SRC_URI="${DRIVERS_URI} ${XVBA_SDK_URI}"
 FOLDER_PREFIX="common/"
-IUSE="debug +modules qt4 static-libs pax_kernel gdm-hack"
+IUSE="debug +modules qt4 static-libs pax_kernel gdm-hack X"
 
 LICENSE="AMD GPL-2 QPL-1.0"
 KEYWORDS="-* ~amd64 ~x86"
@@ -27,29 +27,31 @@ KEYWORDS="-* ~amd64 ~x86"
 RESTRICT="bindist test fetch"
 
 RDEPEND="
-	<=x11-base/xorg-server-1.17.49[-minimal]
-	>=app-eselect/eselect-opengl-1.0.7
-	app-eselect/eselect-opencl
-	sys-power/acpid
-	x11-apps/xauth
-	!x11-libs/xvba-video
-	virtual/glu[${MULTILIB_USEDEP}]
-	x11-libs/libX11[${MULTILIB_USEDEP}]
-	x11-libs/libXext[${MULTILIB_USEDEP}]
-	x11-libs/libXinerama[${MULTILIB_USEDEP}]
-	x11-libs/libXrandr[${MULTILIB_USEDEP}]
-	x11-libs/libXrender[${MULTILIB_USEDEP}]
-	qt4? (
-			x11-libs/libICE
-			x11-libs/libSM
-			x11-libs/libXcursor
-			x11-libs/libXfixes
-			x11-libs/libXxf86vm
-			dev-qt/qtcore:4
-			dev-qt/qtgui:4[accessibility]
-	)
-	gdm-hack? (
-		x11-base/xorg-server:=
+	X? (
+		<=x11-base/xorg-server-1.17.49[-minimal]
+		>=app-eselect/eselect-opengl-1.0.7
+		app-eselect/eselect-opencl
+		sys-power/acpid
+		x11-apps/xauth
+		!x11-libs/xvba-video
+		virtual/glu[${MULTILIB_USEDEP}]
+		x11-libs/libX11[${MULTILIB_USEDEP}]
+		x11-libs/libXext[${MULTILIB_USEDEP}]
+		x11-libs/libXinerama[${MULTILIB_USEDEP}]
+		x11-libs/libXrandr[${MULTILIB_USEDEP}]
+		x11-libs/libXrender[${MULTILIB_USEDEP}]
+		qt4? (
+				x11-libs/libICE
+				x11-libs/libSM
+				x11-libs/libXcursor
+				x11-libs/libXfixes
+				x11-libs/libXxf86vm
+				dev-qt/qtcore:4
+				dev-qt/qtgui:4[accessibility]
+		)
+		gdm-hack? (
+			x11-base/xorg-server:=
+		)
 	)
 "
 if [[ legacy != ${SLOT} ]]; then
@@ -61,13 +63,15 @@ else
 fi
 
 DEPEND="${RDEPEND}
-	x11-proto/inputproto
-	x11-proto/xf86miscproto
-	x11-proto/xf86vidmodeproto
-	x11-proto/xineramaproto
-	x11-libs/libXtst
-	sys-apps/findutils
-	app-misc/pax-utils
+	X? (
+		x11-proto/inputproto
+		x11-proto/xf86miscproto
+		x11-proto/xf86vidmodeproto
+		x11-proto/xineramaproto
+		x11-libs/libXtst
+		sys-apps/findutils
+		app-misc/pax-utils
+	)
 	app-arch/unzip
 "
 
@@ -349,140 +353,144 @@ src_prepare() {
 src_compile() {
 	use modules && linux-mod_src_compile
 
-	ebegin "Building fgl_glxgears"
-	cd "${S}"/extra/fgl_glxgears
-	# These extra libs/utils either have an Imakefile that does not
-	# work very well without tweaking or a Makefile ignoring CFLAGS
-	# and the like. We bypass those.
-	# The -DUSE_GLU is needed to compile using nvidia headers
-	# according to a comment in ati-drivers-extra-8.33.6.ebuild.
-	"$(tc-getCC)" -o fgl_glxgears ${CFLAGS} ${LDFLAGS} -DUSE_GLU \
-		-I"${S}"/${FOLDER_PREFIX}usr/include fgl_glxgears.c \
-		-lGL -lGLU -lX11 -lm || die "fgl_glxgears build failed"
-	eend $?
+	if use X; then
+		ebegin "Building fgl_glxgears"
+		cd "${S}"/extra/fgl_glxgears
+		# These extra libs/utils either have an Imakefile that does not
+		# work very well without tweaking or a Makefile ignoring CFLAGS
+		# and the like. We bypass those.
+		# The -DUSE_GLU is needed to compile using nvidia headers
+		# according to a comment in ati-drivers-extra-8.33.6.ebuild.
+		"$(tc-getCC)" -o fgl_glxgears ${CFLAGS} ${LDFLAGS} -DUSE_GLU \
+			-I"${S}"/${FOLDER_PREFIX}usr/include fgl_glxgears.c \
+			-lGL -lGLU -lX11 -lm || die "fgl_glxgears build failed"
+		eend $?
+	fi
 }
 
 src_install() {
 	use modules && linux-mod_src_install
 
-	# We can do two things here, and neither of them is very nice.
+	if use X; then
+		# We can do two things here, and neither of them is very nice.
 
-	# For direct rendering libGL has to be able to load one or more
-	# dri modules (files ending in _dri.so, like fglrx_dri.so).
-	# Gentoo's mesa looks for these files in the location specified by
-	# LIBGL_DRIVERS_PATH or LIBGL_DRIVERS_DIR, then in the hardcoded
-	# location /usr/$(get_libdir)/dri. Ati's libGL does the same
-	# thing, but the hardcoded location is /usr/X11R6/lib/modules/dri
-	# on x86 and amd64 32bit, /usr/X11R6/lib64/modules/dri on amd64
-	# 64bit. So we can either put the .so files in that (unusual,
-	# compared to "normal" mesa libGL) location or set
-	# LIBGL_DRIVERS_PATH. We currently do the latter. See also bug
-	# 101539.
+		# For direct rendering libGL has to be able to load one or more
+		# dri modules (files ending in _dri.so, like fglrx_dri.so).
+		# Gentoo's mesa looks for these files in the location specified by
+		# LIBGL_DRIVERS_PATH or LIBGL_DRIVERS_DIR, then in the hardcoded
+		# location /usr/$(get_libdir)/dri. Ati's libGL does the same
+		# thing, but the hardcoded location is /usr/X11R6/lib/modules/dri
+		# on x86 and amd64 32bit, /usr/X11R6/lib64/modules/dri on amd64
+		# 64bit. So we can either put the .so files in that (unusual,
+		# compared to "normal" mesa libGL) location or set
+		# LIBGL_DRIVERS_PATH. We currently do the latter. See also bug
+		# 101539.
 
-	# The problem with this approach is that LIBGL_DRIVERS_PATH
-	# *overrides* the default hardcoded location, it does not extend
-	# it. So if ati-drivers is merged but a non-ati libGL is selected
-	# and its hardcoded path does not match our LIBGL_DRIVERS_PATH
-	# (because it changed in a newer mesa or because it was compiled
-	# for a different set of multilib abis than we are) stuff breaks.
+		# The problem with this approach is that LIBGL_DRIVERS_PATH
+		# *overrides* the default hardcoded location, it does not extend
+		# it. So if ati-drivers is merged but a non-ati libGL is selected
+		# and its hardcoded path does not match our LIBGL_DRIVERS_PATH
+		# (because it changed in a newer mesa or because it was compiled
+		# for a different set of multilib abis than we are) stuff breaks.
 
-	# We create one file per ABI to work with "native" multilib, see
-	# below.
+		# We create one file per ABI to work with "native" multilib, see
+		# below.
 
-	echo "COLON_SEPARATED=LIBGL_DRIVERS_PATH" > "${T}/03ati-colon-sep"
-	doenvd "${T}/03ati-colon-sep" || die
+		echo "COLON_SEPARATED=LIBGL_DRIVERS_PATH" > "${T}/03ati-colon-sep"
+		doenvd "${T}/03ati-colon-sep" || die
 
-	# All libraries that we have a 32 bit and 64 bit version of on
-	# amd64 are installed in src_install-libs. Everything else
-	# (including libraries only available in native 64bit on amd64)
-	# goes in here.
-	multilib_foreach_abi src_install-libs
+		# All libraries that we have a 32 bit and 64 bit version of on
+		# amd64 are installed in src_install-libs. Everything else
+		# (including libraries only available in native 64bit on amd64)
+		# goes in here.
+		multilib_foreach_abi src_install-libs
 
-	# This is sorted by the order the files occur in the source tree.
+		# This is sorted by the order the files occur in the source tree.
 
-	# X modules.
-	exeinto /usr/$(get_libdir)/xorg/modules/drivers
-	doexe "${MY_BASE_DIR}"/usr/X11R6/${PKG_LIBDIR}/modules/drivers/fglrx_drv.so
-	exeinto /usr/$(get_libdir)/xorg/modules/linux
-	doexe "${MY_BASE_DIR}"/usr/X11R6/${PKG_LIBDIR}/modules/linux/libfglrxdrm.so
-	exeinto /usr/$(get_libdir)/xorg/modules
-	doexe "${MY_BASE_DIR}"/usr/X11R6/${PKG_LIBDIR}/modules/{glesx.so,amdxmm.so}
+		# X modules.
+		exeinto /usr/$(get_libdir)/xorg/modules/drivers
+		doexe "${MY_BASE_DIR}"/usr/X11R6/${PKG_LIBDIR}/modules/drivers/fglrx_drv.so
+		exeinto /usr/$(get_libdir)/xorg/modules/linux
+		doexe "${MY_BASE_DIR}"/usr/X11R6/${PKG_LIBDIR}/modules/linux/libfglrxdrm.so
+		exeinto /usr/$(get_libdir)/xorg/modules
+		doexe "${MY_BASE_DIR}"/usr/X11R6/${PKG_LIBDIR}/modules/{glesx.so,amdxmm.so}
 
-	#516816
-	if use gdm-hack; then
-		sed -i 's#/proc/%i/fd/0#/etc/ati/xvrn#g' \
-			"${D}/usr/$(get_libdir)/xorg/modules/drivers/fglrx_drv.so" || \
-			die "Applying gdm-hack failed"
+		#516816
+		if use gdm-hack; then
+			sed -i 's#/proc/%i/fd/0#/etc/ati/xvrn#g' \
+				"${D}/usr/$(get_libdir)/xorg/modules/drivers/fglrx_drv.so" || \
+				die "Applying gdm-hack failed"
+		fi
+
+		# Arch-specific files.
+		# (s)bin.
+		into /opt
+		dosbin "${ARCH_DIR}"/usr/sbin/atieventsd
+		use qt4 && dosbin "${ARCH_DIR}"/usr/sbin/amdnotifyui
+		dobin "${ARCH_DIR}"/usr/bin/clinfo
+		# We cleaned out the compilable stuff in src_unpack
+		dobin "${ARCH_DIR}"/usr/X11R6/bin/*
+
+		# Common files.
+		# etc.
+		insinto /etc/ati
+		exeinto /etc/ati
+		# Everything except for the authatieventsd.sh script.
+		doins ${FOLDER_PREFIX}etc/ati/{logo*,control,signature,amdpcsdb.default}
+		doexe ${FOLDER_PREFIX}etc/ati/authatieventsd.sh
+
+		# include.
+		insinto /usr
+		doins -r ${FOLDER_PREFIX}usr/include
+		insinto /usr/include/X11/extensions
+
+		# Just the atigetsysteminfo.sh script.
+		into /usr
+		dosbin ${FOLDER_PREFIX}usr/sbin/*
+
+		# data files for the control panel.
+		if use qt4 ; then
+			insinto /usr/share
+			doins -r ${FOLDER_PREFIX}usr/share/ati
+			insinto /usr/share/pixmaps
+			doins ${FOLDER_PREFIX}usr/share/icons/ccc_large.xpm
+			make_desktop_entry amdcccle 'AMD Catalyst Control Center' \
+				ccc_large System
+		fi
+
+		# doc.
+		dohtml -r ${FOLDER_PREFIX}usr/share/doc/fglrx
+
+		doman ${FOLDER_PREFIX}usr/share/man/man8/atieventsd.8
+
+		pushd ${FOLDER_PREFIX}usr/share/doc/fglrx/examples/etc/acpi > /dev/null
+
+		exeinto /etc/acpi
+		doexe ati-powermode.sh
+		insinto /etc/acpi/events
+		doins events/*
+
+		popd > /dev/null
+
+		# Done with the "source" tree. Install tools we rebuilt:
+		dobin extra/fgl_glxgears/fgl_glxgears
+		newdoc extra/fgl_glxgears/README README.fgl_glxgears
+
+		# Gentoo-specific stuff:
+		newinitd "${FILESDIR}"/atieventsd.init atieventsd
+		echo 'ATIEVENTSDOPTS=""' > "${T}"/atieventsd.conf
+		newconfd "${T}"/atieventsd.conf atieventsd
+		systemd_dounit "${FILESDIR}/atieventsd.service"
+
+		# PowerXpress stuff
+		exeinto /usr/$(get_libdir)/fglrx
+		doexe "${FILESDIR}"/switchlibGL || die "doexe switchlibGL failed"
+		cp "${FILESDIR}"/switchlibGL "${T}"/switchlibglx
+		doexe "${T}"/switchlibglx || die "doexe switchlibglx failed"
+
+		#516816
+		use gdm-hack && Xorg -version > "${D}/etc/ati/xvrn" 2>&1
 	fi
-
-	# Arch-specific files.
-	# (s)bin.
-	into /opt
-	dosbin "${ARCH_DIR}"/usr/sbin/atieventsd
-	use qt4 && dosbin "${ARCH_DIR}"/usr/sbin/amdnotifyui
-	dobin "${ARCH_DIR}"/usr/bin/clinfo
-	# We cleaned out the compilable stuff in src_unpack
-	dobin "${ARCH_DIR}"/usr/X11R6/bin/*
-
-	# Common files.
-	# etc.
-	insinto /etc/ati
-	exeinto /etc/ati
-	# Everything except for the authatieventsd.sh script.
-	doins ${FOLDER_PREFIX}etc/ati/{logo*,control,signature,amdpcsdb.default}
-	doexe ${FOLDER_PREFIX}etc/ati/authatieventsd.sh
-
-	# include.
-	insinto /usr
-	doins -r ${FOLDER_PREFIX}usr/include
-	insinto /usr/include/X11/extensions
-
-	# Just the atigetsysteminfo.sh script.
-	into /usr
-	dosbin ${FOLDER_PREFIX}usr/sbin/*
-
-	# data files for the control panel.
-	if use qt4 ; then
-		insinto /usr/share
-		doins -r ${FOLDER_PREFIX}usr/share/ati
-		insinto /usr/share/pixmaps
-		doins ${FOLDER_PREFIX}usr/share/icons/ccc_large.xpm
-		make_desktop_entry amdcccle 'AMD Catalyst Control Center' \
-			ccc_large System
-	fi
-
-	# doc.
-	dohtml -r ${FOLDER_PREFIX}usr/share/doc/fglrx
-
-	doman ${FOLDER_PREFIX}usr/share/man/man8/atieventsd.8
-
-	pushd ${FOLDER_PREFIX}usr/share/doc/fglrx/examples/etc/acpi > /dev/null
-
-	exeinto /etc/acpi
-	doexe ati-powermode.sh
-	insinto /etc/acpi/events
-	doins events/*
-
-	popd > /dev/null
-
-	# Done with the "source" tree. Install tools we rebuilt:
-	dobin extra/fgl_glxgears/fgl_glxgears
-	newdoc extra/fgl_glxgears/README README.fgl_glxgears
-
-	# Gentoo-specific stuff:
-	newinitd "${FILESDIR}"/atieventsd.init atieventsd
-	echo 'ATIEVENTSDOPTS=""' > "${T}"/atieventsd.conf
-	newconfd "${T}"/atieventsd.conf atieventsd
-	systemd_dounit "${FILESDIR}/atieventsd.service"
-
-	# PowerXpress stuff
-	exeinto /usr/$(get_libdir)/fglrx
-	doexe "${FILESDIR}"/switchlibGL || die "doexe switchlibGL failed"
-	cp "${FILESDIR}"/switchlibGL "${T}"/switchlibglx
-	doexe "${T}"/switchlibglx || die "doexe switchlibglx failed"
-
-	#516816
-	use gdm-hack && Xorg -version > "${D}/etc/ati/xvrn" 2>&1
 }
 
 src_install-libs() {
@@ -602,8 +610,11 @@ pkg_postinst() {
 	elog
 
 	use modules && linux-mod_pkg_postinst
-	"${ROOT}"/usr/bin/eselect opengl set --use-old ati
-	"${ROOT}"/usr/bin/eselect opencl set --use-old amd
+
+	if use X; then
+		"${ROOT}"/usr/bin/eselect opengl set --use-old ati
+		"${ROOT}"/usr/bin/eselect opencl set --use-old amd
+	fi
 
 	if has_version "x11-drivers/xf86-video-intel[sna]"; then
 		ewarn "It is reported that xf86-video-intel built with USE=\"sna\""
@@ -626,10 +637,14 @@ pkg_preinst() {
 }
 
 pkg_prerm() {
-	"${ROOT}"/usr/bin/eselect opengl set --use-old xorg-x11
+	if use X; then
+		"${ROOT}"/usr/bin/eselect opengl set --use-old xorg-x11
+	fi
 }
 
 pkg_postrm() {
 	use modules && linux-mod_pkg_postrm
-	"${ROOT}"/usr/bin/eselect opengl set --use-old xorg-x11
+	if use X; then
+		"${ROOT}"/usr/bin/eselect opengl set --use-old xorg-x11
+	fi
 }
