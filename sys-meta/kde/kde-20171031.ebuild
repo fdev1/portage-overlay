@@ -1,6 +1,5 @@
-# Copyright 1999-2016 Gentoo Foundation
+# Copyright 1999-2017 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Id$
 
 EAPI=5
 
@@ -48,7 +47,6 @@ DEPEND="
 	kde-apps/libkipi:5
 	kde-apps/okular
 	kde-apps/phonon-kde
-	kde-apps/plasma-runtime
 	kde-apps/print-manager:5
 	kde-apps/svgpart
 	kde-apps/sweeper
@@ -60,11 +58,9 @@ DEPEND="
 	kde-apps/kdialog
 	kde-apps/keditbookmarks
 	kde-apps/kfind
-	kde-apps/kfmclient
 	kde-apps/konsole:5
 	kde-apps/kwrite:5
 	kde-apps/phonon-kde
-	kde-apps/plasma-apps
 
 	kde-plasma/plasma-desktop
 	kde-plasma/systemsettings:5
@@ -79,19 +75,9 @@ DEPEND="
 		kde-plasma/breeze-gtk
 		kde-plasma/kde-gtk-config:5
 	)
-	admintools? (
-		kde-apps/kuser
-	)
 	wallpapers? ( kde-plasma/plasma-workspace-wallpapers )
 	konqueror? (
-		kde-apps/konq-plugins
 		kde-apps/konqueror
-		kde-apps/libkonq
-		kde-apps/nsplugins
-	)
-	screensaver? (
-		kde-apps/kdeartwork-kscreensaver
-		kde-plasma/kscreensaver
 	)
 	multimedia? (
 		sys-meta/base-system[multimedia]
