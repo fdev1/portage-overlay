@@ -1,4 +1,4 @@
-# Copyright 1999-2017 Gentoo Foundation
+# Copyright 1999-2018 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
 
 EAPI=5
@@ -35,7 +35,6 @@ DEPEND="
 	kde-apps/kget
 	kde-apps/kmix:*[alsa]
 	kde-apps/kmplot:5
-	kde-apps/kppp
 	kde-apps/krdc:5
 	kde-apps/krfb:5
 	kde-apps/spectacle
@@ -46,7 +45,6 @@ DEPEND="
 	kde-apps/libkexiv2:5
 	kde-apps/libkipi:5
 	kde-apps/okular
-	kde-apps/phonon-kde
 	kde-apps/print-manager:5
 	kde-apps/svgpart
 	kde-apps/sweeper
@@ -60,7 +58,6 @@ DEPEND="
 	kde-apps/kfind
 	kde-apps/konsole:5
 	kde-apps/kwrite:5
-	kde-apps/phonon-kde
 
 	kde-plasma/plasma-desktop
 	kde-plasma/systemsettings:5
@@ -70,6 +67,12 @@ DEPEND="
 	kde-plasma/kmenuedit:5
 	kde-plasma/user-manager
 	kde-plasma/kinfocenter:5
+	kde-plasma/kwrited
+	kde-plasma/kgamma
+	kde-plasma/kwayland-integration
+	kde-plasma/drkonqi
+	sys-fs/cryfs
+	kde-plasma/plasma-vault
 	bluetooth? ( kde-plasma/bluedevil:5 )
 	gtk? (
 		kde-plasma/breeze-gtk
