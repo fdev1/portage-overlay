@@ -9,11 +9,10 @@ HOMEPAGE="https://nourl.com"
 LICENSE="MIT"
 SLOT="0"
 KEYWORDS="-* ~x86 ~amd64"
-IUSE="+kdm +multimedia kdepim +bluetooth +gtk screensaver konqueror +wallpapers admintools x11-apps"
+IUSE="+display-manager +multimedia +bluetooth konqueror admintools x11-apps"
 
 DEPEND="
-	kdepim? ( kde-apps/kdepim-meta:5 )
-	kdm? (
+	display-manager? (
 		x11-misc/sddm
 		kde-plasma/sddm-kcm
 	)
@@ -32,11 +31,6 @@ DEPEND="
 	kde-apps/kcharselect:5
 	kde-apps/kdegraphics-mobipocket
 	kde-apps/kdenetwork-filesharing:5
-	kde-apps/kget
-	kde-apps/kmix:*[alsa]
-	kde-apps/kmplot:5
-	kde-apps/krdc:5
-	kde-apps/krfb:5
 	kde-apps/spectacle
 	kde-apps/kwalletmanager:5
 	kde-apps/libkcddb
@@ -60,26 +54,8 @@ DEPEND="
 	kde-apps/konsole:5
 	kde-apps/kwrite:5
 
-	kde-plasma/plasma-desktop
-	kde-plasma/systemsettings:5
-	kde-plasma/plasma-nm:5
-	kde-plasma/powerdevil:5
-	kde-plasma/khotkeys:5
-	kde-plasma/kmenuedit:5
-	kde-plasma/user-manager
-	kde-plasma/kinfocenter:5
-	kde-plasma/kwrited
-	kde-plasma/kgamma
-	kde-plasma/kwayland-integration
-	kde-plasma/drkonqi
-	sys-fs/cryfs
-	kde-plasma/plasma-vault
-	bluetooth? ( kde-plasma/bluedevil:5 )
-	gtk? (
-		kde-plasma/breeze-gtk
-		kde-plasma/kde-gtk-config:5
-	)
-	wallpapers? ( kde-plasma/plasma-workspace-wallpapers )
+	kde-plasma/plasma-meta
+	bluetooth? ( kde-plasma/plasma-meta[bluetooth] )
 	konqueror? (
 		kde-apps/konqueror
 	)

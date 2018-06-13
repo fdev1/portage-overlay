@@ -103,8 +103,5 @@ unset XKB_IN_USE
 # disable mouse
 xinput disable $(xinput | grep 'ETPS/2 Elantech' | cut -f2 | cut -d'=' -f2)
 
-# start screen locker
-xscreensaver -no-splash &
-
 # start xterm fullscreen with reversed colors
 exec xterm -rv -bw 0 -maximized -bc -bcf 500 -bcn 500

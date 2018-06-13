@@ -1,6 +1,5 @@
-# Copyright 1999-2015 Gentoo Foundation
+# Copyright 1999-2018 Gentoo Foundation
 # Distributed under the terms of the GNU General Public License v2
-# $Id$
 
 EAPI=5
 
@@ -27,7 +26,6 @@ DEPEND="
 	net-analyzer/netcat6
 	net-ftp/ftp
 	net-misc/socat
-	sec-policy/apparmor-policy
 	sys-apps/lshw
 	sys-auth/pam_ssh
 	sys-process/iotop
@@ -48,13 +46,11 @@ DEPEND="
 
 	alsa? (
 		media-plugins/alsa-plugins
-		media-plugins/alsaequal
 		media-sound/alsa-utils
 	)
 
 	multimedia? (
 		app-cdr/cdrtools
-		media-sound/madplay
 		>=media-video/ffmpeg-2.8
 	)
 "
